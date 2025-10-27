@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+/* CSS Custom Properties for Colors */
+:root {
+  --primary-color: #1e40af; /* Blue-800 */
+  --secondary-color: #f3f4f6; /* Gray-100 */
+  --accent-color: #dc2626; /* Red-600 */
+  --text-primary: #111827; /* Gray-900 */
+  --text-secondary: #6b7280; /* Gray-500 */
+  --background: #ffffff; /* White */
+  --background-secondary: #f9fafb; /* Gray-50 */
+}
