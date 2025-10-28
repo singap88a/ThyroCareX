@@ -45,7 +45,7 @@ const ContactPage = () => {
       setForm(initialForm);
       setErrors({});
       setTimeout(() => setStatus(null), 3000);
-    } catch (err) {
+    } catch {
       setStatus("error");
       setTimeout(() => setStatus(null), 3000);
     }
@@ -60,22 +60,22 @@ const ContactPage = () => {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden text-white bg-gradient-to-br from-blue-600 to-purple-700">
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full w-96 h-96 opacity-10"></div>
-        <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 bg-white rounded-full w-80 h-80 opacity-10"></div>
-        
+      <section className="relative py-20 overflow-hidden text-white bg-primary">
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary w-96 h-96 opacity-10"></div>
+        <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full bg-primary w-80 h-80 opacity-10"></div>
+
         <div className="relative px-4 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
-          <div className="inline-flex items-center px-4 py-2 mb-6 text-sm font-medium text-white bg-white rounded-full bg-opacity-20 backdrop-blur-sm">
+          <div className="inline-flex items-center px-4 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary backdrop-blur-sm">
             📞 GET IN TOUCH
           </div>
-          <h1 className="mb-6 text-5xl font-bold md:text-6xl">
+          <h1 className="mb-6 text-5xl font-bold text-white md:text-6xl">
             Contact
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
+            <span className="block text-white">
               ThyroCareX
             </span>
           </h1>
-          <p className="max-w-3xl mx-auto text-xl leading-relaxed text-blue-100">
-            We're here to help you with any questions about thyroid cancer diagnosis, 
+          <p className="max-w-3xl mx-auto text-xl leading-relaxed text-white">
+            We're here to help you with any questions about thyroid cancer diagnosis,
             AI technology, or partnership opportunities. Reach out to us anytime.
           </p>
         </div>
@@ -93,7 +93,7 @@ const ContactPage = () => {
                 <ContactCard
                   title="Email Support"
                   detail="support@thyrocarex.ai"
-                  icon={<FaEnvelope className="w-5 h-5 text-blue-600" />}
+                  icon={<FaEnvelope className="w-5 h-5 text-primary" />}
                   hint="Typical reply within a few hours"
                 />
                 <ContactCard
@@ -120,13 +120,13 @@ const ContactPage = () => {
               <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
                 <div className="mb-4 text-lg font-semibold text-gray-900">Follow Us</div>
                 <div className="flex gap-4">
-                  <a className="p-3 text-blue-600 transition-colors bg-blue-50 rounded-xl hover:bg-blue-100" href="#">
+                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
                     <FaTwitter className="w-5 h-5" />
                   </a>
-                  <a className="p-3 text-blue-700 transition-colors bg-blue-50 rounded-xl hover:bg-blue-100" href="#">
+                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
                     <FaLinkedin className="w-5 h-5" />
                   </a>
-                  <a className="p-3 text-blue-800 transition-colors bg-blue-50 rounded-xl hover:bg-blue-100" href="#">
+                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
                     <FaFacebookF className="w-5 h-5" />
                   </a>
                 </div>
@@ -210,14 +210,14 @@ const ContactPage = () => {
 
                   {/* File Upload */}
                   <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
-                    <div className="flex items-center justify-center w-12 h-12 text-blue-600 rounded-lg bg-blue-50">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-lg text-primary bg-primary/10">
                       <FaUpload className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-700">Attach files (optional)</div>
                       <div className="text-sm text-gray-500">Max 25MB • JPG, PNG, PDF</div>
                     </div>
-                    <button type="button" className="px-4 py-2 text-sm font-medium text-blue-600 rounded-lg bg-blue-50 hover:bg-blue-100">
+                    <button type="button" className="px-4 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20">
                       Browse
                     </button>
                   </div>
@@ -226,7 +226,7 @@ const ContactPage = () => {
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="flex items-center justify-center w-full gap-3 px-6 py-4 font-semibold text-white transition-all duration-300 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:shadow-xl disabled:opacity-50"
+                    className="flex items-center justify-center w-full gap-3 px-6 py-4 font-semibold text-white transition-all duration-300 shadow-lg bg-primary rounded-xl hover:bg-primaryHover disabled:opacity-50"
                   >
                     {status === "sending" ? (
                       <>
@@ -300,7 +300,7 @@ export default ContactPage;
 function ContactCard({ title, detail, icon, hint }) {
   return (
     <div className="flex items-start gap-4 p-6 transition-shadow duration-300 bg-white border border-gray-200 shadow-sm rounded-2xl hover:shadow-md">
-      <div className="flex items-center justify-center w-12 h-12 text-blue-600 bg-blue-50 rounded-xl">
+      <div className="flex items-center justify-center w-12 h-12 text-primary bg-primary/10 rounded-xl">
         {icon}
       </div>
       <div className="flex-1">

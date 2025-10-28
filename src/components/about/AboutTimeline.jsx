@@ -45,7 +45,7 @@ const AboutTimeline = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium text-blue-800 bg-blue-100 rounded-full"
+            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary/10"
           >
             🩺 Our Journey
           </motion.div>
@@ -57,7 +57,7 @@ const AboutTimeline = () => {
             className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-6xl"
           >
             Milestones of{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-primary">
               Excellence
             </span>
           </motion.h2>
@@ -76,7 +76,7 @@ const AboutTimeline = () => {
         {/* ==== Timeline ==== */}
         <div className="relative">
           {/* الخط العمودي */}
-          <div className="absolute w-1 h-full transform -translate-x-1/2 left-1/2 bg-gradient-to-b from-blue-500 to-purple-600"></div>
+          <div className="absolute w-1 h-full transform -translate-x-1/2 left-1/2 bg-primary"></div>
 
           {/* العناصر */}
           <div className="space-y-16">
@@ -99,11 +99,11 @@ const AboutTimeline = () => {
                 >
                   <div className="relative z-10 p-6 transition-all duration-300 bg-white border border-gray-100 shadow-xl rounded-2xl hover:shadow-2xl hover:-translate-y-1">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center justify-center w-12 h-12 text-blue-600 bg-blue-100 shadow-md rounded-xl">
+                      <div className="flex items-center justify-center w-12 h-12 shadow-md text-primary bg-primary/10 rounded-xl">
                         {milestone.icon}
                       </div>
                       <div className="text-left">
-                        <div className="text-2xl font-bold text-blue-600">
+                        <div className="text-2xl font-bold text-primary">
                           {milestone.year}
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900">
@@ -119,7 +119,7 @@ const AboutTimeline = () => {
 <motion.div
   animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
   transition={{ repeat: Infinity, duration: 2 }}
-  className="absolute z-20 w-8 h-8 border-4 border-white rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-purple-600"
+  className="absolute z-20 w-8 h-8 border-4 border-white rounded-full shadow-lg bg-primary"
   style={{ left: "48.7%", transform: "translateX(calc(-50% + 2px))" }}
 ></motion.div>
 
@@ -127,7 +127,7 @@ const AboutTimeline = () => {
 <motion.div
   animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.3, 1] }}
   transition={{ repeat: Infinity, duration: 2 }}
-  className="absolute z-10 rounded-full w-14 h-14 bg-blue-400/30 blur-md"
+  className="absolute z-10 rounded-full w-14 h-14 bg-primary/30 blur-md"
   style={{ left: "48.7%", transform: "translateX(calc(-50% + 2px))" }}
 ></motion.div>
 

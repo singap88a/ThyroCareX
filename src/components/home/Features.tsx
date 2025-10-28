@@ -67,19 +67,17 @@ const Features = () => {
 
   return (
     <section className="relative py-20 overflow-hidden bg-white">
-      {/* Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-72 bg-gradient-to-b from-blue-50 to-transparent"></div>
-      <div className="absolute bottom-0 right-0 -mb-48 -mr-48 rounded-full w-96 h-96 bg-indigo-50"></div>
+ 
 
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
+          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium rounded-full text-primary bg-primary/10">
             🚀 WHY CHOOSE THYROCAREX
           </div>
           <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Revolutionary Thyroid Cancer
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
               Diagnosis Platform
             </span>
           </h2>

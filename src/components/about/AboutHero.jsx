@@ -18,7 +18,7 @@ const AboutHero = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium text-blue-800 bg-blue-100 rounded-full"
+            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary/10"
           >
             🧬 ABOUT THYROCAREX
           </motion.div>
@@ -30,7 +30,7 @@ const AboutHero = () => {
             className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-6xl"
           >
             Revolutionizing
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-primary">
               Thyroid Diagnosis
             </span>
           </motion.h1>
@@ -51,10 +51,10 @@ const AboutHero = () => {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="flex flex-col gap-4 sm:flex-row"
           >
-            <button className="px-8 py-4 text-lg font-semibold text-white transition-all duration-300 transform shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 hover:-translate-y-1 hover:shadow-xl">
+            <button className="px-8 py-4 text-lg font-semibold text-white transition-all duration-300 transform shadow-lg bg-primary rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-xl">
               Meet Our Team
             </button>
-            <button className="px-8 py-4 text-lg font-semibold text-gray-700 transition-all duration-300 border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:text-blue-600">
+            <button className="px-8 py-4 text-lg font-semibold text-gray-700 transition-all duration-300 border-2 border-gray-300 rounded-xl hover:border-primary hover:text-primary">
               View Our Story
             </button>
           </motion.div>
@@ -67,7 +67,7 @@ const AboutHero = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
-            className="relative flex items-center justify-center overflow-hidden rounded-full shadow-2xl w-80 h-80 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-500 to-purple-600"
+            className="relative flex items-center justify-center overflow-hidden rounded-full shadow-2xl w-80 h-80 sm:w-96 sm:h-96 bg-primary"
           >
             {/* Central Icon */}
             <motion.div
@@ -82,7 +82,7 @@ const AboutHero = () => {
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ repeat: Infinity, duration: 3 }}
-              className="absolute inset-0 rounded-full bg-blue-500/30 blur-3xl"
+              className="absolute inset-0 rounded-full bg-primary/30 blur-3xl"
             ></motion.div>
           </motion.div>
 
@@ -92,7 +92,7 @@ const AboutHero = () => {
             transition={{ repeat: Infinity, duration: 3, delay: 0.2 }}
             className="absolute p-4 bg-white border border-gray-100 shadow-lg top-10 left-10 rounded-xl"
           >
-            <Activity className="text-blue-600" size={28} />
+            <Activity className="text-primary" size={28} />
           </motion.div>
 
           <motion.div
@@ -100,7 +100,7 @@ const AboutHero = () => {
             transition={{ repeat: Infinity, duration: 4, delay: 0.4 }}
             className="absolute left-0 p-4 bg-white border border-gray-100 shadow-lg bottom-10 rounded-xl"
           >
-            <HeartPulse className="text-purple-600" size={28} />
+            <HeartPulse className="text-primary" size={28} />
           </motion.div>
 
           <motion.div
@@ -108,7 +108,7 @@ const AboutHero = () => {
             transition={{ repeat: Infinity, duration: 5, delay: 0.6 }}
             className="absolute top-0 p-4 bg-white border border-gray-100 shadow-lg right-10 rounded-xl"
           >
-            <Microscope className="text-blue-500" size={28} />
+            <Microscope className="text-primary" size={28} />
           </motion.div>
 
           {/* Floating Stat Card */}

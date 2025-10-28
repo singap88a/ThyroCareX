@@ -66,12 +66,12 @@ const AboutTeam = () => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* ===== Header Section ===== */}
         <div className="mb-16 text-center">
-          <span className="px-4 py-1.5 text-sm font-semibold tracking-wider text-blue-700 uppercase rounded-full bg-blue-100">
+          <span className="px-4 py-1.5 text-sm font-semibold tracking-wider text-primary uppercase rounded-full bg-primary/10">
             Our Specialists
           </span>
           <h2 className="mt-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Meet Our{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-primary">
               Expert Team
             </span>
           </h2>
@@ -89,7 +89,7 @@ const AboutTeam = () => {
             bulletClass:
               "swiper-pagination-bullet !w-6 !h-1.5 !rounded-full !bg-gray-300 opacity-60 transition-all duration-300",
             bulletActiveClass:
-              "swiper-pagination-bullet-active !bg-gradient-to-r !from-blue-600 !to-purple-600 opacity-100 !w-8",
+              "swiper-pagination-bullet-active !bg-primary opacity-100 !w-8",
           }}
           grabCursor={true}
           breakpoints={{
@@ -112,7 +112,7 @@ const AboutTeam = () => {
                   <div className="absolute inset-0 flex flex-col justify-end p-5 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                     <div className="transition-all duration-300 transform group-hover:translate-y-[-4px]">
                       <h3 className="text-xl font-bold text-white">{member.name}</h3>
-                      <p className="text-sm font-medium text-blue-200">
+                      <p className="text-sm font-medium text-primary">
                         {member.role}
                       </p>
                     </div>
@@ -132,7 +132,7 @@ const AboutTeam = () => {
                         key={idx}
                         className="flex items-center gap-2 text-sm text-gray-600"
                       >
-                        <span className="text-blue-600">{ach.icon}</span>
+                        <span className="text-primary">{ach.icon}</span>
                         {ach.text}
                       </div>
                     ))}

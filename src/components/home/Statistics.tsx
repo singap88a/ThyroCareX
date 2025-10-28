@@ -37,20 +37,18 @@ const Statistics = () => {
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-200 rounded-full w-72 h-72 opacity-20"></div>
-      <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 bg-purple-200 rounded-full w-96 h-96 opacity-20"></div>
+    <section className="relative py-20 overflow-hidden ">
+ 
       
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
+          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium rounded-full text-primary bg-primary/10">
             📊 OUR ACHIEVEMENTS
           </div>
           <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Making a Real
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
               Impact in Healthcare
             </span>
           </h2>

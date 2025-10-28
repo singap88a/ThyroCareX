@@ -71,7 +71,7 @@ const Testimonials = () => {
         <div className="mb-16 text-center">
           <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Trusted by{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
               Medical Experts
             </span>
           </h2>

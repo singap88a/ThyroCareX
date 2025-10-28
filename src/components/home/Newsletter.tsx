@@ -34,7 +34,7 @@ const Newsletter = () => {
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-600 to-purple-700">
+    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-primary to-primary">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full w-72 h-72 opacity-10"></div>
       <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 bg-white rounded-full w-96 h-96 opacity-10"></div>

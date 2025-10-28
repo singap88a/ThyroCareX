@@ -3,7 +3,7 @@ import { FaCheck, FaCrown, FaStar, FaRocket, FaUserTie, FaBuilding, FaShieldAlt,
 
 const PricingPage = () => {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
-  const [activePlan, setActivePlan] = useState('professional');
+
 
   const plans = [
     {
@@ -101,25 +101,25 @@ const PricingPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
       {/* Header Section */}
       <section className="relative py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center px-6 py-3 rounded-2xl bg-blue-50 border border-blue-200 mb-8">
-              <FaStar className="w-5 h-5 text-blue-600 mr-2" />
-              <span className="text-blue-600 font-semibold">TRANSPARENT PRICING</span>
+            <div className="inline-flex items-center px-6 py-3 mb-8 border rounded-2xl bg-primary/10 border-primary/20">
+              <FaStar className="w-5 h-5 mr-2 text-primary" />
+              <span className="font-semibold text-primary">TRANSPARENT PRICING</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="mb-6 text-5xl font-bold text-gray-900 md:text-6xl">
               Simple, Honest
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 block">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">
                 Pricing
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+            <p className="max-w-3xl mx-auto mb-12 text-xl leading-relaxed text-gray-600">
               Choose the perfect plan for your thyroid care journey. All plans include 
               our industry-leading AI diagnosis technology with different levels of support and features.
             </p>
 
             {/* Billing Toggle */}
-            <div className="inline-flex items-center bg-gray-100 rounded-2xl p-2 mb-16">
+            <div className="inline-flex items-center p-2 mb-16 bg-gray-100 rounded-2xl">
               <button
                 onClick={() => setBillingPeriod('monthly')}
                 className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
@@ -139,7 +139,7 @@ const PricingPage = () => {
                 }`}
               >
                 Yearly
-                <span className="ml-2 text-sm text-green-600 font-normal">Save up to 25%</span>
+                <span className="ml-2 text-sm font-normal text-green-600">Save up to 25%</span>
               </button>
             </div>
           </div>
@@ -148,8 +148,8 @@ const PricingPage = () => {
 
       {/* Pricing Plans */}
       <section className="py-20 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-6">
             {plans.map((plan) => (
               <div
                 key={plan.id}
@@ -159,8 +159,8 @@ const PricingPage = () => {
               >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-8 py-3 rounded-2xl shadow-2xl flex items-center space-x-2">
+                  <div className="absolute z-20 transform -translate-x-1/2 -top-4 left-1/2">
+                    <div className="flex items-center px-8 py-3 space-x-2 text-white shadow-2xl bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl">
                       <FaCrown className="w-4 h-4" />
                       <span className="font-semibold">MOST POPULAR</span>
                     </div>
@@ -175,50 +175,49 @@ const PricingPage = () => {
                   {/* Gradient Overlay */}
                   <div className={`absolute inset-0 bg-gradient-to-r ${plan.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
 
-                  <div className="relative p-8 flex-1">
+                  <div className="relative flex-1 p-8">
                     {/* Header */}
-                    <div className="text-center mb-8">
+                    <div className="mb-8 text-center">
                       <div className={`inline-flex items-center justify-center w-16 h-16 rounded-3xl ${plan.bgColor} mb-4`}>
                         <div className={`text-transparent bg-clip-text bg-gradient-to-r ${plan.gradient}`}>
                           {plan.icon}
                         </div>
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                      <h3 className="mb-2 text-2xl font-bold text-gray-900">{plan.name}</h3>
                       <p className="text-gray-600">{plan.description}</p>
                     </div>
 
                     {/* Price */}
-                    <div className="text-center mb-8">
+                    <div className="mb-8 text-center">
                       <div className="flex items-baseline justify-center gap-2 mb-2">
                         <span className={`text-4xl md:text-5xl font-bold bg-gradient-to-r ${plan.gradient} bg-clip-text text-transparent`}>
                           {billingPeriod === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
                         </span>
                         {plan.period && (
-                          <span className="text-gray-500 text-lg">/{plan.period}</span>
+                          <span className="text-lg text-gray-500">/{plan.period}</span>
                         )}
                       </div>
                       {plan.savings && billingPeriod === 'yearly' && (
-                        <div className="text-green-600 font-semibold text-sm">
+                        <div className="text-sm font-semibold text-green-600">
                           {plan.savings}
                         </div>
                       )}
                     </div>
 
                     {/* Features List */}
-                    <div className="space-y-4 mb-8 flex-1">
+                    <div className="flex-1 mb-8 space-y-4">
                       {plan.features.map((feature, index) => (
                         <div key={index} className="flex items-start space-x-3">
                           <div className={`w-6 h-6 rounded-full bg-gradient-to-r ${plan.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                             {feature.icon}
                           </div>
-                          <span className="text-gray-600 leading-relaxed">{feature.text}</span>
+                          <span className="leading-relaxed text-gray-600">{feature.text}</span>
                         </div>
                       ))}
                     </div>
 
                     {/* CTA Button */}
                     <button
-                      onClick={() => setActivePlan(plan.id)}
                       className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:-translate-y-1 ${
                         plan.popular
                           ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-900'
@@ -240,23 +239,23 @@ const PricingPage = () => {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <h2 className="mb-6 text-4xl font-bold text-gray-900">
               Everything You Need for
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 block">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primaryHover">
                 Complete Thyroid Care
               </span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature, index) => (
               <div key={index} className="text-center group">
-                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 transition-transform duration-300 text-primary bg-primary/10 rounded-2xl group-hover:scale-110">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                <h3 className="mb-3 text-xl font-semibold text-gray-900">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
@@ -266,17 +265,17 @@ const PricingPage = () => {
 
       {/* FAQ Section */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+        <div className="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <h2 className="mb-6 text-4xl font-bold text-gray-900">
               Frequently Asked
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 block">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primaryHover">
                 Questions
               </span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {[
               {
                 question: "Can I change plans later?",
@@ -295,8 +294,8 @@ const PricingPage = () => {
                 answer: "We accept all major credit cards, PayPal, and bank transfers for enterprise customers."
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">{faq.question}</h3>
+              <div key={index} className="p-6 bg-white border border-gray-100 shadow-lg rounded-2xl">
+                <h3 className="mb-3 text-lg font-semibold text-gray-900">{faq.question}</h3>
                 <p className="text-gray-600">{faq.answer}</p>
               </div>
             ))}
@@ -306,20 +305,20 @@ const PricingPage = () => {
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+        <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">
             Ready to Transform Your
-            <span className="text-blue-200 block">Thyroid Care?</span>
+            <span className="block text-blue-200">Thyroid Care?</span>
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="max-w-2xl mx-auto mb-8 text-xl text-blue-100">
             Join thousands of patients and healthcare providers who trust ThyroCareX 
             for accurate, AI-powered thyroid diagnosis.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <button className="px-8 py-4 text-lg font-semibold transition-all duration-300 transform bg-white shadow-lg text-primary rounded-2xl hover:bg-gray-100 hover:-translate-y-1 hover:shadow-xl">
               Start Free Diagnosis
             </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-300">
+            <button className="px-8 py-4 text-lg font-semibold text-white transition-all duration-300 border-2 border-white rounded-2xl hover:bg-white hover:text-primary">
               Contact Sales
             </button>
           </div>

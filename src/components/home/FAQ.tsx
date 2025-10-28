@@ -47,7 +47,7 @@ const FAQ = () => {
   const rightColumnFaqs = faqs.slice(Math.ceil(faqs.length / 2));
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-20 bg-gradient-to-b ">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -56,13 +56,13 @@ const FAQ = () => {
           transition={{ duration: 0.6 }}
           className="mb-16 text-center"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border border-blue-100 rounded-full bg-blue-50">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-sm font-medium text-blue-700">FAQ</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border rounded-full border-primary/20 bg-primary/10">
+            <div className="w-2 h-2 rounded-full bg-primary"></div>
+            <span className="text-sm font-medium text-primary">FAQ</span>
           </div>
           <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Frequently Asked{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
               Questions
             </span>
           </h2>
@@ -87,7 +87,7 @@ const FAQ = () => {
                   onClick={() => toggleFAQ(index)}
                   className="flex items-start w-full gap-4 px-6 py-5 text-left transition-colors hover:bg-gray-50 rounded-2xl"
                 >
-                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-1 text-blue-600 bg-blue-100 rounded-lg">
+                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-1 rounded-lg text-primary bg-primary/10">
                     {faq.icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ const FAQ = () => {
                       )}
                     </AnimatePresence>
                   </div>
-                  <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 text-blue-600">
+                  <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 text-primary">
                     {openIndex === index ? (
                       <FaChevronUp className="w-4 h-4" />
                     ) : (
@@ -137,7 +137,7 @@ const FAQ = () => {
                     onClick={() => toggleFAQ(adjustedIndex)}
                     className="flex items-start w-full gap-4 px-6 py-5 text-left transition-colors hover:bg-gray-50 rounded-2xl"
                   >
-                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-1 text-purple-600 bg-purple-100 rounded-lg">
+                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-1 rounded-lg text-primary bg-primary/10">
                       {faq.icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -159,7 +159,7 @@ const FAQ = () => {
                         )}
                       </AnimatePresence>
                     </div>
-                    <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 text-purple-600">
+                    <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 text-primary">
                       {openIndex === adjustedIndex ? (
                         <FaChevronUp className="w-4 h-4" />
                       ) : (

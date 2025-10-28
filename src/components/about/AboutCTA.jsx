@@ -1,6 +1,6 @@
 const AboutCTA = () => {
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+    <section className="py-20 bg-primary">
       <div className="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
         <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">
           Ready to Transform

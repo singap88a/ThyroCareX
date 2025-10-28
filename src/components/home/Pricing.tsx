@@ -33,8 +33,8 @@ const Pricing = () => {
       cta: 'Choose Advanced',
       popular: true,
       icon: <FaStar className="w-6 h-6" />,
-      gradient: 'from-blue-500 to-purple-600',
-      bgColor: 'bg-blue-50'
+      gradient: 'from-primary to-primary',
+      bgColor: 'bg-primary/10'
     },
     {
       name: 'Professional',
@@ -57,20 +57,18 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-b from-white to-blue-50">
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-200 rounded-full w-96 h-96 opacity-20"></div>
-      <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 bg-purple-200 rounded-full w-80 h-80 opacity-20"></div>
+    <section className="relative py-20 overflow-hidden ">
+ 
       
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
+          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium rounded-full text-primary bg-primary/10">
             💰 TRANSPARENT PRICING
           </div>
           <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             Choose Your
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
               Healthcare Plan
             </span>
           </h2>
@@ -92,7 +90,7 @@ const Pricing = () => {
               {/* Popular Badge */}
               {plan.popular && (
                 <div className="absolute z-20 transform -translate-x-1/2 -top-4 left-1/2">
-                  <div className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-purple-600">
+                  <div className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-primary to-primary">
                     <FaStar className="w-4 h-4" />
                     MOST POPULAR
                   </div>
@@ -101,8 +99,10 @@ const Pricing = () => {
 
               {/* Pricing Card */}
               <div className={`relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 border-2 ${
-                plan.popular ? 'border-blue-500' : 'border-gray-100'
-              } group-hover:border-blue-300 overflow-hidden`}>
+                plan.popular ? 'border-primary' : 'border-transparent'
+              } ${
+                plan.name === 'Basic' ? 'group-hover:border-gray-500' : plan.name === 'Professional' ? 'group-hover:border-orange-500' : ''
+              } overflow-hidden`}>
                 
                 {/* Gradient Overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-r ${plan.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
@@ -140,9 +140,9 @@ const Pricing = () => {
 
                   {/* CTA Button */}
                   <button className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform group-hover:-translate-y-1 ${
-                    plan.popular 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white hover:shadow-lg'
+                    plan.popular
+                      ? 'bg-gradient-to-r from-primary to-primary text-white shadow-lg hover:shadow-xl hover:from-primary/90 hover:to-primary/90'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gradient-to-r hover:from-primary hover:to-primary hover:text-white hover:shadow-lg'
                   }`}>
                     {plan.cta}
                   </button>

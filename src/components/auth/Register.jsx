@@ -142,14 +142,14 @@ const Register = () => {
         <div key={step} className="flex items-center">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
             step <= currentStep
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+              ? 'bg-gradient-to-r from-primary to-purple-600 text-white'
               : 'bg-gray-200 text-gray-600'
           }`}>
             {step}
           </div>
           {step < 3 && (
             <div className={`w-12 h-1 mx-2 transition-all duration-300 ${
-              step < currentStep ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
+              step < currentStep ? 'bg-gradient-to-r from-primary to-purple-600' : 'bg-gray-200'
             }`}></div>
           )}
         </div>
@@ -535,12 +535,12 @@ const Register = () => {
       <div className="relative max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center mb-6 text-blue-600 transition-colors duration-300 hover:text-blue-700">
+          <Link to="/" className="inline-flex items-center mb-6 transition-colors duration-300 text-primary hover:text-primaryHover">
             <FaArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>
           <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
+            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-primary rounded-2xl">
               <FaUserPlus className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -574,7 +574,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="ml-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  className="ml-auto px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primaryHover transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
                 >
                   Next
                 </button>
@@ -582,7 +582,7 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="ml-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="ml-auto px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primaryHover transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? 'Creating Account...' : 'Create Account'}
                 </button>
@@ -596,7 +596,7 @@ const Register = () => {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                className="font-semibold transition-colors duration-300 text-primary hover:text-primaryHover"
               >
                 Sign in here
               </Link>

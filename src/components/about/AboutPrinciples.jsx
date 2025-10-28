@@ -45,7 +45,7 @@ const AboutPrinciples = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium text-blue-800 bg-blue-100 rounded-full"
+            className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary/10"
           >
             🌍 OUR CORE FOUNDATION
           </motion.div>
@@ -57,7 +57,7 @@ const AboutPrinciples = () => {
             className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-6xl"
           >
             The Heart of{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-primary">
               ThyroCareX
             </span>
           </motion.h2>
@@ -88,7 +88,7 @@ const AboutPrinciples = () => {
               onClick={() => setActiveTab(key)}
               className={`relative pb-2 text-lg font-semibold transition-all duration-300 ${
                 activeTab === key
-                  ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                  ? "text-transparent bg-clip-text bg-primary"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -96,7 +96,7 @@ const AboutPrinciples = () => {
               {activeTab === key && (
                 <motion.div
                   layoutId="underline"
-                  className="absolute left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 to-purple-600 rounded-full -bottom-1"
+                  className="absolute left-0 right-0 h-[3px] bg-primary rounded-full -bottom-1"
                 />
               )}
             </button>

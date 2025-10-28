@@ -36,29 +36,29 @@ const Hero = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-primary/10 to-secondary">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-2000"></div>
+        <div className="absolute rounded-full -top-24 -right-24 w-96 h-96 bg-primary/20 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute delay-1000 rounded-full -bottom-24 -left-24 w-96 h-96 bg-secondary mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute transform -translate-x-1/2 -translate-y-1/2 rounded-full top-1/2 left-1/2 w-96 h-96 bg-primary/15 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 px-4 pt-20 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid items-center grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Left Content */}
           <div className="text-center lg:text-left">
             <div className="mb-6">
-              <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium mb-4">
+              <span className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium rounded-full text-primary bg-primary/10">
                 🏆 Trusted by Medical Professionals Worldwide
               </span>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 md:text-6xl">
                 Early Detection
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 block">
+                <span className="block text-transparent bg-clip-text bg-primary ">
                   Saves Lives
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8 max-w-2xl leading-relaxed">
+              <p className="max-w-2xl mb-8 text-xl leading-relaxed text-gray-600">
                 Revolutionary AI-powered platform for thyroid cancer diagnosis. 
                 Get accurate, instant results with our cutting-edge technology 
                 and expert medical validation.
@@ -66,20 +66,20 @@ const Hero = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
+            <div className="flex flex-col justify-center gap-4 mb-12 sm:flex-row lg:justify-start">
+              <button className="px-8 py-4 text-lg font-semibold text-white transition-all duration-300 transform shadow-lg bg-primary rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-xl">
                 Start Free Diagnosis
               </button>
-              <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-300 transform hover:-translate-y-1">
+              <button className="px-8 py-4 text-lg font-semibold text-gray-700 transition-all duration-300 transform border-2 border-gray-300 rounded-xl hover:border-primary hover:text-primary hover:-translate-y-1">
                 Watch Demo Video
               </button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl">
+            <div className="grid max-w-2xl grid-cols-2 gap-6 md:grid-cols-4">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center lg:text-left">
-                  <div className="text-2xl md:text-3xl font-bold text-gray-900">{stat.number}</div>
+                  <div className="text-2xl font-bold text-gray-900 md:text-3xl">{stat.number}</div>
                   <div className="text-sm text-gray-600">{stat.label}</div>
                 </div>
               ))}
@@ -89,16 +89,16 @@ const Hero = () => {
           {/* Right Content - Animated Cards */}
           <div className="relative">
             {/* Main Feature Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 transform hover:scale-105 transition-transform duration-300 border border-gray-100">
+            <div className="p-8 transition-transform duration-300 transform bg-white border border-gray-100 shadow-2xl rounded-2xl hover:scale-105">
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-2xl">
+                <div className="flex items-center justify-center w-12 h-12 text-2xl text-white bg-primary rounded-xl">
                   {features[currentSlide].icon}
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 ml-4">
+                <h3 className="ml-4 text-2xl font-bold text-gray-900">
                   {features[currentSlide].title}
                 </h3>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">
+              <p className="text-lg leading-relaxed text-gray-600">
                 {features[currentSlide].description}
               </p>
               
@@ -109,7 +109,7 @@ const Hero = () => {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentSlide ? 'bg-blue-600 w-8' : 'bg-gray-300'
+                      index === currentSlide ? 'bg-primary w-8' : 'bg-gray-300'
                     }`}
                   />
                 ))}
@@ -117,10 +117,10 @@ const Hero = () => {
             </div>
 
             {/* Floating Elements */}
-            <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg transform rotate-6">
+            <div className="absolute px-4 py-2 text-sm font-semibold text-white transform bg-green-500 rounded-full shadow-lg -top-4 -right-4 rotate-6">
               FDA Approved
             </div>
-            <div className="absolute -bottom-4 -left-4 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg transform -rotate-6">
+            <div className="absolute px-4 py-2 text-sm font-semibold text-white transform bg-orange-500 rounded-full shadow-lg -bottom-4 -left-4 -rotate-6">
               HIPAA Compliant
             </div>
           </div>

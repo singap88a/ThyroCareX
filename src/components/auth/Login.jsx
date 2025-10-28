@@ -85,12 +85,12 @@ const Login = () => {
       <div className="relative w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center mb-6 text-blue-600 transition-colors duration-300 hover:text-blue-700">
+          <Link to="/" className="inline-flex items-center mb-6 transition-colors duration-300 text-primary hover:text-primaryHover">
             <FaArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>
           <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
+            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-primary rounded-2xl">
               <FaUser className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -161,7 +161,7 @@ const Login = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary"
                 />
                 <label htmlFor="rememberMe" className="block ml-2 text-sm text-gray-700">
                   Remember me
@@ -169,7 +169,7 @@ const Login = () => {
               </div>
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                className="text-sm font-medium transition-colors duration-300 text-primary hover:text-primaryHover"
               >
                 Forgot password?
               </Link>
@@ -179,7 +179,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-primary text-white py-3 px-4 rounded-xl font-semibold text-lg hover:bg-primaryHover transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -221,7 +221,7 @@ const Login = () => {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                className="font-semibold transition-colors duration-300 text-primary hover:text-primaryHover"
               >
                 Sign up now
               </Link>

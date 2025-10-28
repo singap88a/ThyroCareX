@@ -14,7 +14,7 @@ const AboutStats = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center group">
-              <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 text-blue-600 transition-transform duration-300 bg-blue-100 rounded-2xl group-hover:scale-110">
+              <div className="flex items-center justify-center w-20 h-20 mx-auto transition-transform duration-300 text-primary bg-primary/10 rounded-2xl group-hover:scale-110">
                 {stat.icon}
               </div>
               <div className="mb-2 text-4xl font-bold text-gray-900">{stat.number}</div>

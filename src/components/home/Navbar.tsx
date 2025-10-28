@@ -84,8 +84,8 @@ const Navbar = () => {
                         to={link.path}
                         className={`flex items-center space-x-1 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
                           isActiveLink(link.path)
-                            ? 'text-blue-600 bg-blue-50 shadow-sm'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'text-primary bg-primary/10 shadow-sm'
+                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                         }`}
                       >
                         <span>{link.label}</span>
@@ -101,10 +101,10 @@ const Navbar = () => {
                             <Link
                               key={dropdownItem.path}
                               to={dropdownItem.path}
-                              className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-blue-600 hover:bg-blue-50 group"
+                              className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10 group"
                               onClick={() => setActiveDropdown(null)}
                             >
-                              <div className="w-2 h-2 mr-3 transition-colors duration-300 bg-blue-200 rounded-full group-hover:bg-blue-500"></div>
+                              <div className="w-2 h-2 mr-3 transition-colors duration-300 rounded-full bg-primary/20 group-hover:bg-primary"></div>
                               {dropdownItem.label}
                             </Link>
                           ))}
@@ -115,15 +115,15 @@ const Navbar = () => {
                     // رابط عادي
                     <Link
                       to={link.path}
-                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                        isActiveLink(link.path)
-                          ? 'text-blue-600'
-                          : 'text-gray-700 hover:text-blue-600'
-                      }`}
+                        className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                          isActiveLink(link.path)
+                            ? 'text-primary'
+                            : 'text-gray-700 hover:text-primary'
+                        }`}
                     >
                       {link.label}
                       {isActiveLink(link.path) && (
-                        <div className="absolute bottom-0 w-6 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                        <div className="absolute bottom-0 w-6 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-primary"></div>
                       )}
                     </Link>
                   )}
@@ -151,7 +151,7 @@ const Navbar = () => {
                     onClick={() => setProfileDropdown(!profileDropdown)}
                     className="flex items-center px-4 py-2 space-x-3 transition-all duration-300 rounded-xl hover:bg-gray-50"
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-purple-600">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-primary">
                       <FaUser className="w-5 h-5 text-white" />
                     </div>
                     <span className="font-medium text-gray-700">{user?.firstName} {user?.lastName}</span>
@@ -169,7 +169,7 @@ const Navbar = () => {
                       </div>
                       <Link
                         to="/profile"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-blue-600 hover:bg-blue-50"
+                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
                         onClick={() => setProfileDropdown(false)}
                       >
                         <FaUserCircle className="w-4 h-4 mr-3" />
@@ -177,7 +177,7 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/add-patient"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-blue-600 hover:bg-blue-50"
+                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
                         onClick={() => setProfileDropdown(false)}
                       >
                         <FaStethoscope className="w-4 h-4 mr-3" />
@@ -185,7 +185,7 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/settings"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-blue-600 hover:bg-blue-50"
+                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
                         onClick={() => setProfileDropdown(false)}
                       >
                         <FaCog className="w-4 h-4 mr-3" />
@@ -210,14 +210,14 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="flex items-center space-x-2 px-6 py-2.5 text-gray-700 hover:text-blue-600 font-medium rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-blue-200"
+                  className="flex items-center space-x-2 px-6 py-2.5 text-gray-700 hover:text-primary font-medium rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-primary"
                 >
                   <FaUser className="w-4 h-4" />
                   <span>Login</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
                 >
                   <FaUserPlus className="w-4 h-4" />
                   <span>Get Started</span>
@@ -249,8 +249,8 @@ const Navbar = () => {
                         onClick={() => setActiveDropdown(activeDropdown === link.path ? null : link.path)}
                         className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                           isActiveLink(link.path)
-                            ? 'text-blue-600 bg-blue-50'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'text-primary bg-primary/10'
+                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                         }`}
                       >
                         <span>{link.label}</span>
@@ -265,13 +265,13 @@ const Navbar = () => {
                             <Link
                               key={dropdownItem.path}
                               to={dropdownItem.path}
-                              className="flex items-center px-4 py-2.5 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-white transition-all duration-300"
+                              className="flex items-center px-4 py-2.5 text-gray-600 hover:text-primary rounded-lg hover:bg-white transition-all duration-300"
                               onClick={() => {
                                 setIsOpen(false);
                                 setActiveDropdown(null);
                               }}
                             >
-                              <div className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-3"></div>
+                              <div className="w-1.5 h-1.5 bg-primary/30 rounded-full mr-3"></div>
                               {dropdownItem.label}
                             </Link>
                           ))}
@@ -283,8 +283,8 @@ const Navbar = () => {
                       to={link.path}
                       className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                         isActiveLink(link.path)
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                          ? 'text-primary bg-primary/10'
+                          : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
@@ -308,7 +308,7 @@ const Navbar = () => {
                 )}
                 <Link
                   to="/login"
-                  className="flex items-center justify-center w-full px-4 py-3 font-medium text-gray-700 transition-all duration-300 border border-gray-300 rounded-xl hover:border-blue-300 hover:text-blue-600"
+                  className="flex items-center justify-center w-full px-4 py-3 font-medium text-gray-700 transition-all duration-300 border border-gray-300 rounded-xl hover:border-primary hover:text-primary"
                   onClick={() => setIsOpen(false)}
                 >
                   <FaUser className="w-4 h-4 mr-2" />
@@ -316,7 +316,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5"
+                  className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-primary to-primaryHover text-white font-medium rounded-xl hover:from-primaryHover hover:to-primary transition-all duration-300 transform hover:-translate-y-0.5"
                   onClick={() => setIsOpen(false)}
                 >
                   <FaUserPlus className="w-4 h-4 mr-2" />
