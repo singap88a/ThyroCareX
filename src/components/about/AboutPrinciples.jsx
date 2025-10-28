@@ -31,12 +31,8 @@ const AboutPrinciples = () => {
   };
 
   return (
-    <section className="relative overflow-hidden py-28 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* خلفية ديكورية ناعمة */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-3xl"></div>
-      </div>
+    <section className="relative overflow-hidden py-28 ">
+ 
 
       <div className="relative px-6 mx-auto max-w-7xl sm:px-8 lg:px-12">
         {/* ===== Section Header ===== */}

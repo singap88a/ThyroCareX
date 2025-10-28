@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 export default {
   content: [
     "./index.html",
@@ -7,14 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#00B4D8',
-        primaryHover: '#00A2C2',
-        secondary: '#e0f2fe', // light blue
+        primary: "var(--primary-color)",
+        primaryHover: "var(--primary-hover)",
+        secondary: "var(--secondary-color)",
+        accent: "var(--accent-color)",
         neutral: {
-          white: '#ffffff',
-          gray: '#f9fafb',
+          white: "var(--background)",
+          gray: "var(--background-secondary)",
         },
-        accent: '#6366f1', // soft indigo
       },
     },
   },

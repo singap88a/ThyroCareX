@@ -1,15 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
-import { Brain, Activity, HeartPulse, Microscope } from "lucide-react";
+import { Activity, HeartPulse, Microscope } from "lucide-react";
 
 const AboutHero = () => {
   return (
-    <section className="relative py-24 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-100">
-      {/* خلفية ديكورية ناعمة */}
-      <div className="absolute inset-0">
-        <div className="absolute rounded-full top-10 left-10 w-72 h-72 bg-blue-200/30 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 rounded-full w-96 h-96 bg-purple-200/40 blur-3xl"></div>
-      </div>
+    <section className="relative py-24 overflow-hidden ">
+  
 
       <div className="relative grid items-center grid-cols-1 gap-16 px-6 mx-auto max-w-7xl lg:px-8 lg:grid-cols-2">
         {/* --- LEFT CONTENT --- */}
@@ -62,28 +58,18 @@ const AboutHero = () => {
 
         {/* --- RIGHT VISUAL / ANIMATION AREA --- */}
         <div className="relative flex justify-center">
-          {/* Main Glowing Orb */}
+          {/* Main Image */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
-            className="relative flex items-center justify-center overflow-hidden rounded-full shadow-2xl w-80 h-80 sm:w-96 sm:h-96 bg-primary"
+            className="relative flex items-center justify-center overflow-hidden rounded-lg w-80 h-80 sm:w-96 sm:h-96"
           >
-            {/* Central Icon */}
-            <motion.div
-              animate={{ rotate: [0, 360] }}
-              transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <Brain size={100} className="text-white opacity-90" />
-            </motion.div>
-
-            {/* Pulsing Glow Effect */}
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-              className="absolute inset-0 rounded-full bg-primary/30 blur-3xl"
-            ></motion.div>
+            <img
+              src="/hero_about.webp"
+              alt="Hero About"
+              className="object-cover w-full h-full "
+            />
           </motion.div>
 
           {/* Floating Medical Icons */}
