@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
- import Home from './pages/Home';
+import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import DoctorProfile from './pages/DoctorProfile';
@@ -12,6 +12,8 @@ import PRICING from './pages/PRICING';
 import ScrollToTop from './components/ScrollToTop';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
@@ -27,14 +29,14 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<DoctorProfile />} />
             <Route path="/add-patient" element={<AddPatient />} />
-                      <Route path="/pricing" element={<PRICING />} />
+            <Route path="/pricing" element={<PRICING />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </div>
-              <Footer />
-
+        <Footer />
       </Router>
     </AuthProvider>
   );

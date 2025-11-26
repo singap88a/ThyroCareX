@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaUser, FaUserPlus, FaChevronDown, FaStethoscope, FaSignOutAlt, FaCog, FaUserCircle } from 'react-icons/fa';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  FaBars,
+  FaTimes,
+  FaUser,
+  FaUserPlus,
+  FaChevronDown,
+  FaStethoscope,
+  FaSignOutAlt,
+  FaCog,
+  FaUserCircle,
+} from "react-icons/fa";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,8 +28,8 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // إغلاق القوائم عند تغيير الصفحة
@@ -31,42 +41,80 @@ const Navbar = () => {
 
   // الروابط الرئيسية
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/about', label: 'About' },
+    { path: "/", label: "Home" },
+    { path: "/about", label: "About" },
     {
-      path: '/services',
-      label: 'Services',
+      path: "/services",
+      label: "Services",
       dropdown: [
-        { path: '/services/ai-diagnosis', label: 'AI Diagnosis' },
-        { path: '/services/doctor-consultation', label: 'Doctor Consultation' },
-        { path: '/services/second-opinion', label: 'Second Opinion' },
-        { path: '/services/progress-tracking', label: 'Progress Tracking' }
-      ]
+        { path: "/services/ai-diagnosis", label: "AI Diagnosis" },
+        { path: "/services/doctor-consultation", label: "Doctor Consultation" },
+        { path: "/services/second-opinion", label: "Second Opinion" },
+        { path: "/services/progress-tracking", label: "Progress Tracking" },
+      ],
     },
-    { path: '/pricing', label: 'Pricing' },
-    { path: '/contact', label: 'Contact' }
+    { path: "/pricing", label: "Pricing" },
+    { path: "/contact", label: "Contact" },
   ];
 
   const isActiveLink = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md transition-all duration-500 ${
-      isScrolled ? 'shadow-2xl py-2' : '   '
-    }`}>
+    <nav
+      className={`fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md transition-all duration-500 ${
+        isScrolled ? "shadow-2xl py-2" : "   "
+      }`}
+    >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
+{/* اللوجو */}
+<Link to="/" className="flex items-center py-1 space-x-3 group">
+  <img
+    src="/logo.webp"
+    alt="ThyroCareX Logo"
+    className="object-contain w-12 sm:w-14 md:w-14 transition-all duration-300"
+  />
+  <div className="flex flex-col items-start leading-tight">
+    {/* اسم البراند */}
+    <span
+      className="font-extrabold tracking-tight text-xl sm:text-xl"
+      style={{
+        fontFamily: "'Montserrat', sans-serif",
+        color: "#ffffff",
+        WebkitTextStroke: "0.8px #4695a5",
+        letterSpacing: "-0.5px",
+      }}
+    >
+      THYROC
+      <span
+        style={{
+          color: "#4695a5",
+          WebkitTextStroke: "0.8px #4695a5",
+        }}
+      >
+        AREX
+      </span>
+    </span>
 
-          {/* اللوجو */}
-          <Link to="/" className="flex items-center space-x-3 group">
-       <img src="/logo.png" alt="ThyroCareX Logo"  className='object-contain w-48 max-h-20'  />
+    {/* الجملة اللي تحت */}
+    <span
+      className="mt-1 italic font-semibold uppercase text-xs sm:text-[11px]"
+      style={{
+        color: "#4695a5",
+        fontFamily: "'Poppins', sans-serif",
+        letterSpacing: "1px",
+      }}
+    >
+      AI THYROID DIAGNOSIS
+    </span>
+  </div>
+</Link>
 
-
-          </Link>
 
           {/* الروابط الرئيسية - وسط الصفحة */}
           <div className="absolute hidden transform -translate-x-1/2 lg:flex left-1/2">
@@ -84,14 +132,16 @@ const Navbar = () => {
                         to={link.path}
                         className={`flex items-center space-x-1 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
                           isActiveLink(link.path)
-                            ? 'text-primary bg-primary/10 shadow-sm'
-                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                            ? "text-primary bg-primary/10 shadow-sm"
+                            : "text-gray-700 hover:text-primary hover:bg-gray-50"
                         }`}
                       >
                         <span>{link.label}</span>
-                        <FaChevronDown className={`w-3 h-3 transition-transform duration-300 ${
-                          activeDropdown === link.path ? 'rotate-180' : ''
-                        }`} />
+                        <FaChevronDown
+                          className={`w-3 h-3 transition-transform duration-300 ${
+                            activeDropdown === link.path ? "rotate-180" : ""
+                          }`}
+                        />
                       </Link>
 
                       {/* القائمة المنسدلة */}
@@ -115,11 +165,11 @@ const Navbar = () => {
                     // رابط عادي
                     <Link
                       to={link.path}
-                        className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                          isActiveLink(link.path)
-                            ? 'text-primary'
-                            : 'text-gray-700 hover:text-primary'
-                        }`}
+                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                        isActiveLink(link.path)
+                          ? "text-primary"
+                          : "text-gray-700 hover:text-primary"
+                      }`}
                     >
                       {link.label}
                       {isActiveLink(link.path) && (
@@ -154,17 +204,23 @@ const Navbar = () => {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-primary">
                       <FaUser className="w-5 h-5 text-white" />
                     </div>
-                    <span className="font-medium text-gray-700">{user?.firstName} {user?.lastName}</span>
-                    <FaChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-300 ${
-                      profileDropdown ? 'rotate-180' : ''
-                    }`} />
+                    <span className="font-medium text-gray-700">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                    <FaChevronDown
+                      className={`w-3 h-3 text-gray-500 transition-transform duration-300 ${
+                        profileDropdown ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
 
                   {/* Profile Dropdown */}
                   {profileDropdown && (
                     <div className="absolute right-0 w-56 py-2 mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl backdrop-blur-md">
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.firstName} {user?.lastName}
+                        </p>
                         <p className="text-sm text-gray-500">{user?.email}</p>
                       </div>
                       <Link
@@ -246,17 +302,23 @@ const Navbar = () => {
                   {link.dropdown ? (
                     <div className="space-y-1">
                       <button
-                        onClick={() => setActiveDropdown(activeDropdown === link.path ? null : link.path)}
+                        onClick={() =>
+                          setActiveDropdown(
+                            activeDropdown === link.path ? null : link.path
+                          )
+                        }
                         className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                           isActiveLink(link.path)
-                            ? 'text-primary bg-primary/10'
-                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                            ? "text-primary bg-primary/10"
+                            : "text-gray-700 hover:text-primary hover:bg-gray-50"
                         }`}
                       >
                         <span>{link.label}</span>
-                        <FaChevronDown className={`w-3 h-3 transition-transform duration-300 ${
-                          activeDropdown === link.path ? 'rotate-180' : ''
-                        }`} />
+                        <FaChevronDown
+                          className={`w-3 h-3 transition-transform duration-300 ${
+                            activeDropdown === link.path ? "rotate-180" : ""
+                          }`}
+                        />
                       </button>
 
                       {activeDropdown === link.path && (
@@ -283,8 +345,8 @@ const Navbar = () => {
                       to={link.path}
                       className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                         isActiveLink(link.path)
-                          ? 'text-primary bg-primary/10'
-                          : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                          ? "text-primary bg-primary/10"
+                          : "text-gray-700 hover:text-primary hover:bg-gray-50"
                       }`}
                       onClick={() => setIsOpen(false)}
                     >

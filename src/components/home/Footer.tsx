@@ -1,4 +1,5 @@
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaHeart, FaShieldAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -48,15 +49,22 @@ const Footer = () => {
                   Quick Links
                 </h4>
                 <ul className="space-y-3">
-                  {['Home', 'About Us', 'Services', 'Pricing', 'Contact', 'Blog'].map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
+                  {[
+                    { name: 'Home', path: '/' },
+                    { name: 'About Us', path: '/about' },
+                    { name: 'Services', path: '/services' },
+                    { name: 'Pricing', path: '/pricing' },
+                    { name: 'Contact', path: '/contact' },
+                    { name: 'Blog', path: '/blog' }
+                  ].map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        to={item.path}
                         className="flex items-center gap-2 text-gray-600 transition-all duration-300 hover:text-primary hover:translate-x-2 group"
                       >
                         <div className="w-1 h-1 transition-colors duration-300 bg-gray-400 rounded-full group-hover:bg-primary"></div>
-                        {item}
-                      </a>
+                        {item.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -120,12 +128,12 @@ const Footer = () => {
             </p>
 
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <a href="#" className="text-gray-600 transition-colors duration-300 hover:text-primary">
+              <Link to="/privacy" className="text-gray-600 transition-colors duration-300 hover:text-primary">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-gray-600 transition-colors duration-300 hover:text-primary">
+              </Link>
+              <Link to="/terms" className="text-gray-600 transition-colors duration-300 hover:text-primary">
                 Terms of Service
-              </a>
+              </Link>
               <a href="#" className="text-gray-600 transition-colors duration-300 hover:text-primary">
                 Cookie Policy
               </a>

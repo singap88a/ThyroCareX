@@ -1,14 +1,8 @@
-# Doctor Profile Page Implementation
+# TODO: Modify Add_patient.jsx
 
-## Tasks
-- [x] Create src/pages/DoctorProfile.jsx main page component
-- [x] Create src/components/doctor/DoctorHeader.jsx component
-- [x] Create src/components/doctor/DoctorInfo.jsx component
-- [x] Create src/components/doctor/DoctorCredentials.jsx component
-- [x] Create src/components/doctor/ContactInfo.jsx component
-- [x] Create src/components/doctor/Reviews.jsx component
-- [x] Create src/components/doctor/AppointmentBooking.jsx component
-- [x] Update src/App.jsx to add '/doctor-profile' route
-- [x] Run development server to test the new page
-- [x] Verify responsive design on different screen sizes
-- [x] Ensure all components integrate properly with existing app structure
+- [ ] Import ArrowRight icon from lucide-react
+- [ ] Change header background to solid white (remove backdrop-blur)
+- [ ] Replace connecting lines in progress steps with ArrowRight icons
+- [ ] Change all blue gradient colors to solid primary color
+- [ ] Update focus rings, borders, and text colors to use primary
+- [ ] Ensure no secondary colors are mixed with primary

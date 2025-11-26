@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  User, 
-  Calendar, 
-  Weight, 
-  Ruler, 
-  Phone, 
+import {
+  ArrowLeft,
+  ArrowRight,
+  User,
+  Calendar,
+  Weight,
+  Ruler,
+  Phone,
   MapPin,
   FileText,
   Activity,
@@ -50,21 +51,21 @@ const AddPatient = () => {
   });
 
   const symptoms = [
-    { id: "fatigue", name: "تعب وإرهاق", category: "عام" },
-    { id: "weightGain", name: "زيادة الوزن", category: "وزن" },
-    { id: "weightLoss", name: "فقدان الوزن", category: "وزن" },
-    { id: "coldIntolerance", name: "عدم تحمل البرد", category: "حراري" },
-    { id: "heatIntolerance", name: "عدم تحمل الحر", category: "حراري" },
-    { id: "hairLoss", name: "تساقط الشعر", category: "جلدي" },
-    { id: "dryMain", name: "جفاف الجلد", category: "جلدي" },
-    { id: "constipation", name: "إمساك", category: "هضمي" },
-    { id: "diarrhea", name: "إسهال", category: "هضمي" },
-    { id: "heartPalpitations", name: "خفقان القلب", category: "قلبي" },
-    { id: "anxiety", name: "قلق وتوتر", category: "نفسي" },
-    { id: "depression", name: "اكتئاب", category: "نفسي" },
-    { id: "musclePain", name: "ألم العضلات", category: "عضلي" },
-    { id: "tremor", name: "رعشة", category: "عصبي" },
-    { id: "sleepProblems", name: "مشاكل النوم", category: "نوم" }
+    { id: "fatigue", name: "Fatigue", category: "General" },
+    { id: "weightGain", name: "Weight Gain", category: "Weight" },
+    { id: "weightLoss", name: "Weight Loss", category: "Weight" },
+    { id: "coldIntolerance", name: "Cold Intolerance", category: "Thermal" },
+    { id: "heatIntolerance", name: "Heat Intolerance", category: "Thermal" },
+    { id: "hairLoss", name: "Hair Loss", category: "Dermatological" },
+    { id: "dryMain", name: "Dry Skin", category: "Dermatological" },
+    { id: "constipation", name: "Constipation", category: "Digestive" },
+    { id: "diarrhea", name: "Diarrhea", category: "Digestive" },
+    { id: "heartPalpitations", name: "Heart Palpitations", category: "Cardiac" },
+    { id: "anxiety", name: "Anxiety", category: "Psychological" },
+    { id: "depression", name: "Depression", category: "Psychological" },
+    { id: "musclePain", name: "Muscle Pain", category: "Muscular" },
+    { id: "tremor", name: "Tremor", category: "Neurological" },
+    { id: "sleepProblems", name: "Sleep Problems", category: "Sleep" }
   ];
 
   const showToast = (title, description, type = 'success') => {
@@ -111,28 +112,28 @@ const AddPatient = () => {
   };
 
   const handleSubmit = () => {
-    showToast("تم حفظ بيانات المريض", "سيتم تحليل البيانات وعرض النتائج قريباً");
+    showToast("Patient data saved successfully", "Data will be analyzed and results displayed soon");
     // navigate("/diagnosis-results", { state: { patientData } });
   };
 
   const saveDraft = () => {
-    showToast("تم حفظ المسودة", "يمكنك العودة لإكمال البيانات لاحقاً");
+    showToast("Draft saved", "You can return to complete the data later");
   };
 
   const steps = [
-    { id: 1, title: "المعلومات الأساسية", icon: User },
-    { id: 2, title: "التاريخ المرضي", icon: FileText },
-    { id: 3, title: "الأعراض", icon: Activity },
-    { id: 4, title: "التحاليل والفحوصات", icon: Upload }
+    { id: 1, title: "Basic Information", icon: User },
+    { id: 2, title: "Medical History", icon: FileText },
+    { id: 3, title: "Symptoms", icon: Activity },
+    { id: 4, title: "Tests & Scans", icon: Upload }
   ];
 
   const getBMIStatus = (bmi) => {
     if (!bmi) return '';
     const bmiValue = parseFloat(bmi);
-    if (bmiValue < 18.5) return { status: 'نقص الوزن', color: 'text-yellow-600' };
-    if (bmiValue < 25) return { status: 'وزن طبيعي', color: 'text-green-600' };
-    if (bmiValue < 30) return { status: 'زيادة الوزن', color: 'text-orange-600' };
-    return { status: 'سمنة', color: 'text-red-600' };
+    if (bmiValue < 18.5) return { status: 'Underweight', color: 'text-yellow-600' };
+    if (bmiValue < 25) return { status: 'Normal weight', color: 'text-green-600' };
+    if (bmiValue < 30) return { status: 'Overweight', color: 'text-orange-600' };
+    return { status: 'Obese', color: 'text-red-600' };
   };
 
   const bmi = calculateBMI();
@@ -141,7 +142,7 @@ const AddPatient = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Toast Notifications */}
-      <div className="fixed z-50 space-y-2 top-4 left-4">
+      <div className="fixed z-50 space-y-2 top-4 right-4">
         {toasts.map(toast => (
           <div
             key={toast.id}
@@ -159,7 +160,7 @@ const AddPatient = () => {
                 <CheckCircle className="w-5 h-5 text-green-500" />
               )}
             </div>
-            <div className="mr-3">
+            <div className="ml-3">
               <div className="font-semibold">{toast.title}</div>
               <div className="text-sm">{toast.description}</div>
             </div>
@@ -168,25 +169,25 @@ const AddPatient = () => {
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
         <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="flex items-center space-x-4">
               <button className="p-2 transition-colors duration-200 rounded-lg hover:bg-gray-100">
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">إضافة مريض جديد</h1>
-                <p className="text-gray-600">أدخل بيانات المريض للحصول على التشخيص</p>
+                <h1 className="text-2xl font-bold text-gray-900">Add New Patient</h1>
+                <p className="text-gray-600">Enter patient data for diagnosis</p>
               </div>
             </div>
-            <div className="flex space-x-2 space-x-reverse">
+            <div className="flex space-x-2">
               <button 
                 onClick={saveDraft}
-                className="flex items-center px-4 py-2 space-x-2 space-x-reverse font-medium text-gray-700 transition-colors duration-200 bg-white border border-gray-300 shadow-sm rounded-xl hover:bg-gray-50"
+                className="flex items-center px-4 py-2 space-x-2 font-medium text-gray-700 transition-colors duration-200 bg-white border border-gray-300 shadow-sm rounded-xl hover:bg-gray-50"
               >
                 <Save className="w-4 h-4" />
-                <span>حفظ مسودة</span>
+                <span>Save Draft</span>
               </button>
             </div>
           </div>
@@ -210,7 +211,7 @@ const AddPatient = () => {
                   >
                     <Icon className="w-5 h-5" />
                   </div>
-                  <div className="mr-3">
+                  <div className="ml-3">
                     <div className={`font-medium transition-colors duration-300 ${
                       currentStep >= step.id ? "text-blue-600" : "text-gray-400"
                     }`}>
@@ -218,12 +219,12 @@ const AddPatient = () => {
                     </div>
                   </div>
                   {index < steps.length - 1 && (
-                    <div 
-                      className={`w-16 h-1 mx-4 rounded-full transition-all duration-500 ${
-                        currentStep > step.id 
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600" 
-                          : "bg-gray-300"
-                      }`} 
+                    <ArrowRight
+                      className={`w-12 h-6 mx-4 transition-all duration-500 ${
+                        currentStep > step.id
+                          ? "text-primary"
+                          : "text-gray-300"
+                      }`}
                     />
                   )}
                 </div>
@@ -237,25 +238,25 @@ const AddPatient = () => {
           <div className="overflow-hidden border border-gray-200 shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl animate-fadeIn">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center">
-                <User className="w-6 h-6 ml-2 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">المعلومات الأساسية</h2>
+                <User className="w-6 h-6 mr-2 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
               </div>
-              <p className="mt-1 text-gray-600">أدخل المعلومات الشخصية الأساسية للمريض</p>
+              <p className="mt-1 text-gray-600">Enter patient's basic personal information</p>
             </div>
             <div className="p-6 space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">الاسم الكامل</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Full Name</label>
                   <input
                     type="text"
-                    placeholder="اسم المريض بالكامل"
+                    placeholder="Patient full name"
                     value={patientData.fullName}
                     onChange={(e) => setPatientData(prev => ({ ...prev, fullName: e.target.value }))}
                     className="w-full px-4 py-3 transition-colors duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">تاريخ الميلاد</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Date of Birth</label>
                   <input
                     type="date"
                     value={patientData.dateOfBirth}
@@ -264,7 +265,7 @@ const AddPatient = () => {
                   />
                   {calculateAge() && (
                     <div className="inline-block px-3 py-1 mt-2 text-sm text-blue-700 rounded-lg bg-blue-50">
-                      العمر: {calculateAge()} سنة
+                      Age: {calculateAge()} years
                     </div>
                   )}
                 </div>
@@ -272,19 +273,19 @@ const AddPatient = () => {
 
               <div className="grid gap-6 md:grid-cols-3">
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">الجنس</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Gender</label>
                   <select 
                     value={patientData.gender}
                     onChange={(e) => setPatientData(prev => ({ ...prev, gender: e.target.value }))}
                     className="w-full px-4 py-3 transition-colors duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">اختر الجنس</option>
-                    <option value="male">ذكر</option>
-                    <option value="female">أنثى</option>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">الطول (سم)</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Height (cm)</label>
                   <input
                     type="number"
                     placeholder="170"
@@ -294,7 +295,7 @@ const AddPatient = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">الوزن (كجم)</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Weight (kg)</label>
                   <input
                     type="number"
                     placeholder="70"
@@ -303,7 +304,7 @@ const AddPatient = () => {
                     className="w-full px-4 py-3 transition-colors duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   {bmi && (
-                    <div className="flex items-center mt-2 space-x-2 space-x-reverse">
+                    <div className="flex items-center mt-2 space-x-2">
                       <div className="px-3 py-1 text-sm text-gray-700 rounded-lg bg-gray-50">
                         BMI: {bmi}
                       </div>
@@ -317,7 +318,7 @@ const AddPatient = () => {
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">رقم الهاتف</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Phone Number</label>
                   <input
                     type="tel"
                     placeholder="01234567890"
@@ -327,10 +328,10 @@ const AddPatient = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">العنوان (اختياري)</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Address (Optional)</label>
                   <input
                     type="text"
-                    placeholder="عنوان المريض"
+                    placeholder="Patient address"
                     value={patientData.address}
                     onChange={(e) => setPatientData(prev => ({ ...prev, address: e.target.value }))}
                     className="w-full px-4 py-3 transition-colors duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -346,16 +347,16 @@ const AddPatient = () => {
           <div className="overflow-hidden border border-gray-200 shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl animate-fadeIn">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center">
-                <FileText className="w-6 h-6 ml-2 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">التاريخ المرضي</h2>
+                <FileText className="w-6 h-6 mr-2 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Medical History</h2>
               </div>
-              <p className="mt-1 text-gray-600">معلومات طبية مهمة عن المريض</p>
+              <p className="mt-1 text-gray-600">Important medical information about the patient</p>
             </div>
             <div className="p-6 space-y-6">
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">التاريخ المرضي</label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Medical History</label>
                 <textarea
-                  placeholder="اذكر الأمراض السابقة، العمليات الجراحية، أو أي حالات مرضية في التاريخ العائلي..."
+                  placeholder="Mention previous diseases, surgeries, or any medical conditions in family history..."
                   value={patientData.medicalHistory}
                   onChange={(e) => setPatientData(prev => ({ ...prev, medicalHistory: e.target.value }))}
                   rows={4}
@@ -364,9 +365,9 @@ const AddPatient = () => {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">الأدوية الحالية</label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Current Medications</label>
                 <textarea
-                  placeholder="اذكر جميع الأدوية التي يتناولها المريض حالياً مع الجرعات..."
+                  placeholder="List all medications the patient is currently taking with doses..."
                   value={patientData.currentMedications}
                   onChange={(e) => setPatientData(prev => ({ ...prev, currentMedications: e.target.value }))}
                   rows={3}
@@ -375,9 +376,9 @@ const AddPatient = () => {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">الحساسيات المعروفة</label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Known Allergies</label>
                 <textarea
-                  placeholder="اذكر أي حساسيات معروفة للأدوية أو الطعام أو المواد الأخرى..."
+                  placeholder="List any known allergies to medications, food, or other substances..."
                   value={patientData.allergies}
                   onChange={(e) => setPatientData(prev => ({ ...prev, allergies: e.target.value }))}
                   rows={3}
@@ -393,13 +394,13 @@ const AddPatient = () => {
           <div className="overflow-hidden border border-gray-200 shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl animate-fadeIn">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center">
-                <Activity className="w-6 h-6 ml-2 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">الأعراض</h2>
+                <Activity className="w-6 h-6 mr-2 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Symptoms</h2>
               </div>
-              <p className="mt-1 text-gray-600">حدد الأعراض الموجودة ودرجة شدتها (1-10)</p>
+              <p className="mt-1 text-gray-600">Select existing symptoms and their severity (1-10)</p>
             </div>
             <div className="p-6">
-              <div className="pr-2 space-y-4 overflow-y-auto max-h-96">
+              <div className="pl-2 space-y-4 overflow-y-auto max-h-96">
                 {symptoms.map((symptom) => (
                   <div 
                     key={symptom.id} 
@@ -410,7 +411,7 @@ const AddPatient = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 space-x-reverse">
+                      <div className="flex items-center space-x-3">
                         <input
                           type="checkbox"
                           checked={patientData.symptoms[symptom.id] > 0}
@@ -421,7 +422,7 @@ const AddPatient = () => {
                         />
                         <div>
                           <span className="font-medium text-gray-900">{symptom.name}</span>
-                          <span className="px-2 py-1 mr-2 text-xs text-gray-700 bg-gray-200 rounded-full">
+                          <span className="px-2 py-1 ml-2 text-xs text-gray-700 bg-gray-200 rounded-full">
                             {symptom.category}
                           </span>
                         </div>
@@ -433,7 +434,7 @@ const AddPatient = () => {
                       )}
                     </div>
                     {patientData.symptoms[symptom.id] > 0 && (
-                      <div className="mt-3 mr-6">
+                      <div className="mt-3 ml-6">
                         <input
                           type="range"
                           value={patientData.symptoms[symptom.id] || 0}
@@ -444,9 +445,9 @@ const AddPatient = () => {
                           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                         />
                         <div className="flex justify-between mt-1 text-xs text-gray-500">
-                          <span>خفيف</span>
-                          <span>متوسط</span>
-                          <span>شديد</span>
+                          <span>Mild</span>
+                          <span>Moderate</span>
+                          <span>Severe</span>
                         </div>
                       </div>
                     )}
@@ -462,14 +463,14 @@ const AddPatient = () => {
           <div className="overflow-hidden border border-gray-200 shadow-sm bg-white/80 backdrop-blur-sm rounded-2xl animate-fadeIn">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center">
-                <Upload className="w-6 h-6 ml-2 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">التحاليل والفحوصات</h2>
+                <Upload className="w-6 h-6 mr-2 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Tests & Scans</h2>
               </div>
-              <p className="mt-1 text-gray-600">أدخل نتائج التحاليل المخبرية والفحوصات التصويرية</p>
+              <p className="mt-1 text-gray-600">Enter laboratory test results and imaging scans</p>
             </div>
             <div className="p-6 space-y-6">
               <div>
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">تحاليل الغدة الدرقية</h3>
+                <h3 className="mb-4 text-lg font-semibold text-gray-900">Thyroid Tests</h3>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">TSH (mIU/L)</label>
@@ -510,9 +511,9 @@ const AddPatient = () => {
               <div className="pt-6 border-t border-gray-200">
                 <div className="space-y-4">
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700">تحاليل أخرى</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Other Tests</label>
                     <textarea
-                      placeholder="أي تحاليل أخرى مثل الأجسام المضادة، الكالسيوم، إلخ..."
+                      placeholder="Any other tests like antibodies, calcium, etc..."
                       value={patientData.otherTests}
                       onChange={(e) => setPatientData(prev => ({ ...prev, otherTests: e.target.value }))}
                       rows={3}
@@ -521,9 +522,9 @@ const AddPatient = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700">الفحوصات التصويرية</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Imaging Scans</label>
                     <textarea
-                      placeholder="نتائج السونار، الأشعة المقطعية، أو أي فحوصات تصويرية أخرى..."
+                      placeholder="Ultrasound, CT scan results, or other imaging findings..."
                       value={patientData.imagingResults}
                       onChange={(e) => setPatientData(prev => ({ ...prev, imagingResults: e.target.value }))}
                       rows={3}
@@ -534,14 +535,14 @@ const AddPatient = () => {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">رفع الملفات (اختياري)</label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Upload Files (Optional)</label>
                 <div className="p-8 text-center transition-colors duration-200 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 hover:bg-blue-50">
                   <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                   <p className="mb-2 text-sm text-gray-600">
-                    اسحب الملفات هنا أو انقر للاختيار
+                    Drag files here or click to select
                   </p>
                   <p className="text-xs text-gray-500">
-                    PDF, JPG, PNG حتى 10MB
+                    PDF, JPG, PNG up to 10MB
                   </p>
                   <input type="file" multiple className="hidden" />
                 </div>
@@ -561,24 +562,24 @@ const AddPatient = () => {
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm'
             }`}
           >
-            السابق
+            Previous
           </button>
           
-          <div className="flex space-x-2 space-x-reverse">
+          <div className="flex space-x-2">
             {currentStep < 4 ? (
               <button
                 onClick={() => setCurrentStep(prev => prev + 1)}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
               >
-                التالي
+                Next
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center space-x-2 space-x-reverse"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center space-x-2"
               >
                 <Send className="w-4 h-4" />
-                <span>تحليل البيانات</span>
+                <span>Analyze Data</span>
               </button>
             )}
           </div>
