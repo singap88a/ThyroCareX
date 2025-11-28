@@ -15,25 +15,26 @@ import Register from './components/auth/Register';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import './components/Dashboard/AdminDashboard.css';
-import AdminLayout from './components/Dashboard/AdminLayout';
-import DashboardOverview from './components/Dashboard/DashboardOverview';
-import DoctorsManager from './components/Dashboard/DoctorsManager';
-import CasesManager from './components/Dashboard/CasesManager';
-import AILogsViewer from './components/Dashboard/AILogsViewer';
-import SubscriptionsManager from './components/Dashboard/SubscriptionsManager';
-import CreditsManager from './components/Dashboard/CreditsManager';
-import MessagesInbox from './components/Dashboard/MessagesInbox';
-import SettingsManager from './components/Dashboard/SettingsManager';
-import MediaManager from './components/Dashboard/MediaManager';
-import AdminUsersManager from './components/Dashboard/AdminUsersManager';
-import AnnouncementsManager from './components/Dashboard/AnnouncementsManager';
+import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { AdminThemeProvider } from './contexts/AdminThemeContext';
+import AdminLayout from './components/admin/layout/AdminLayout';
+import DashboardOverview from './components/admin/dashboard/DashboardOverview';
+import DoctorsManager from './components/admin/doctors/DoctorsManager';
+import CasesManager from './components/admin/patients/CasesManager';
+import AILogsManager from './components/admin/ai/AILogsManager';
+import SubscriptionsManager from './components/admin/subscriptions/SubscriptionsManager';
+import CreditsManager from './components/admin/credits/CreditsManager';
+import MediaManager from './components/admin/media/MediaManager';
+import ContactMessages from './components/admin/messages/ContactMessages';
+import AdminUsers from './components/admin/users/AdminUsers';
+import SettingsManager from './components/admin/settings/SettingsManager';
+import SecurityLogs from './components/admin/security/SecurityLogs';
+import AnnouncementsManager from './components/admin/announcements/AnnouncementsManager';
 
 function App() {
   return (
     <AuthProvider>
-      <ThemeProvider>
+  
       <Router>
         <ScrollToTop />
         <Navbar/>
@@ -49,28 +50,33 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
-            
+
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/admin" element={
+              <AdminAuthProvider>
+                <AdminThemeProvider>
+                  <AdminLayout />
+                </AdminThemeProvider>
+              </AdminAuthProvider>
+            }>
               <Route index element={<DashboardOverview />} />
-              <Route path="analytics" element={<DashboardOverview />} />
               <Route path="doctors" element={<DoctorsManager />} />
-              <Route path="cases" element={<CasesManager />} />
-              <Route path="ai-logs" element={<AILogsViewer />} />
+              <Route path="patients" element={<CasesManager />} />
+              <Route path="ai-logs" element={<AILogsManager />} />
               <Route path="subscriptions" element={<SubscriptionsManager />} />
               <Route path="credits" element={<CreditsManager />} />
-              <Route path="messages" element={<MessagesInbox />} />
-              <Route path="settings" element={<SettingsManager />} />
               <Route path="media" element={<MediaManager />} />
-              <Route path="users" element={<AdminUsersManager />} />
+              <Route path="messages" element={<ContactMessages />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="settings" element={<SettingsManager />} />
+              <Route path="security" element={<SecurityLogs />} />
               <Route path="announcements" element={<AnnouncementsManager />} />
             </Route>
           </Routes>
         </div>
         <Footer />
       </Router>
-      </ThemeProvider>
-    </AuthProvider>
+     </AuthProvider>
   );
 }
 
