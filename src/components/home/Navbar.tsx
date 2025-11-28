@@ -66,7 +66,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md transition-all duration-500 ${
+      className={`fixed top-0 w-full z-[500] bg-white/95 backdrop-blur-md transition-all duration-500 ${
         isScrolled ? "shadow-2xl py-2" : "   "
       }`}
     >
@@ -77,12 +77,12 @@ const Navbar = () => {
   <img
     src="/logo.webp"
     alt="ThyroCareX Logo"
-    className="object-contain w-12 sm:w-14 md:w-14 transition-all duration-300"
+    className="object-contain w-12 transition-all duration-300 sm:w-14 md:w-14"
   />
   <div className="flex flex-col items-start leading-tight">
     {/* اسم البراند */}
     <span
-      className="font-extrabold tracking-tight text-xl sm:text-xl"
+      className="text-xl font-extrabold tracking-tight sm:text-xl"
       style={{
         fontFamily: "'Montserrat', sans-serif",
         color: "#ffffff",

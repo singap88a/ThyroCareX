@@ -1,29 +1,11 @@
-# Dashboard Dark/Light Mode Implementation
+# Sidebar Professionalization Tasks
 
-## Overview
-Implement full dark mode and light mode support for the entire dashboard by converting inline styles to Tailwind classes.
-
-## Components to Update
-- [x] AdminUsersManager.jsx - Convert inline styles to Tailwind classes
-- [x] AILogsViewer.jsx - Convert inline styles to Tailwind classes
-- [x] AnnouncementsManager.jsx - Convert inline styles to Tailwind classes
-- [x] CasesManager.jsx - Convert inline styles to Tailwind classes
-- [ ] CreditsManager.jsx - Convert inline styles to Tailwind classes
-- [ ] MediaManager.jsx - Convert inline styles to Tailwind classes
-- [ ] MessagesInbox.jsx - Convert inline styles to Tailwind classes
-- [ ] SettingsManager.jsx - Convert inline styles to Tailwind classes
-- [ ] SubscriptionsManager.jsx - Convert inline styles to Tailwind classes
-
-## Already Themed Components
-- [x] AdminLayout.jsx - Already uses Tailwind dark: classes
-- [x] AdminLogin.jsx - Already uses Tailwind dark: classes
-- [x] DashboardOverview.jsx - Already uses Tailwind dark: classes
-- [x] DoctorsManager.jsx - Already uses Tailwind dark: classes
-- [x] Sidebar.jsx - Already uses Tailwind dark: classes
-- [x] StatCard.jsx - Already uses Tailwind dark: classes
-- [x] ChartCard.jsx - Already uses Tailwind dark: classes
-
-## Testing
-- [ ] Test theme toggle functionality
-- [ ] Verify all components display correctly in both modes
-- [ ] Check sidebar, text, and all UI elements
+- [ ] Update imports: Add Menu and X icons from lucide-react
+- [ ] Group menu items into logical sections with separators
+- [ ] Rearrange layout: Label - Count - Icon when expanded
+- [ ] Remove notification badges on icons
+- [ ] Change count color to neutral (slate)
+- [ ] Reduce spacing between menu items and sections
+- [ ] Improve font styles (use font-semibold)
+- [ ] Update toggle button to use Menu/X icons
+- [ ] Add subtle visual enhancements (shadows, hover effects)
