@@ -1,11 +1,10 @@
-# Sidebar Professionalization Tasks
+# Task: Modify Navbar and PatientsList Page
 
-- [ ] Update imports: Add Menu and X icons from lucide-react
-- [ ] Group menu items into logical sections with separators
-- [ ] Rearrange layout: Label - Count - Icon when expanded
-- [ ] Remove notification badges on icons
-- [ ] Change count color to neutral (slate)
-- [ ] Reduce spacing between menu items and sections
-- [ ] Improve font styles (use font-semibold)
-- [ ] Update toggle button to use Menu/X icons
-- [ ] Add subtle visual enhancements (shadows, hover effects)
+## Completed Tasks
+- [ ] Create TODO.md file
+
+## Pending Tasks
+- [ ] Modify Navbar.tsx: Remove "All Patients" from main nav and add to profile dropdown
+- [ ] Modify PatientsList.jsx: Change from grid cards to professional table layout
+- [ ] Test navbar functionality
+- [ ] Test table layout and responsiveness

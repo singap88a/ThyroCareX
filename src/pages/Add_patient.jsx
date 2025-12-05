@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 
 const AddPatient = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [toasts, setToasts] = useState([]);
   const [patientData, setPatientData] = useState({
@@ -113,7 +115,9 @@ const AddPatient = () => {
 
   const handleSubmit = () => {
     showToast("Patient data saved successfully", "Data will be analyzed and results displayed soon");
-    // navigate("/diagnosis-results", { state: { patientData } });
+    setTimeout(() => {
+      navigate("/diagnosis-results", { state: { patientData } });
+    }, 1500);
   };
 
   const saveDraft = () => {
@@ -142,7 +146,7 @@ const AddPatient = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Toast Notifications */}
-      <div className="fixed z-50 space-y-2 top-4 right-4">
+      <div className="fixed space-y-2 z-[600] top-4 right-4">
         {toasts.map(toast => (
           <div
             key={toast.id}

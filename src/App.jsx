@@ -5,6 +5,9 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import DoctorProfile from './pages/DoctorProfile';
 import AddPatient from './pages/Add_patient';
+import DiagnosisResults from './pages/DiagnosisResults';
+import PatientsList from './pages/PatientsList';
+import PatientDetails from './pages/PatientDetails';
 import './App.css';
 import Footer from './components/home/Footer';
 import Navbar from './components/home/Navbar';
@@ -50,6 +53,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/diagnosis-results" element={<DiagnosisResults />} />
+            <Route path="/patients" element={<PatientsList />} />
+            <Route path="/patients/:id" element={<PatientDetails />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={
