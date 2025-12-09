@@ -253,20 +253,20 @@ const ThyroidFeatures = () => {
         transition={{ duration: 1, delay: 1.5 }}
         className="relative z-10 mt-20 text-center"
       >
-        <div className="inline-flex items-center gap-8 bg-gray-900/50 backdrop-blur-sm px-8 py-4 rounded-2xl border border-gray-800">
+        <div className="inline-flex items-center gap-8 bg-white/80 backdrop-blur-sm px-8 py-4 rounded-2xl border-2 border-blue-100 shadow-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
-            <span className="text-gray-300">Active Regulation</span>
+            <span className="text-gray-700 font-medium">Active Regulation</span>
           </div>
-          <div className="w-px h-6 bg-gray-700"></div>
+          <div className="w-px h-6 bg-gray-200"></div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-cyan-500 animate-pulse"></div>
-            <span className="text-gray-300">Vascular Response</span>
+            <span className="text-gray-700 font-medium">Vascular Response</span>
           </div>
-          <div className="w-px h-6 bg-gray-700"></div>
+          <div className="w-px h-6 bg-gray-200"></div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></div>
-            <span className="text-gray-300">Neural Integration</span>
+            <span className="text-gray-700 font-medium">Neural Integration</span>
           </div>
         </div>
       </motion.div>
