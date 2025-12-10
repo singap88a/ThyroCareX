@@ -14,7 +14,7 @@ const features = [
   {
     title: "Hormone Regulation",
     desc: "Balances T3 & T4 hormone levels to ensure stable endocrine function and consistent biological activity",
-    position: "top-[-60px] left-[-140px]",
+    position: "top-[5px] left-[-140px]",
     delay: 0.6,
     icon: <FaBalanceScale className="text-blue-600" />,
     color: "blue"
@@ -22,7 +22,7 @@ const features = [
   {
     title: "Metabolism Control",
     desc: "Regulates energy production and metabolic rate to support healthy weight management and daily vitality",
-    position: "top-[-60px] right-[-140px]",
+    position: "top-[5px] right-[-140px]",
     delay: 0.8,
     icon: <FaFire className="text-orange-500" />,
     color: "orange"
@@ -229,7 +229,7 @@ const ThyroidFeatures = () => {
             
             {/* الصورة مكبرة */}
             <img
-              src="/ff.webp"
+              src="/fff.png"
               alt="Thyroid Gland"
               className="relative z-10 w-[780px] h-auto select-none drop-shadow-xl rounded-2xl"
               style={{ maxWidth: 'none' }}
@@ -251,7 +251,7 @@ const ThyroidFeatures = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="relative z-10 mt-20 text-center"
+        className="relative z-10  mt-7 text-center"
       >
         <div className="inline-flex items-center gap-8 bg-white/80 backdrop-blur-sm px-8 py-4 rounded-2xl border-2 border-blue-100 shadow-lg">
           <div className="flex items-center gap-2">
