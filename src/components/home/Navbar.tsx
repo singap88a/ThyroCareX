@@ -10,6 +10,7 @@ import {
   FaSignOutAlt,
   FaCog,
   FaUserCircle,
+  FaUsers,
 } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -189,7 +190,7 @@ const Navbar = () => {
                 {/* Add Patient Button */}
                 <Link
                   to="/add-patient"
-                  className="flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  className="flex items-center space-x-2 px-4 py-2.5 bg-primary   text-white font-medium rounded-xl  transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
                 >
                   <FaStethoscope className="w-4 h-4" />
                   <span>Add Patient</span>
@@ -238,6 +239,14 @@ const Navbar = () => {
                       >
                         <FaStethoscope className="w-4 h-4 mr-3" />
                         Add Patient
+                      </Link>
+                      <Link
+                        to="/patients"
+                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
+                        onClick={() => setProfileDropdown(false)}
+                      >
+                        <FaUsers className="w-4 h-4 mr-3" />
+                        All Patients
                       </Link>
                       <Link
                         to="/settings"

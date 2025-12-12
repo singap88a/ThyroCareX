@@ -1,0 +1,1196 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  AlertCircle, 
+  CheckCircle, 
+  XCircle, 
+  TrendingUp, 
+  TrendingDown,
+  Download,
+  Share2,
+  Printer,
+  Clock,
+  Calendar,
+  User,
+  Smartphone,
+  Mail,
+  Activity,
+  Heart,
+  Thermometer,
+  Pill,
+  Brain,
+  Eye,
+  Scan,
+  Cpu,
+  Shield,
+  Target,
+  BarChart3,
+  ChevronRight,
+  ExternalLink,
+  Video,
+  MessageSquare,
+  Bell,
+  Settings,
+  Zap,
+  Database,
+  Layers,
+  GitBranch,
+  PieChart,
+  LineChart,
+  Target as TargetIcon,
+  MapPin,
+  Circle
+} from 'lucide-react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import CountUp from 'react-countup';
+import { motion } from 'framer-motion';
+
+const ThyroidDiagnosisResult = () => {
+  const { patientId } = useParams();
+  const navigate = useNavigate();
+  const canvasRef = useRef(null);
+  const [diagnosisResult, setDiagnosisResult] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [is3DLoaded, setIs3DLoaded] = useState(false);
+  const [scanRotation, setScanRotation] = useState(0);
+
+  // Initialize AOS
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true
+    });
+  }, []);
+
+  // Mock AI Diagnosis Result - All in English
+  const mockDiagnosis = {
+    patientInfo: {
+      id: patientId || "THY-2024-001234",
+      name: "Mohamed Ahmed",
+      age: 42,
+      gender: "Male",
+      phone: "+20 100 123 4567",
+      email: "mohamed.ahmed@example.com",
+      registrationDate: "2024-02-15",
+      lastScan: "2024-03-20",
+      scanId: "SCAN-78901",
+      aiModelVersion: "ThyroScan AI v3.2.1",
+      patientNumber: "PAT-789456",
+      address: "123 Medical Street, Cairo",
+      bloodType: "O+",
+      allergies: "None",
+      weight: "75 kg",
+      height: "175 cm",
+      bmi: "24.5"
+    },
+    
+    diagnosisSummary: {
+      status: "MALIGNANT",
+      confidence: 94.7,
+      thyroidCondition: "Papillary Thyroid Carcinoma",
+      severity: "Moderate",
+      riskLevel: "High",
+      recommendation: "Immediate surgical resection with radioactive iodine therapy",
+      urgency: "HIGH"
+    },
+    
+    noduleAnalysis: {
+      totalNodules: 3,
+      suspiciousNodules: 2,
+      largestNodule: {
+        size: "2.8 cm",
+        location: "Right Lobe - Inferior",
+        tiradsScore: 5,
+        characteristics: ["Irregular", "Microcalcifications", "Heterogeneous", "Rapid Growth"]
+      },
+      nodules: [
+        {
+          id: "NOD-001",
+          size: "2.8 cm",
+          location: "Right Lobe",
+          tirads: 5,
+          malignancyProbability: 92,
+          characteristics: ["Irregular", "Microcalcifications", "Rapid Growth"],
+          coordinates: { x: 2.8, y: 0.5, z: 0.3 } // 3D coordinates for the tumor
+        },
+        {
+          id: "NOD-002",
+          size: "1.2 cm",
+          location: "Left Lobe",
+          tirads: 4,
+          malignancyProbability: 65,
+          characteristics: ["Heterogeneous", "Absent Halo"],
+          coordinates: { x: -1.5, y: 0.3, z: 0.2 }
+        },
+        {
+          id: "NOD-003",
+          size: "0.8 cm",
+          location: "Left Lobe",
+          tirads: 2,
+          malignancyProbability: 5,
+          characteristics: ["Smooth", "Homogeneous"],
+          coordinates: { x: -2.0, y: -0.2, z: 0.1 }
+        }
+      ]
+    },
+    
+    aiMetrics: {
+      accuracy: 96.3,
+      sensitivity: 94.8,
+      specificity: 97.1,
+      processingTime: "3.2 seconds",
+      modelConfidence: 98.7,
+      dataPointsAnalyzed: 12500
+    },
+    
+    biomarkers: {
+      tsh: { value: 0.15, normalRange: "0.4-4.0", unit: "mIU/L", status: "Very Low" },
+      t4: { value: 18.9, normalRange: "4.5-12.0", unit: "μg/dL", status: "Very High" },
+      t3: { value: 325, normalRange: "80-200", unit: "ng/dL", status: "Very High" },
+      calcitonin: { value: 45, normalRange: "0-10", unit: "pg/mL", status: "High" },
+      thyroglobulin: { value: 380, normalRange: "0-40", unit: "ng/mL", status: "Very High" }
+    },
+    
+    timeline: [
+      {
+        date: "2024-03-20",
+        event: "AI Diagnosis",
+        description: "Detected 3 nodules - 2 suspicious",
+        status: "Diagnosis"
+      },
+      {
+        date: "2024-03-15",
+        event: "Ultrasound Examination",
+        description: "Expert opinion: Suspected malignancy",
+        status: "Examination"
+      },
+      {
+        date: "2024-02-28",
+        event: "First Symptom Appearance",
+        description: "Neck swelling and difficulty swallowing",
+        status: "Symptoms"
+      },
+      {
+        date: "2024-02-15",
+        event: "Initial Consultation",
+        description: "Patient registration and initial tests",
+        status: "Consultation"
+      }
+    ],
+    
+    recommendations: [
+      {
+        type: "Surgical",
+        title: "Total Thyroidectomy",
+        urgency: "Immediate",
+        details: "Within 2-4 weeks",
+        icon: "🔪"
+      },
+      {
+        type: "Therapeutic",
+        title: "Radioactive Iodine 131I Therapy",
+        urgency: "Post-surgery",
+        details: "High dosage treatment",
+        icon: "☢️"
+      },
+      {
+        type: "Laboratory",
+        title: "Fine Needle Aspiration Biopsy",
+        urgency: "Immediate",
+        details: "For diagnosis confirmation",
+        icon: "🔬"
+      },
+      {
+        type: "Follow-up",
+        title: "Regular 3-month checkups",
+        urgency: "Continuous",
+        details: "For 5 years duration",
+        icon: "📅"
+      }
+    ],
+    
+    statistics: {
+      survivalRate: { value: 98, description: "5-Year Survival Rate" },
+      recurrenceRate: { value: 15, description: "Recurrence Rate" },
+      treatmentSuccess: { value: 92, description: "Treatment Success Rate" },
+      commonality: { value: 3.1, description: "Global Prevalence" }
+    }
+  };
+
+  // Initialize 3D Thyroid Model
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8fafc); // Light background
+    
+    const camera = new THREE.PerspectiveCamera(75, canvasRef.current.clientWidth / canvasRef.current.clientHeight, 0.1, 1000);
+    camera.position.set(5, 3, 5);
+    
+    const renderer = new THREE.WebGLRenderer({ 
+      canvas: canvasRef.current,
+      antialias: true,
+      alpha: true 
+    });
+    renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+    
+    // Primary color scheme
+    const primaryColors = {
+      blue: 0x3b82f6,      // Primary Blue
+      lightBlue: 0x60a5fa,  // Light Blue
+      red: 0xef4444,       // Primary Red
+      lightRed: 0xf87171,   // Light Red
+      green: 0x10b981,     // Primary Green
+      lightGreen: 0x34d399  // Light Green
+    };
+    
+    // Create thyroid gland model
+    const createThyroidModel = () => {
+      // Left lobe
+      const leftLobeGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+      const leftLobeMaterial = new THREE.MeshPhongMaterial({ 
+        color: primaryColors.blue,
+        transparent: true,
+        opacity: 0.8,
+        shininess: 60,
+        specular: 0x333333
+      });
+      const leftLobe = new THREE.Mesh(leftLobeGeometry, leftLobeMaterial);
+      leftLobe.position.set(-2, 0, 0);
+      scene.add(leftLobe);
+      
+      // Right lobe (with tumor)
+      const rightLobeGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+      const rightLobeMaterial = new THREE.MeshPhongMaterial({ 
+        color: primaryColors.lightBlue,
+        transparent: true,
+        opacity: 0.8,
+        shininess: 60,
+        specular: 0x333333
+      });
+      const rightLobe = new THREE.Mesh(rightLobeGeometry, rightLobeMaterial);
+      rightLobe.position.set(2, 0, 0);
+      scene.add(rightLobe);
+      
+      // Main tumor on right lobe (marked with red X)
+      const tumorGeometry = new THREE.SphereGeometry(0.8, 32, 32);
+      const tumorMaterial = new THREE.MeshPhongMaterial({ 
+        color: primaryColors.red,
+        emissive: primaryColors.red,
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.9
+      });
+      const tumor = new THREE.Mesh(tumorGeometry, tumorMaterial);
+      tumor.position.set(2.8, 0.5, 0.3);
+      scene.add(tumor);
+      
+      // Create red X mark on tumor
+      const createRedX = (position) => {
+        // First line of X
+        const line1Geometry = new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8);
+        const line1Material = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+        const line1 = new THREE.Mesh(line1Geometry, line1Material);
+        line1.position.copy(position);
+        line1.rotation.z = Math.PI / 4;
+        scene.add(line1);
+        
+        // Second line of X
+        const line2Geometry = new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8);
+        const line2Material = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+        const line2 = new THREE.Mesh(line2Geometry, line2Material);
+        line2.position.copy(position);
+        line2.rotation.z = -Math.PI / 4;
+        scene.add(line2);
+        
+        // Add pulsing effect
+        const pulseMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0xff0000, 
+          transparent: true, 
+          opacity: 0.3 
+        });
+        const pulseGeometry = new THREE.SphereGeometry(0.9, 16, 16);
+        const pulseSphere = new THREE.Mesh(pulseGeometry, pulseMaterial);
+        pulseSphere.position.copy(position);
+        scene.add(pulseSphere);
+        
+        return { line1, line2, pulseSphere };
+      };
+      
+      const redX = createRedX(new THREE.Vector3(2.8, 0.5, 0.3));
+      
+      // Secondary nodules
+      const createNodule = (position, size, color) => {
+        const geometry = new THREE.SphereGeometry(size, 16, 16);
+        const material = new THREE.MeshPhongMaterial({ 
+          color: color,
+          transparent: true,
+          opacity: 0.8
+        });
+        const nodule = new THREE.Mesh(geometry, material);
+        nodule.position.copy(position);
+        scene.add(nodule);
+        
+        // Add small marker
+        const markerGeometry = new THREE.SphereGeometry(size * 0.3, 8, 8);
+        const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.position.copy(position);
+        marker.position.y += size * 1.5;
+        scene.add(marker);
+        
+        return nodule;
+      };
+      
+      // Add other nodules
+      const nodule2 = createNodule(new THREE.Vector3(-1.5, 0.3, 0.2), 0.4, primaryColors.red);
+      const nodule3 = createNodule(new THREE.Vector3(-2.0, -0.2, 0.1), 0.3, primaryColors.green);
+      
+      // Isthmus
+      const isthmusGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4, 32);
+      const isthmusMaterial = new THREE.MeshPhongMaterial({ 
+        color: primaryColors.blue,
+        transparent: true,
+        opacity: 0.7
+      });
+      const isthmus = new THREE.Mesh(isthmusGeometry, isthmusMaterial);
+      isthmus.position.set(0, 0, 0);
+      scene.add(isthmus);
+      
+      // Add trachea
+      const tracheaGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 16);
+      const tracheaMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x94a3b8,
+        transparent: true,
+        opacity: 0.5
+      });
+      const trachea = new THREE.Mesh(tracheaGeometry, tracheaMaterial);
+      trachea.position.set(0, -2.5, 0);
+      scene.add(trachea);
+      
+      // Create 3D text labels
+      const create3DLabel = (text, position, color = 0x000000) => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 256;
+        
+        // Background
+        context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Text
+        context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        context.font = 'bold 40px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(text, canvas.width / 2, canvas.height / 2);
+        
+        // Border
+        context.strokeStyle = '#3b82f6';
+        context.lineWidth = 4;
+        context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ 
+          map: texture,
+          transparent: true 
+        });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.copy(position);
+        sprite.scale.set(3, 1.5, 1);
+        scene.add(sprite);
+        
+        return sprite;
+      };
+      
+      // Add labels for different parts
+      create3DLabel('Suspicious Nodule', new THREE.Vector3(3.5, 1.8, 0.5), primaryColors.red);
+      create3DLabel('Left Lobe', new THREE.Vector3(-3, 1.8, 0), primaryColors.blue);
+      create3DLabel('Right Lobe', new THREE.Vector3(3, -1.8, 0), primaryColors.blue);
+      create3DLabel('Trachea', new THREE.Vector3(0, -4, 0), 0x64748b);
+      
+      return { leftLobe, rightLobe, tumor, isthmus, redX, nodule2, nodule3, trachea };
+    };
+    
+    const thyroidModel = createThyroidModel();
+    setIs3DLoaded(true);
+    
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      // Smooth rotation
+      thyroidModel.rightLobe.rotation.y += 0.002;
+      thyroidModel.leftLobe.rotation.y += 0.002;
+      
+      // Pulsing effect for tumor
+      const time = Date.now() * 0.001;
+      thyroidModel.tumor.scale.x = 1 + Math.sin(time * 2) * 0.05;
+      thyroidModel.tumor.scale.y = 1 + Math.sin(time * 2) * 0.05;
+      thyroidModel.tumor.scale.z = 1 + Math.sin(time * 2) * 0.05;
+      
+      // Pulsing effect for red X
+      if (thyroidModel.redX && thyroidModel.redX.pulseSphere) {
+        thyroidModel.redX.pulseSphere.scale.x = 1 + Math.sin(time * 3) * 0.2;
+        thyroidModel.redX.pulseSphere.scale.y = 1 + Math.sin(time * 3) * 0.2;
+        thyroidModel.redX.pulseSphere.scale.z = 1 + Math.sin(time * 3) * 0.2;
+      }
+      
+      // Gentle floating animation
+      thyroidModel.rightLobe.position.y = Math.sin(time * 0.5) * 0.05;
+      thyroidModel.leftLobe.position.y = Math.sin(time * 0.5 + 1) * 0.05;
+      
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    
+    animate();
+    
+    // Handle resize
+    const handleResize = () => {
+      camera.aspect = canvasRef.current.clientWidth / canvasRef.current.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+    };
+  }, []);
+
+  // Animation for scan rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setScanRotation(prev => (prev + 1) % 360);
+    }, 50);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleDownloadReport = () => {
+    // Implement download functionality
+    console.log('Downloading report...');
+    alert('Report download initiated');
+  };
+
+  const handleShareResults = () => {
+    // Implement share functionality
+    console.log('Sharing results...');
+    alert('Share functionality triggered');
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'MALIGNANT': return 'bg-gradient-to-r from-red-500 to-red-600 text-white';
+      case 'BENIGN': return 'bg-gradient-to-r from-green-500 to-green-600 text-white';
+      case 'SUSPICIOUS': return 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white';
+      default: return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white';
+    }
+  };
+
+  const getUrgencyColor = (urgency) => {
+    switch(urgency) {
+      case 'HIGH': return 'bg-gradient-to-r from-red-500 to-red-600';
+      case 'MEDIUM': return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
+      case 'LOW': return 'bg-gradient-to-r from-green-500 to-green-600';
+      default: return 'bg-gradient-to-r from-gray-500 to-gray-600';
+    }
+  };
+
+  return (
+    <div className="min-h-screen overflow-hidden text-gray-800 bg-gradient-to-br from-gray-50 to-white">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-100 rounded-full w-96 h-96 blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full w-96 h-96 bg-cyan-100 blur-3xl"></div>
+      </div>
+
+      <div className="relative px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="flex flex-col items-start justify-between mb-8 lg:flex-row lg:items-center" data-aos="fade-down">
+          <div>
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2 transition-transform transform group-hover:-translate-x-1" />
+              Back
+            </button>
+            <h1 className="text-4xl font-bold text-primary ">
+              Thyroid AI Diagnosis Results
+            </h1>
+            <p className="mt-2 text-gray-600">Advanced analysis using ThyroScan AI technology</p>
+          </div>
+          
+          <div className="flex gap-3 mt-4 lg:mt-0">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDownloadReport}
+              className="flex items-center px-6 py-3 text-white transition-all bg-primary rounded-xl hover:shadow-lg "
+            >
+              <Download className="w-5 h-5 mr-2" />
+              Download Report
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleShareResults}
+              className="flex items-center px-6 py-3 text-white transition-all bg-blue-600 rounded-xl hover:shadow-lg hover:shadow-purple-500/25"
+            >
+              <Share2 className="w-5 h-5 mr-2" />
+              Share Results
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Patient Information Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="p-6 mb-8 bg-white border border-gray-200 shadow-lg rounded-2xl"
+        >
+          <h2 className="flex items-center mb-6 text-2xl font-bold text-primary">
+            <User className="w-6 h-6 mr-3 text-primary" />
+            Patient Information
+          </h2>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <User className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Patient Name</p>
+                <p className="text-lg font-bold text-gray-800">{mockDiagnosis.patientInfo.name}</p>
+                <p className="text-sm text-gray-500">Age: {mockDiagnosis.patientInfo.age} • {mockDiagnosis.patientInfo.gender}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-green-100 rounded-xl">
+                <Smartphone className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Patient ID</p>
+                <p className="text-lg font-bold text-gray-800 dir-ltr">{mockDiagnosis.patientInfo.id}</p>
+                <p className="text-sm text-gray-500">{mockDiagnosis.patientInfo.phone}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-purple-100 rounded-xl">
+                <Cpu className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">AI Model Version</p>
+                <p className="text-lg font-bold text-gray-800">{mockDiagnosis.patientInfo.aiModelVersion}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-red-100 rounded-xl">
+                <Calendar className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Diagnosis Date</p>
+                <p className="text-lg font-bold text-gray-800">{mockDiagnosis.patientInfo.lastScan}</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Additional Patient Details */}
+          <div className="grid grid-cols-2 gap-4 mt-6 md:grid-cols-4">
+            <div className="p-3 rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-500">Blood Type</p>
+              <p className="font-bold text-gray-800">{mockDiagnosis.patientInfo.bloodType}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-500">BMI</p>
+              <p className="font-bold text-gray-800">{mockDiagnosis.patientInfo.bmi}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-500">Weight/Height</p>
+              <p className="font-bold text-gray-800">{mockDiagnosis.patientInfo.weight} / {mockDiagnosis.patientInfo.height}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-500">Allergies</p>
+              <p className="font-bold text-gray-800">{mockDiagnosis.patientInfo.allergies}</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          
+          {/* Left Column - 3D Visualization & Diagnosis */}
+          <div className="space-y-8 lg:col-span-2">
+            
+            {/* 3D Thyroid Visualization */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="flex items-center text-2xl font-bold text-primary">
+                  <TargetIcon className="w-6 h-6 mr-2 text-primary" />
+                  3D Thyroid Gland Visualization
+                </h2>
+                <div className="flex items-center text-green-600">
+                  <div className="w-3 h-3 mr-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm">Live Model</span>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden border border-gray-200 h-96 rounded-xl bg-gradient-to-b from-gray-50 to-white">
+                <canvas 
+                  ref={canvasRef} 
+                  className="w-full h-full"
+                />
+                
+                {!is3DLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                      <p className="text-gray-600">Loading 3D Thyroid Model...</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Scan Animation */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div 
+                    className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
+                    style={{ 
+                      top: `${Math.sin(scanRotation * Math.PI / 180) * 50 + 50}%`,
+                      transform: `rotate(${scanRotation}deg)`
+                    }}
+                  ></div>
+                </div>
+                
+                {/* Legend */}
+                <div className="absolute p-4 bg-white border border-gray-200 rounded-lg shadow-lg bottom-4 left-4">
+                  <h4 className="mb-3 font-bold text-gray-800">Visual Legend</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 mr-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm text-gray-700">Healthy Tissue</span>
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-3 h-3 mr-2 text-red-500" />
+                      <span className="text-sm text-gray-700">Tumor Location</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 mr-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-gray-700">Suspicious Nodule</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 mr-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-gray-700">Benign Nodule</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mt-6 md:grid-cols-4">
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="p-4 border border-gray-200 bg-gray-50 rounded-xl"
+                >
+                  <div className="mb-1 text-sm text-gray-500">Total Nodules</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    <CountUp end={mockDiagnosis.noduleAnalysis.totalNodules} duration={2} />
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="p-4 border border-gray-200 bg-gray-50 rounded-xl"
+                >
+                  <div className="mb-1 text-sm text-gray-500">Suspicious Nodules</div>
+                  <div className="text-2xl font-bold text-red-600">
+                    <CountUp end={mockDiagnosis.noduleAnalysis.suspiciousNodules} duration={2} />
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="p-4 border border-gray-200 bg-gray-50 rounded-xl"
+                >
+                  <div className="mb-1 text-sm text-gray-500">Largest Nodule</div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {mockDiagnosis.noduleAnalysis.largestNodule.size}
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  className="p-4 border border-gray-200 bg-gray-50 rounded-xl"
+                >
+                  <div className="mb-1 text-sm text-gray-500">TI-RADS Score</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {mockDiagnosis.noduleAnalysis.largestNodule.tiradsScore}
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+            
+            {/* Diagnosis Result */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className={`${getUrgencyColor(mockDiagnosis.diagnosisSummary.urgency)} text-white rounded-2xl p-8 shadow-2xl`}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="flex items-center text-2xl font-bold">
+                    <AlertCircle className="w-8 h-8 mr-3" />
+                    Final Diagnosis Result
+                  </h2>
+                  <p className="mt-2 text-white/90">Advanced AI-powered analysis</p>
+                </div>
+                
+                <div className="text-right">
+                  <div className="text-sm opacity-90">AI Confidence Level</div>
+                  <div className="text-4xl font-bold">
+                    <CountUp end={mockDiagnosis.diagnosisSummary.confidence} decimals={1} suffix="%" duration={3} />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="p-6 bg-white/10 backdrop-blur-sm rounded-xl">
+                  <h3 className="mb-4 text-xl font-bold">Diagnosis Details</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/90">Status:</span>
+                      <span className={`px-4 py-2 font-bold rounded-full ${getStatusColor(mockDiagnosis.diagnosisSummary.status)}`}>
+                        {mockDiagnosis.diagnosisSummary.status === 'MALIGNANT' ? 'MALIGNANT' : 'BENIGN'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/90">Cancer Type:</span>
+                      <span className="font-bold">{mockDiagnosis.diagnosisSummary.thyroidCondition}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/90">Severity Level:</span>
+                      <span className="font-bold">{mockDiagnosis.diagnosisSummary.severity}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/90">Risk Level:</span>
+                      <span className="font-bold">{mockDiagnosis.diagnosisSummary.riskLevel}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-white/10 backdrop-blur-sm rounded-xl">
+                  <h3 className="mb-4 text-xl font-bold">Immediate Recommendation</h3>
+                  <p className="mb-4 text-white/90">{mockDiagnosis.diagnosisSummary.recommendation}</p>
+                  <div className="flex items-center text-white/80">
+                    <Clock className="w-5 h-5 mr-2" />
+                    <span>Required Action: {mockDiagnosis.diagnosisSummary.urgency === 'HIGH' ? 'IMMEDIATE' : 'NON-URGENT'}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Detailed Nodule Analysis */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-green-600">
+                <Activity className="w-6 h-6 mr-2 text-green-600" />
+                Detailed Nodule Analysis
+              </h2>
+              
+              <div className="space-y-4">
+                {mockDiagnosis.noduleAnalysis.nodules.map((nodule, index) => (
+                  <motion.div 
+                    key={nodule.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="p-6 transition-all border border-gray-200 bg-gray-50 rounded-xl hover:border-blue-200"
+                  >
+                    <div className="flex flex-col justify-between md:flex-row md:items-center">
+                      <div>
+                        <div className="flex items-center mb-2">
+                          <div className={`w-4 h-4 rounded-full mr-3 ${
+                            nodule.tirads >= 4 ? 'bg-red-500 animate-pulse' : 
+                            nodule.tirads >= 3 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}></div>
+                          <h3 className="text-lg font-bold text-gray-800">{nodule.id}</h3>
+                          <span className="mr-3 text-gray-600">- {nodule.location}</span>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {nodule.characteristics.map((char, idx) => (
+                            <span key={idx} className="px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-full">
+                              {char}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col md:items-end">
+                        <div className="mb-2 text-2xl font-bold text-blue-600">{nodule.size}</div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-center">
+                            <div className="text-sm text-gray-500">TI-RADS</div>
+                            <div className="text-xl font-bold text-gray-800">{nodule.tirads}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-sm text-gray-500">Malignancy Probability</div>
+                            <div className="text-xl font-bold text-red-600">
+                              <CountUp end={nodule.malignancyProbability} suffix="%" duration={2} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Probability Bar */}
+                    <div className="mt-4">
+                      <div className="flex justify-between mb-1 text-sm text-gray-500">
+                        <span>Malignancy Probability</span>
+                        <span>{nodule.malignancyProbability}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden bg-gray-200 rounded-full">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${nodule.malignancyProbability}%` }}
+                          transition={{ duration: 2, delay: index * 0.2 }}
+                          className={`h-full rounded-full ${
+                            nodule.malignancyProbability > 70 ? 'bg-gradient-to-r from-red-600 to-red-400' :
+                            nodule.malignancyProbability > 30 ? 'bg-gradient-to-r from-yellow-600 to-yellow-400' :
+                            'bg-gradient-to-r from-green-600 to-green-400'
+                          }`}
+                        ></motion.div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+                    {/* Diagnosis Timeline */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="p-6 mt-8 bg-white border border-gray-200 shadow-lg rounded-2xl"
+        >
+          <h2 className="mb-6 text-2xl font-bold text-primary">Diagnosis Timeline</h2>
+          
+          <div className="relative">
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent"></div>
+            
+            <div className="space-y-8">
+              {mockDiagnosis.timeline.map((item, index) => (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.2 }}
+                  className="relative flex items-center"
+                >
+                  <div className="absolute z-10 w-8 h-8 border-4 rounded-full border-[#e1e3e4] left-4 bg-primary"></div>
+                  
+                  <div className="flex-1 p-5 ml-16 transition-all border border-gray-200 bg-gray-50 rounded-xl hover:border-blue-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-bold text-gray-800">{item.event}</h3>
+                      <span className="text-sm text-gray-500">{item.date}</span>
+                    </div>
+                    <p className="text-gray-600">{item.description}</p>
+                    <div className="mt-3">
+                      <span className="inline-block px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-full">
+                        {item.status}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+          </div>
+          
+          {/* Right Column - Stats & Recommendations */}
+          <div className="space-y-8">
+            
+            {/* AI Performance Stats */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-purple-600">
+                <Cpu className="w-6 h-6 mr-2 text-purple-600" />
+                AI Performance Metrics
+              </h2>
+              
+              <div className="space-y-4">
+                {Object.entries(mockDiagnosis.aiMetrics).map(([key, value], index) => (
+                  <motion.div 
+                    key={key}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="p-4 transition-colors bg-gray-50 rounded-xl hover:bg-gray-100"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-700 capitalize">
+                        {key === 'processingTime' ? 'Processing Time' :
+                         key === 'modelConfidence' ? 'Model Confidence' :
+                         key === 'dataPointsAnalyzed' ? 'Data Points Analyzed' :
+                         key === 'accuracy' ? 'Accuracy' :
+                         key === 'sensitivity' ? 'Sensitivity' : 'Specificity'}
+                      </span>
+                      <span className="text-xl font-bold text-green-600">
+                        {typeof value === 'number' ? (
+                          <CountUp end={value} decimals={key.includes('Confidence') ? 1 : 1} suffix={key.includes('Confidence') || key.includes('accuracy') || key.includes('sensitivity') || key.includes('specificity') ? "%" : ""} duration={2} />
+                        ) : value}
+                      </span>
+                    </div>
+                    
+                    {typeof value === 'number' && (
+                      <div className="mt-2">
+                        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${value}%` }}
+                            transition={{ duration: 2, delay: index * 0.2 }}
+                            className="h-full rounded-full bg-gradient-to-r from-green-500 to-cyan-500"
+                          ></motion.div>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Biomarkers */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-yellow-600">
+                <Brain className="w-6 h-6 mr-2 text-yellow-600" />
+                Biomarkers Analysis
+              </h2>
+              
+              <div className="space-y-4">
+                {Object.entries(mockDiagnosis.biomarkers).map(([key, biomarker], index) => (
+                  <div key={key} className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-800">{key.toUpperCase()}</span>
+                      <div className="flex items-center">
+                        <span className="mr-2 text-xl font-bold text-gray-800">
+                          {typeof biomarker.value === 'number' ? biomarker.value.toFixed(2) : biomarker.value}
+                        </span>
+                        <span className="text-sm text-gray-500">{biomarker.unit}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span className="text-gray-500">Normal Range: {biomarker.normalRange}</span>
+                      <span className={
+                        biomarker.status.includes('High') ? 'text-red-600 font-bold' :
+                        biomarker.status.includes('Low') ? 'text-blue-600 font-bold' : 'text-green-600 font-bold'
+                      }>
+                        {biomarker.status}
+                      </span>
+                    </div>
+                    
+                    <div className="h-2 overflow-hidden bg-gray-200 rounded-full">
+                      <div className={`h-full rounded-full ${
+                        biomarker.status.includes('Very High') ? 'bg-gradient-to-r from-red-600 to-red-400' :
+                        biomarker.status.includes('Very Low') ? 'bg-gradient-to-r from-blue-600 to-blue-400' :
+                        biomarker.status.includes('High') ? 'bg-gradient-to-r from-orange-600 to-orange-400' :
+                        biomarker.status.includes('Low') ? 'bg-gradient-to-r from-cyan-600 to-cyan-400' :
+                        'bg-gradient-to-r from-green-600 to-green-400'
+                      }`} style={{ 
+                        width: typeof biomarker.value === 'number' 
+                          ? `${Math.min(100, (biomarker.value / 20) * 100)}%` 
+                          : '100%' 
+                      }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Treatment Plan & Recommendations */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-gray-800">
+                <Shield className="w-6 h-6 mr-2 text-cyan-600" />
+                Treatment Plan & Recommendations
+              </h2>
+              
+              <div className="space-y-4">
+                {mockDiagnosis.recommendations.map((rec, index) => (
+                  <motion.div 
+                    key={index}
+                    whileHover={{ x: 5 }}
+                    className="p-4 border border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-xl"
+                  >
+                    <div className="flex items-center mb-3">
+                      <span className="mr-3 text-2xl">{rec.icon}</span>
+                      <div>
+                        <div className="font-bold text-gray-800">{rec.title}</div>
+                        <div className="text-sm text-gray-500">{rec.type}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{rec.details}</span>
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                        rec.urgency === 'Immediate' ? 'bg-red-100 text-red-800' :
+                        rec.urgency === 'Post-surgery' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {rec.urgency}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Patient Tracking Section */}
+              <div className="p-4 mt-6 border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-blue-700">Patient Tracking Number:</span>
+                  <span className="font-mono text-lg font-bold text-blue-800 dir-ltr">{mockDiagnosis.patientInfo.patientNumber}</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Patient can use this number to log into the app for follow-up and receive updates
+                </p>
+              </div>
+            </motion.div>
+            
+            {/* Global Statistics */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-primary">
+                <PieChart className="w-6 h-6 mr-2 text-primary" />
+                Global Statistics
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(mockDiagnosis.statistics).map(([key, stat], index) => (
+                  <motion.div 
+                    key={key}
+                    whileHover={{ scale: 1.05 }}
+                    className="p-4 text-center bg-gray-50 rounded-xl"
+                  >
+                    <div className="mb-1 text-3xl font-bold text-primary">
+                      <CountUp end={stat.value} suffix="%" duration={2} />
+                    </div>
+                    <div className="text-sm text-gray-600">{stat.description}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+  
+
+        {/* Additional Notes */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1 }}
+          className="p-6 mt-8 border border-[#4695a5] bg-[#3fbdd61c] rounded-2xl"
+        >
+          <div className="flex items-center mb-4">
+            <AlertCircle className="w-6 h-6 mr-3 text-primary" />
+            <h3 className="text-lg font-bold text-primary">Important Notes</h3>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="p-4 bg-white rounded-lg">
+              <h4 className="mb-2 font-bold text-gray-800">Next Steps</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start">
+                  <Circle className="w-2 h-2 mt-1 mr-2 text-blue-500" />
+                  Schedule consultation with endocrinologist
+                </li>
+                <li className="flex items-start">
+                  <Circle className="w-2 h-2 mt-1 mr-2 text-blue-500" />
+                  Complete pre-surgical testing
+                </li>
+                <li className="flex items-start">
+                  <Circle className="w-2 h-2 mt-1 mr-2 text-blue-500" />
+                  Prepare for surgical procedure
+                </li>
+              </ul>
+            </div>
+            <div className="p-4 bg-white rounded-lg">
+              <h4 className="mb-2 font-bold text-gray-800">Follow-up Schedule</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start">
+                  <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                  Initial follow-up: 2 weeks post-diagnosis
+                </li>
+                <li className="flex items-start">
+                  <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                  Post-surgery check: 6 weeks after surgery
+                </li>
+                <li className="flex items-start">
+                  <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                  Long-term monitoring: Every 3-6 months
+                </li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default ThyroidDiagnosisResult;
