@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone, FaCalendar, FaMapMarker, FaStethoscope, FaArrowLeft, FaUserPlus } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import Lottie from 'lottie-react';
+import animationData from "../../../public/signup.json";
+
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -525,25 +528,28 @@ const Register = () => {
   );
 
   return (
-    <div className="min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-100 sm:px-6 lg:px-8">
+    <div style={{
+      justifyContent:'space-around',
+      alignItems:'center'
+    }} className="flex min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-100 sm:px-6 lg:px-8">
+           <div style={{ width: 600 }}>
+      <Lottie
+        animationData={animationData}
+        loop={true}
+        autoplay={true}
+      />
+    </div>
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute bg-blue-200 rounded-full -top-24 -right-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute delay-1000 bg-indigo-200 rounded-full -bottom-24 -left-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
       </div>
+     
 
       <div className="relative max-w-2xl mx-auto">
+       
         {/* Header */}
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center mb-6 transition-colors duration-300 text-primary hover:text-primaryHover">
-            <FaArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-primary rounded-2xl">
-              <FaUserPlus className="w-8 h-8 text-white" />
-            </div>
-          </div>
           <h2 className="mb-2 text-3xl font-bold text-gray-900">Create Your Account</h2>
           <p className="text-gray-600">Join ThyroCareX for advanced thyroid care</p>
         </div>

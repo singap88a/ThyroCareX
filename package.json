@@ -17,6 +17,7 @@
     "chart.js": "^4.5.1",
     "framer-motion": "^12.23.25",
     "gsap": "^3.13.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.548.0",
     "react": "^19.1.1",
     "react-chartjs-2": "^5.3.1",

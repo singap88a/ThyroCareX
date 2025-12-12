@@ -7,12 +7,11 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-primary/30">
 
       {/* Header */}
-      <section className="relative z-10 pt-32 pb-20 px-6 overflow-hidden">
-
-        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] bg-gradient-to-br from-[#4695a5]/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-blue-100 to-transparent rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      <section
+        className="relative z-10 pt-16 pb-12 px-6 overflow-hidden bg-cover bg-center h-[70vh]"
+        style={{ backgroundImage: "url('/banner.png')",backgroundRepeat: 'no-repeat',backgroundSize: 'cover' }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
@@ -20,23 +19,27 @@ const PrivacyPolicy = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Link to="/" className="inline-flex items-center text-gray-600 hover:text-primary mb-8 transition-colors">
+            <Link to="/"
+              className="inline-flex items-center text-white bg-primary/80 hover:bg-primary transition-colors px-3 py-1 rounded-lg mb-8 shadow-md"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
             </Link>
 
-            <div className="flex justify-center mb-8">
+
+            <div className="flex justify-center mb-4">
               <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 shadow-md">
                 <Shield className="w-10 h-10 text-primary" />
               </div>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6 tracking-tight text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4 tracking-tight text-center">
               Privacy Policy
             </h1>
 
-            <p className="max-w-2xl mx-auto text-xl text-gray-600 mb-4">
+            <p className="max-w-2xl mx-auto text-xl text-white mb-4">
               We are committed to protecting your personal information and your right to privacy.
             </p>
+
             <p className="text-sm text-gray-700 font-mono bg-gray-50 inline-block px-4 py-2 rounded-2xl border border-gray-200 shadow-sm">
               Last Updated: November 22, 2025
             </p>
@@ -47,7 +50,7 @@ const PrivacyPolicy = () => {
 
 
       {/* Content */}
-      <section className="relative z-10 pb-24 px-6">
+      <section className="relative z-10 pb-24 px-6 pt-12">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

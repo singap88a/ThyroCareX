@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import Lottie from 'lottie-react';
+import animationData from "../../../public/Login.json";
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -75,26 +78,29 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-100 sm:px-6 lg:px-8">
+    <div style={{
+      justifyContent:'space-around',
+      alignItems:'center'
+    }} className="flex items-center gap-6 min-h-screen px-2 py-10 bg-gradient-to-br from-blue-50 to-indigo-100 sm:px-6 lg:px-8">
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute bg-blue-200 rounded-full -top-24 -right-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute delay-1000 bg-indigo-200 rounded-full -bottom-24 -left-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
       </div>
 
+            <div style={{ width: 600 }}>
+      <Lottie
+        animationData={animationData}
+        loop={true}
+        autoplay={true}
+      />
+    </div>
+
       <div className="relative w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center mb-6 transition-colors duration-300 text-primary hover:text-primaryHover">
-            <FaArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-primary rounded-2xl">
-              <FaUser className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <h2 className="mb-2 text-3xl font-bold text-gray-900">Welcome Back</h2>
+     
           <p className="text-gray-600">Sign in to your ThyroCareX account</p>
         </div>
 
