@@ -91,14 +91,14 @@ const Navbar = () => {
         letterSpacing: "-0.5px",
       }}
     >
-      THYROC
+      THYRO
       <span
         style={{
           color: "#4695a5",
           WebkitTextStroke: "0.8px #4695a5",
         }}
       >
-        AREX
+        CAREX
       </span>
     </span>
 

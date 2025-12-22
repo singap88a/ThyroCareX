@@ -19,8 +19,15 @@ import Newsletter from '../components/home/Newsletter';
 
 // --- Components ---
 
+import { useNavigate } from 'react-router-dom';
+
 const PricingCard = ({ plan, billingPeriod }) => {
   const isPopular = plan.popular;
+  const navigate = useNavigate();
+  
+  const handlePurchase = () => {
+    navigate('/checkout', { state: { plan } });
+  };
   
   return (
     <motion.div
@@ -57,6 +64,7 @@ const PricingCard = ({ plan, billingPeriod }) => {
       </div>
 
       <button
+        onClick={handlePurchase}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 mb-8 ${
           isPopular
             ? 'bg-[#4695a5] text-white hover:bg-[#3a7e8c] shadow-lg shadow-[#4695a5]/30 hover:shadow-[#4695a5]/50'

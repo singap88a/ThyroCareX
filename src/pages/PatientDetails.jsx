@@ -767,7 +767,7 @@ const ThyroidDiagnosisResult = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className={`${getUrgencyColor(mockDiagnosis.diagnosisSummary.urgency)} text-white rounded-2xl p-8 shadow-2xl`}
+              className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-2xl p-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -904,103 +904,55 @@ const ThyroidDiagnosisResult = () => {
               </div>
             </motion.div>
 
-                    {/* Diagnosis Timeline */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="p-6 mt-8 bg-white border border-gray-200 shadow-lg rounded-2xl"
-        >
-          <h2 className="mb-6 text-2xl font-bold text-primary">Diagnosis Timeline</h2>
-          
-          <div className="relative">
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent"></div>
-            
-            <div className="space-y-8">
-              {mockDiagnosis.timeline.map((item, index) => (
-                <motion.div 
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                  className="relative flex items-center"
-                >
-                  <div className="absolute z-10 w-8 h-8 border-4 rounded-full border-[#e1e3e4] left-4 bg-primary"></div>
-                  
-                  <div className="flex-1 p-5 ml-16 transition-all border border-gray-200 bg-gray-50 rounded-xl hover:border-blue-200">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-bold text-gray-800">{item.event}</h3>
-                      <span className="text-sm text-gray-500">{item.date}</span>
+            {/* AI Analysis Images */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="p-6 mt-8 bg-white border border-gray-200 shadow-lg rounded-2xl"
+            >
+              <h2 className="flex items-center mb-6 text-2xl font-bold text-primary">
+                <Scan className="w-6 h-6 mr-2 text-primary" />
+                Thyroid Scan Analysis
+              </h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                 {[1, 2, 3].map((item) => (
+                    <div key={item} className="relative overflow-hidden transition-all border border-gray-200 rounded-xl group hover:shadow-lg">
+                      <div className="aspect-video bg-gray-100 relative">
+                        {/* Placeholder for real ML images */}
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                          <Scan className="w-12 h-12 opacity-50" />
+                        </div>
+                        <img 
+                          src={`/api/placeholder/400/300?text=Thyroid+Scan+${item}`}
+                          alt={`Analysis ${item}`}
+                          className="object-cover w-full h-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          onError={(e) => e.target.style.display = 'none'}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-end p-4">
+                           <p className="text-white font-medium">Nodule Segment {item}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-white">
+                        <div className="flex justify-between items-center mb-1">
+                           <span className="text-xs font-bold text-red-500 uppercase">Suspicious</span>
+                           <span className="text-xs text-gray-500">Confidence: 9{item}.5%</span>
+                        </div>
+                        <p className="text-sm text-gray-600">Automated segmentation detected irregular margins.</p>
+                      </div>
                     </div>
-                    <p className="text-gray-600">{item.description}</p>
-                    <div className="mt-3">
-                      <span className="inline-block px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-full">
-                        {item.status}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
+                 ))}
+              </div>
+            </motion.div>
+
+
           </div>
           
           {/* Right Column - Stats & Recommendations */}
           <div className="space-y-8">
             
             {/* AI Performance Stats */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
-            >
-              <h2 className="flex items-center mb-6 text-2xl font-bold text-purple-600">
-                <Cpu className="w-6 h-6 mr-2 text-purple-600" />
-                AI Performance Metrics
-              </h2>
-              
-              <div className="space-y-4">
-                {Object.entries(mockDiagnosis.aiMetrics).map(([key, value], index) => (
-                  <motion.div 
-                    key={key}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="p-4 transition-colors bg-gray-50 rounded-xl hover:bg-gray-100"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-700 capitalize">
-                        {key === 'processingTime' ? 'Processing Time' :
-                         key === 'modelConfidence' ? 'Model Confidence' :
-                         key === 'dataPointsAnalyzed' ? 'Data Points Analyzed' :
-                         key === 'accuracy' ? 'Accuracy' :
-                         key === 'sensitivity' ? 'Sensitivity' : 'Specificity'}
-                      </span>
-                      <span className="text-xl font-bold text-green-600">
-                        {typeof value === 'number' ? (
-                          <CountUp end={value} decimals={key.includes('Confidence') ? 1 : 1} suffix={key.includes('Confidence') || key.includes('accuracy') || key.includes('sensitivity') || key.includes('specificity') ? "%" : ""} duration={2} />
-                        ) : value}
-                      </span>
-                    </div>
-                    
-                    {typeof value === 'number' && (
-                      <div className="mt-2">
-                        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${value}%` }}
-                            transition={{ duration: 2, delay: index * 0.2 }}
-                            className="h-full rounded-full bg-gradient-to-r from-green-500 to-cyan-500"
-                          ></motion.div>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+
             
             {/* Biomarkers */}
             <motion.div 
@@ -1108,33 +1060,46 @@ const ThyroidDiagnosisResult = () => {
               </div>
             </motion.div>
             
-            {/* Global Statistics */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
-            >
-              <h2 className="flex items-center mb-6 text-2xl font-bold text-primary">
-                <PieChart className="w-6 h-6 mr-2 text-primary" />
-                Global Statistics
-              </h2>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(mockDiagnosis.statistics).map(([key, stat], index) => (
-                  <motion.div 
-                    key={key}
-                    whileHover={{ scale: 1.05 }}
-                    className="p-4 text-center bg-gray-50 rounded-xl"
-                  >
-                    <div className="mb-1 text-3xl font-bold text-primary">
-                      <CountUp end={stat.value} suffix="%" duration={2} />
+                                {/* Diagnosis Timeline */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="p-6 mt-8 bg-white border border-gray-200 shadow-lg rounded-2xl"
+        >
+          <h2 className="mb-6 text-2xl font-bold text-primary">Diagnosis Timeline</h2>
+          
+          <div className="relative">
+            <div className="absolute left-1 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-transparent"></div>
+            
+            <div className="space-y-8">
+              {mockDiagnosis.timeline.map((item, index) => (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.2 }}
+                  className="relative flex items-center"
+                >
+                  <div className="absolute z-10 w-8 h-8 border-4 rounded-full border-[#e1e3e4] -left-3 bg-primary"></div>
+                  
+                  <div className="flex-1 p-3 ml-8 transition-all border border-gray-200 bg-gray-50 rounded-xl hover:border-blue-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-bold text-gray-800">{item.event}</h3>
                     </div>
-                    <div className="text-sm text-gray-600">{stat.description}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+                    <p className="text-gray-600">{item.description}</p>
+                    <div className="mt-3">
+                      <span className="inline-block px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-full">
+                        {item.status}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+ 
           </div>
         </div>
 

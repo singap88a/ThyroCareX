@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone, FaCalendar, FaMapMarker, FaStethoscope, FaArrowLeft, FaUserPlus } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,8 +35,13 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [pageLoaded, setPageLoaded] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setPageLoaded(true);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -142,14 +147,14 @@ const Register = () => {
         <div key={step} className="flex items-center">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
             step <= currentStep
-              ? 'bg-gradient-to-r from-primary to-purple-600 text-white'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
               : 'bg-gray-200 text-gray-600'
           }`}>
             {step}
           </div>
           {step < 3 && (
             <div className={`w-12 h-1 mx-2 transition-all duration-300 ${
-              step < currentStep ? 'bg-gradient-to-r from-primary to-purple-600' : 'bg-gray-200'
+              step < currentStep ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
             }`}></div>
           )}
         </div>
@@ -525,82 +530,104 @@ const Register = () => {
   );
 
   return (
-    <div className="min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-100 sm:px-6 lg:px-8">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute bg-blue-200 rounded-full -top-24 -right-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute delay-1000 bg-indigo-200 rounded-full -bottom-24 -left-24 w-96 h-96 mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-      </div>
+    <div className="flex min-h-screen bg-white">
+      {/* Left Section - Registration Form */}
+      <div className={`w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 transition-all duration-700 ${pageLoaded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+        <div className="w-full max-w-2xl">
+          {/* Back Button - Mobile Only */}
+          <div className="mb-6 lg:hidden">
+            <Link to="/" className="inline-flex items-center text-blue-600 transition-colors duration-300 hover:text-blue-700">
+              <FaArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
 
-      <div className="relative max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center mb-6 transition-colors duration-300 text-primary hover:text-primaryHover">
-            <FaArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center justify-center w-16 h-16 shadow-lg bg-primary rounded-2xl">
-              <FaUserPlus className="w-8 h-8 text-white" />
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex items-center justify-center w-16 h-16 bg-blue-600 shadow-lg rounded-2xl">
+                <FaUserPlus className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h2 className="mb-2 text-3xl font-bold text-gray-900">Registration</h2>
+            <p className="text-gray-600">Create your ThyroCareX account</p>
+          </div>
+
+          {/* Step Indicator */}
+          {renderStepIndicator()}
+
+          {/* Registration Form */}
+          <div className="p-8 bg-white border border-gray-100 shadow-lg rounded-2xl">
+            <form onSubmit={handleSubmit}>
+              {currentStep === 1 && renderStep1()}
+              {currentStep === 2 && renderStep2()}
+              {currentStep === 3 && renderStep3()}
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between mt-8">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="px-6 py-3 font-medium text-gray-700 transition-all duration-300 border border-gray-300 rounded-xl hover:bg-gray-50"
+                  >
+                    Previous
+                  </button>
+                )}
+
+                {currentStep < 3 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isLoading ? 'Creating Account...' : 'Register'}
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* Sign In Link - Desktop hidden, shown in right panel */}
+            <div className="mt-8 text-center lg:hidden">
+              <p className="text-gray-600">
+                Already have an account?{' '}
+                <Link
+                  to="/login"
+                  className="font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                >
+                  Login
+                </Link>
+              </p>
             </div>
           </div>
-          <h2 className="mb-2 text-3xl font-bold text-gray-900">Create Your Account</h2>
-          <p className="text-gray-600">Join ThyroCareX for advanced thyroid care</p>
         </div>
+      </div>
 
-        {/* Step Indicator */}
-        {renderStepIndicator()}
-
-        {/* Registration Form */}
-        <div className="p-8 bg-white border border-gray-100 shadow-2xl rounded-2xl">
-          <form onSubmit={handleSubmit}>
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  className="px-6 py-3 font-medium text-gray-700 transition-all duration-300 border border-gray-300 rounded-xl hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-              )}
-
-              {currentStep < 3 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="ml-auto px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primaryHover transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
-                >
-                  Next
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="ml-auto px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primaryHover transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
-                </button>
-              )}
-            </div>
-          </form>
-
-          {/* Sign In Link */}
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-semibold transition-colors duration-300 text-primary hover:text-primaryHover"
-              >
-                Sign in here
-              </Link>
-            </p>
+      {/* Right Section - Graphics/Info */}
+      <div className={`hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 flex-col items-center justify-center p-12 transition-all duration-700 ${pageLoaded ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+        <div className="max-w-md text-center">
+          <h1 className="mb-6 text-4xl font-bold text-white">Welcome!</h1>
+          <p className="mb-8 text-xl text-blue-100">Join our thyroid care community</p>
+          <div className="mb-8">
+            <p className="text-2xl font-semibold text-white">Hello, Welcome!</p>
+            <p className="mt-2 text-blue-100">Create an account to start your journey to better thyroid health</p>
+          </div>
+          <div className="mt-12">
+            <p className="text-blue-100">Already have an account?</p>
+            <Link
+              to="/login"
+              className="inline-block px-8 py-3 mt-4 text-lg font-semibold text-blue-600 transition-all duration-300 transform bg-white rounded-full shadow-lg hover:bg-gray-100 hover:-translate-y-1 hover:shadow-xl"
+            >
+              Login
+            </Link>
           </div>
         </div>
       </div>

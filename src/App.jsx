@@ -12,6 +12,7 @@ import './App.css';
 import Footer from './components/home/Footer';
 import Navbar from './components/home/Navbar';
 import PRICING from './pages/PRICING';
+import Checkout from './pages/Checkout';
 import ScrollToTop from './components/ScrollToTop';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -49,6 +50,7 @@ function App() {
             <Route path="/profile" element={<DoctorProfile />} />
             <Route path="/add-patient" element={<AddPatient />} />
             <Route path="/pricing" element={<PRICING />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

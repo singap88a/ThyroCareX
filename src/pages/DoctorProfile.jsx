@@ -59,14 +59,7 @@ const Profile = () => {
     confirmPassword: ""
   });
 
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    diagnosticReminders: true,
-    weeklyReports: true,
-    language: "en",
-    theme: "light"
-  });
+
 
   const [performanceStats, setPerformanceStats] = useState({
     totalPatients: { current: 0, target: 156, change: "+12" },
@@ -132,9 +125,7 @@ const Profile = () => {
     });
   };
 
-  const handleSavePreferences = () => {
-    showToast("Preferences Saved", "Your system preferences have been updated");
-  };
+
 
   const exportData = () => {
     showToast("Data Export", "Your data export file will be sent to your email");
@@ -143,9 +134,7 @@ const Profile = () => {
   const tabs = [
     { id: 'personal', label: 'Personal Info', icon: User },
     { id: 'security', label: 'Security', icon: Shield },
-    { id: 'preferences', label: 'Preferences', icon: Settings },
-    { id: 'statistics', label: 'Analytics', icon: BarChart3 },
-    { id: 'activity', label: 'Activity', icon: Activity }
+    { id: 'statistics', label: 'Analytics', icon: BarChart3 }
   ];
 
   const getProgressColor = (percentage) => {
@@ -238,124 +227,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Enhanced Statistics Grid */}
-        <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
-          {/* Main Performance Metrics */}
-          <div className="grid grid-cols-1 gap-6 lg:col-span-2 sm:grid-cols-2">
-            {[
-              { 
-                key: 'totalPatients', 
-                label: 'Total Patients', 
-                icon: Users,
-                format: (val) => val,
-                color: 'from-blue-500 to-cyan-500'
-              },
-              { 
-                key: 'totalDiagnoses', 
-                label: 'Diagnoses', 
-                icon: FileText,
-                format: (val) => val,
-                color: 'from-purple-500 to-pink-500'
-              },
-              { 
-                key: 'accuracyRate', 
-                label: 'Accuracy Rate', 
-                icon: Target,
-                format: (val) => `${val}%`,
-                color: 'from-green-500 to-emerald-500'
-              },
-              { 
-                key: 'patientSatisfaction', 
-                label: 'Satisfaction', 
-                icon: Star,
-                format: (val) => `${val}%`,
-                color: 'from-amber-500 to-orange-500'
-              }
-            ].map((metric, index) => {
-              const Icon = metric.icon;
-              const stat = performanceStats[metric.key];
-              const percentage = (stat.current / stat.target) * 100;
-              
-              return (
-                <div 
-                  key={metric.key}
-                  className="p-6 transition-all duration-300 transform border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-md hover:-translate-y-1"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 rounded-lg bg-slate-100">
-                      <Icon className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <div className={`text-sm font-medium ${getChangeColor(stat.change)}`}>
-                      {stat.change}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-2 text-2xl font-bold text-slate-900">
-                    {metric.format(stat.current)}
-                  </div>
-                  <div className="text-sm font-medium text-slate-600">{metric.label}</div>
-                  
-                  <div className="mt-4">
-                    <div className="flex justify-between mb-1 text-xs text-slate-500">
-                      <span>Progress</span>
-                      <span>{Math.round(percentage)}%</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-200">
-                      <div 
-                        className={`h-2 transition-all duration-1000 ease-out rounded-full bg-gradient-to-r ${metric.color}`}
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
 
-          {/* Weekly Activity Chart */}
-          <div className="p-6 transition-all duration-300 transform border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-md hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Weekly Activity</h3>
-              <TrendingUp className="w-5 h-5 text-green-500" />
-            </div>
-            
-            <div className="space-y-4">
-              {activityData.map((day, index) => (
-                <div key={day.day} className="flex items-center justify-between">
-                  <span className="w-8 text-sm font-medium text-slate-600">{day.day}</span>
-                  <div className="flex-1 mx-4">
-                    <div className="flex space-x-1">
-                      {/* Diagnoses Bar */}
-                      <div 
-                        className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
-                        style={{ width: `${(day.diagnoses / 25) * 100}%` }}
-                      ></div>
-                      {/* Patients Bar */}
-                      <div 
-                        className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
-                        style={{ width: `${(day.patients / 20) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="w-16 text-xs text-right text-slate-500">
-                    {day.diagnoses} / {day.patients}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex items-center justify-center mt-6 space-x-4 text-xs">
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-                <span className="text-slate-600">Diagnoses</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                <span className="text-slate-600">Patients</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Main Content Tabs */}
         <div className="overflow-hidden border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl">
@@ -612,112 +484,7 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Preferences Tab */}
-            {activeTab === 'preferences' && (
-              <div className="space-y-8 animate-fadeIn">
-                <div>
-                  <h3 className="mb-2 text-2xl font-semibold text-slate-900">Preferences & Settings</h3>
-                  <p className="text-slate-600">Customize your system settings and notifications</p>
-                </div>
 
-                <div>
-                  <h4 className="mb-6 text-xl font-semibold text-slate-900">Notifications</h4>
-                  <div className="space-y-4">
-                    {[
-                      { 
-                        id: 'emailNotifications', 
-                        title: 'Email Notifications', 
-                        description: 'Receive updates and alerts via email',
-                        icon: Mail,
-                        checked: preferences.emailNotifications 
-                      },
-                      { 
-                        id: 'smsNotifications', 
-                        title: 'SMS Notifications', 
-                        description: 'Urgent alerts only via SMS',
-                        icon: Smartphone,
-                        checked: preferences.smsNotifications 
-                      },
-                      { 
-                        id: 'diagnosticReminders', 
-                        title: 'Diagnostic Reminders', 
-                        description: 'Reminders for case follow-ups',
-                        icon: Clock,
-                        checked: preferences.diagnosticReminders 
-                      },
-                      { 
-                        id: 'weeklyReports', 
-                        title: 'Weekly Reports', 
-                        description: 'Weekly activity summary',
-                        icon: FileText,
-                        checked: preferences.weeklyReports 
-                      }
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <div key={item.id} className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
-                          <div className="flex items-center space-x-4">
-                            <div className="p-3 bg-purple-100 rounded-xl">
-                              <Icon className="w-6 h-6 text-purple-600" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-900">{item.title}</p>
-                              <p className="text-sm text-slate-600">{item.description}</p>
-                            </div>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              checked={item.checked}
-                              onChange={(e) => setPreferences(prev => ({ ...prev, [item.id]: e.target.checked }))}
-                              className="sr-only peer" 
-                            />
-                            <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="pt-8 border-t border-slate-200">
-                  <h4 className="mb-6 text-xl font-semibold text-slate-900">General Settings</h4>
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                    <div>
-                      <label className="block mb-3 text-sm font-medium text-slate-700">Language</label>
-                      <select 
-                        value={preferences.language}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, language: e.target.value }))}
-                        className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="en">English</option>
-                        <option value="ar">Arabic</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block mb-3 text-sm font-medium text-slate-700">Theme</label>
-                      <select 
-                        value={preferences.theme}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, theme: e.target.value }))}
-                        className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                        <option value="auto">Auto</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={handleSavePreferences}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>Save Preferences</span>
-                </button>
-              </div>
-            )}
 
             {/* Statistics Tab */}
             {activeTab === 'statistics' && (
@@ -727,24 +494,121 @@ const Profile = () => {
                   <p className="text-slate-600">Detailed report of your activity and system performance</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <div className="p-8 text-center text-white transition-all duration-300 transform bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl hover:scale-105 hover:shadow-xl">
-                    <Users className="w-8 h-8 mx-auto mb-4" />
-                    <div className="mb-2 text-4xl font-bold">156</div>
-                    <div className="text-blue-100">Total Patients</div>
-                    <div className="mt-2 text-sm text-blue-200">+12 this month</div>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                  {/* Performance Metrics */}
+                  <div className="grid grid-cols-1 gap-6 lg:col-span-2 sm:grid-cols-2">
+                    {[
+                      { 
+                        key: 'totalPatients', 
+                        label: 'Total Patients', 
+                        icon: Users,
+                        format: (val) => val,
+                        color: 'from-blue-500 to-cyan-500'
+                      },
+                      { 
+                        key: 'totalDiagnoses', 
+                        label: 'Diagnoses', 
+                        icon: FileText,
+                        format: (val) => val,
+                        color: 'from-purple-500 to-pink-500'
+                      },
+                      { 
+                        key: 'accuracyRate', 
+                        label: 'Accuracy Rate', 
+                        icon: Target,
+                        format: (val) => `${val}%`,
+                        color: 'from-green-500 to-emerald-500'
+                      },
+                      { 
+                        key: 'patientSatisfaction', 
+                        label: 'Satisfaction', 
+                        icon: Star,
+                        format: (val) => `${val}%`,
+                        color: 'from-amber-500 to-orange-500'
+                      }
+                    ].map((metric) => {
+                      const Icon = metric.icon;
+                      const stat = performanceStats[metric.key];
+                      const percentage = (stat.current / stat.target) * 100;
+                      
+                      return (
+                        <div 
+                          key={metric.key}
+                          className="p-6 transition-all duration-300 transform border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-md hover:-translate-y-1"
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="p-2 rounded-lg bg-slate-100">
+                              <Icon className="w-5 h-5 text-slate-600" />
+                            </div>
+                            <div className={`text-sm font-medium ${getChangeColor(stat.change)}`}>
+                              {stat.change}
+                            </div>
+                          </div>
+                          
+                          <div className="mb-2 text-2xl font-bold text-slate-900">
+                            {metric.format(stat.current)}
+                          </div>
+                          <div className="text-sm font-medium text-slate-600">{metric.label}</div>
+                          
+                          <div className="mt-4">
+                            <div className="flex justify-between mb-1 text-xs text-slate-500">
+                              <span>Progress</span>
+                              <span>{Math.round(percentage)}%</span>
+                            </div>
+                            <div className="w-full h-2 rounded-full bg-slate-200">
+                              <div 
+                                className={`h-2 transition-all duration-1000 ease-out rounded-full bg-gradient-to-r ${metric.color}`}
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="p-8 text-center text-white transition-all duration-300 transform bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl hover:scale-105 hover:shadow-xl">
-                    <Target className="w-8 h-8 mx-auto mb-4" />
-                    <div className="mb-2 text-4xl font-bold">92%</div>
-                    <div className="text-emerald-100">Accuracy Rate</div>
-                    <div className="mt-2 text-sm text-emerald-200">+2% improvement</div>
-                  </div>
-                  <div className="p-8 text-center text-white transition-all duration-300 transform bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl hover:scale-105 hover:shadow-xl">
-                    <Award className="w-8 h-8 mx-auto mb-4" />
-                    <div className="mb-2 text-4xl font-bold">289</div>
-                    <div className="text-purple-100">Total Diagnoses</div>
-                    <div className="mt-2 text-sm text-purple-200">+23 this quarter</div>
+
+                  {/* Weekly Activity Chart */}
+                  <div className="p-6 transition-all duration-300 transform border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-md hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-slate-900">Weekly Activity</h3>
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {activityData.map((day) => (
+                        <div key={day.day} className="flex items-center justify-between">
+                          <span className="w-8 text-sm font-medium text-slate-600">{day.day}</span>
+                          <div className="flex-1 mx-4">
+                            <div className="flex space-x-1">
+                              {/* Diagnoses Bar */}
+                              <div 
+                                className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
+                                style={{ width: `${(day.diagnoses / 25) * 100}%` }}
+                              ></div>
+                              {/* Patients Bar */}
+                              <div 
+                                className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+                                style={{ width: `${(day.patients / 20) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <div className="w-16 text-xs text-right text-slate-500">
+                            {day.diagnoses} / {day.patients}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-center mt-6 space-x-4 text-xs">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                        <span className="text-slate-600">Diagnoses</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                        <span className="text-slate-600">Patients</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -772,102 +636,7 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Activity Tab */}
-            {activeTab === 'activity' && (
-              <div className="space-y-8 animate-fadeIn">
-                <div>
-                  <h3 className="mb-2 text-2xl font-semibold text-slate-900">Activity Log</h3>
-                  <p className="text-slate-600">Track all recent activities and operations in the system</p>
-                </div>
 
-                <div className="space-y-4">
-                  {[
-                    {
-                      id: 1,
-                      type: 'diagnosis',
-                      title: 'New Diagnosis Completed',
-                      description: 'Diagnosed hypothyroidism case for patient Ahmed Mohamed',
-                      time: '2 hours ago',
-                      icon: Activity,
-                      color: 'text-blue-600 bg-blue-100'
-                    },
-                    {
-                      id: 2,
-                      type: 'login',
-                      title: 'Successful Login',
-                      description: 'Logged in from Windows 11 device',
-                      time: '4 hours ago',
-                      icon: Shield,
-                      color: 'text-green-600 bg-green-100'
-                    },
-                    {
-                      id: 3,
-                      type: 'report',
-                      title: 'Report Generated',
-                      description: 'Monthly performance and diagnostics report',
-                      time: '1 day ago',
-                      icon: FileText,
-                      color: 'text-purple-600 bg-purple-100'
-                    },
-                    {
-                      id: 4,
-                      type: 'patient',
-                      title: 'New Patient Added',
-                      description: 'Added patient Fatima Ali to the system',
-                      time: '2 days ago',
-                      icon: Users,
-                      color: 'text-orange-600 bg-orange-100'
-                    },
-                    {
-                      id: 5,
-                      type: 'update',
-                      title: 'Profile Updated',
-                      description: 'Updated contact information and specialty',
-                      time: '3 days ago',
-                      icon: User,
-                      color: 'text-slate-600 bg-slate-100'
-                    }
-                  ].map((activity) => {
-                    const Icon = activity.icon;
-                    return (
-                      <div key={activity.id} className="flex items-start p-6 space-x-4 transition-all duration-200 bg-slate-50 rounded-2xl hover:bg-slate-100 hover:shadow-sm">
-                        <div className={`flex-shrink-0 p-3 rounded-xl ${activity.color}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-lg font-semibold text-slate-900">{activity.title}</p>
-                            <p className="text-sm text-slate-500">{activity.time}</p>
-                          </div>
-                          <p className="mt-1 text-slate-600">{activity.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="pt-8 border-t border-slate-200">
-                  <div className="flex flex-col items-start justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
-                    <div>
-                      <h4 className="text-xl font-semibold text-slate-900">Filter Activity</h4>
-                      <p className="text-slate-600">View activities by type or date range</p>
-                    </div>
-                    <div className="flex space-x-3">
-                      <select className="px-4 py-2 text-sm border rounded-lg border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="all">All Activities</option>
-                        <option value="diagnosis">Diagnoses</option>
-                        <option value="login">Logins</option>
-                        <option value="reports">Reports</option>
-                        <option value="patients">Patients</option>
-                      </select>
-                      <button className="px-6 py-2 text-sm font-semibold text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700">
-                        Filter
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
