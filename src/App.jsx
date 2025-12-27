@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout';
 import ScrollToTop from './components/ScrollToTop';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import PendingVerification from './components/auth/PendingVerification';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import { AuthProvider } from './contexts/AuthContext';
@@ -58,6 +59,7 @@ function App() {
             <Route path="/diagnosis-results" element={<DiagnosisResults />} />
             <Route path="/patients" element={<PatientsList />} />
             <Route path="/patients/:id" element={<PatientDetails />} />
+            <Route path="/pending-verification" element={<PendingVerification />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={
