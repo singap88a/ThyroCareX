@@ -222,15 +222,32 @@ const ThyroidDiagnosisResult = () => {
     }
   };
 
-  // Initialize 3D Thyroid Model
+  // Disease location number from ML model (hardcoded for testing - will come from backend)
+  // Change this number (1-8) to test different marker positions on the thyroid
+  const diseaseLocationNumber = 1;
+
+  // Disease Location Mapping - Maps ML output numbers to 3D positions on the thyroid
+  // Position 1 is now in the exact center of the thyroid for precise marking
+  const DISEASE_LOCATION_MAP = {
+    1: { position: { x: -0.40, y: -0.5, z: 0.3 }, label: "Thyroid Center", description: "Center of thyroid gland" },
+    2: { position: { x: 0.5, y: 0.2, z: 0.25 }, label: "Right Lobe - Superior", description: "Upper right thyroid region" },
+    3: { position: { x: 0.6, y: 0, z: 0.3 }, label: "Right Lobe - Middle", description: "Central right thyroid region" },
+    4: { position: { x: 0.5, y: -0.2, z: 0.25 }, label: "Right Lobe - Inferior", description: "Lower right thyroid region" },
+    5: { position: { x: -0.5, y: 0.2, z: 0.25 }, label: "Left Lobe - Superior", description: "Upper left thyroid region" },
+    6: { position: { x: -0.6, y: 0, z: 0.3 }, label: "Left Lobe - Middle", description: "Central left thyroid region" },
+    7: { position: { x: -0.5, y: -0.2, z: 0.25 }, label: "Left Lobe - Inferior", description: "Lower left thyroid region" },
+    8: { position: { x: 0, y: 0.15, z: 0.2 }, label: "Isthmus", description: "Isthmus region" },
+  };
+
+  // Initialize 3D Thyroid Model with GLB Loading
   useEffect(() => {
     if (!canvasRef.current) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc); // Light background
+    scene.background = new THREE.Color(0x0a1628); // Dark professional background
     
-    const camera = new THREE.PerspectiveCamera(75, canvasRef.current.clientWidth / canvasRef.current.clientHeight, 0.1, 1000);
-    camera.position.set(5, 3, 5);
+    const camera = new THREE.PerspectiveCamera(50, canvasRef.current.clientWidth / canvasRef.current.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0, 4);
     
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvasRef.current,
@@ -239,225 +256,257 @@ const ThyroidDiagnosisResult = () => {
     });
     renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.minDistance = 2;
+    controls.maxDistance = 8;
+    controls.autoRotate = false; // User controls rotation manually
     
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // Professional lighting setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 5, 5);
-    scene.add(directionalLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    mainLight.position.set(5, 5, 5);
+    scene.add(mainLight);
     
-    // Primary color scheme
-    const primaryColors = {
-      blue: 0x3b82f6,      // Primary Blue
-      lightBlue: 0x60a5fa,  // Light Blue
-      red: 0xef4444,       // Primary Red
-      lightRed: 0xf87171,   // Light Red
-      green: 0x10b981,     // Primary Green
-      lightGreen: 0x34d399  // Light Green
+    const fillLight = new THREE.DirectionalLight(0x4fc3f7, 0.6);
+    fillLight.position.set(-5, 0, 5);
+    scene.add(fillLight);
+    
+    const backLight = new THREE.DirectionalLight(0xff7043, 0.4);
+    backLight.position.set(0, -5, -5);
+    scene.add(backLight);
+
+    // Add subtle environment lighting
+    const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x1a237e, 0.3);
+    scene.add(hemisphereLight);
+
+    // Store animated objects for the animation loop
+    let diseaseMarker = null;
+    let pulseRing = null;
+    let markerLabel = null;
+    let thyroidModel = null;
+
+    // Create professional disease marker
+    const createDiseaseMarker = (locationData) => {
+      const markerGroup = new THREE.Group();
+      const pos = locationData.position;
+
+      // Main marker sphere (glowing red/orange)
+      const markerGeometry = new THREE.SphereGeometry(0.08, 32, 32);
+      const markerMaterial = new THREE.MeshPhongMaterial({
+        color: 0xff4444,
+        emissive: 0xff2222,
+        emissiveIntensity: 0.8,
+        transparent: true,
+        opacity: 0.95,
+        shininess: 100
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.set(pos.x, pos.y, pos.z);
+      markerGroup.add(marker);
+      diseaseMarker = marker;
+
+      // Outer pulse ring
+      const ringGeometry = new THREE.RingGeometry(0.1, 0.15, 32);
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff6666,
+        transparent: true,
+        opacity: 0.6,
+        side: THREE.DoubleSide
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.position.set(pos.x, pos.y, pos.z + 0.01);
+      markerGroup.add(ring);
+      pulseRing = ring;
+
+      // Inner glow sphere
+      const glowGeometry = new THREE.SphereGeometry(0.12, 32, 32);
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff4444,
+        transparent: true,
+        opacity: 0.3
+      });
+      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      glow.position.set(pos.x, pos.y, pos.z);
+      markerGroup.add(glow);
+
+      // Pointer line from marker
+      const linePoints = [
+        new THREE.Vector3(pos.x, pos.y, pos.z),
+        new THREE.Vector3(pos.x + 0.5, pos.y + 0.4, pos.z + 0.3)
+      ];
+      const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+      const lineMaterial = new THREE.LineBasicMaterial({ 
+        color: 0xff6666, 
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.8
+      });
+      const line = new THREE.Line(lineGeometry, lineMaterial);
+      markerGroup.add(line);
+
+      // Create label at end of pointer line
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = 512;
+      canvas.height = 128;
+      
+      // Label background with gradient
+      const gradient = context.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, 'rgba(239, 68, 68, 0.95)');
+      gradient.addColorStop(1, 'rgba(234, 88, 12, 0.95)');
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.roundRect(10, 10, canvas.width - 20, canvas.height - 20, 15);
+      context.fill();
+      
+      // Border
+      context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      context.lineWidth = 3;
+      context.stroke();
+      
+      // Text
+      context.fillStyle = '#ffffff';
+      context.font = 'bold 32px Arial';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(locationData.label, canvas.width / 2, canvas.height / 2);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({ 
+        map: texture,
+        transparent: true 
+      });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(pos.x + 0.5, pos.y + 0.4, pos.z + 0.3);
+      sprite.scale.set(1.2, 0.3, 1);
+      markerGroup.add(sprite);
+      markerLabel = sprite;
+
+      scene.add(markerGroup);
+      return markerGroup;
     };
-    
-    // Create thyroid gland model
-    const createThyroidModel = () => {
-      // Left lobe
-      const leftLobeGeometry = new THREE.SphereGeometry(1.2, 32, 32);
-      const leftLobeMaterial = new THREE.MeshPhongMaterial({ 
-        color: primaryColors.blue,
-        transparent: true,
-        opacity: 0.8,
-        shininess: 60,
-        specular: 0x333333
-      });
-      const leftLobe = new THREE.Mesh(leftLobeGeometry, leftLobeMaterial);
-      leftLobe.position.set(-2, 0, 0);
-      scene.add(leftLobe);
-      
-      // Right lobe (with tumor)
-      const rightLobeGeometry = new THREE.SphereGeometry(1.5, 32, 32);
-      const rightLobeMaterial = new THREE.MeshPhongMaterial({ 
-        color: primaryColors.lightBlue,
-        transparent: true,
-        opacity: 0.8,
-        shininess: 60,
-        specular: 0x333333
-      });
-      const rightLobe = new THREE.Mesh(rightLobeGeometry, rightLobeMaterial);
-      rightLobe.position.set(2, 0, 0);
-      scene.add(rightLobe);
-      
-      // Main tumor on right lobe (marked with red X)
-      const tumorGeometry = new THREE.SphereGeometry(0.8, 32, 32);
-      const tumorMaterial = new THREE.MeshPhongMaterial({ 
-        color: primaryColors.red,
-        emissive: primaryColors.red,
-        emissiveIntensity: 0.3,
-        transparent: true,
-        opacity: 0.9
-      });
-      const tumor = new THREE.Mesh(tumorGeometry, tumorMaterial);
-      tumor.position.set(2.8, 0.5, 0.3);
-      scene.add(tumor);
-      
-      // Create red X mark on tumor
-      const createRedX = (position) => {
-        // First line of X
-        const line1Geometry = new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8);
-        const line1Material = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
-        const line1 = new THREE.Mesh(line1Geometry, line1Material);
-        line1.position.copy(position);
-        line1.rotation.z = Math.PI / 4;
-        scene.add(line1);
+
+    // Load the thyroid GLB model
+    const loader = new GLTFLoader();
+    loader.load(
+      '/models/thyroid.glb',
+      (gltf) => {
+        thyroidModel = gltf.scene;
         
-        // Second line of X
-        const line2Geometry = new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8);
-        const line2Material = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
-        const line2 = new THREE.Mesh(line2Geometry, line2Material);
-        line2.position.copy(position);
-        line2.rotation.z = -Math.PI / 4;
-        scene.add(line2);
+        // Center and scale the model
+        const box = new THREE.Box3().setFromObject(thyroidModel);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
         
-        // Add pulsing effect
-        const pulseMaterial = new THREE.MeshBasicMaterial({ 
-          color: 0xff0000, 
-          transparent: true, 
-          opacity: 0.3 
+        // Calculate scale to fit nicely in view
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 2 / maxDim;
+        thyroidModel.scale.setScalar(scale);
+        
+        // Center the model
+        thyroidModel.position.x = -center.x * scale;
+        thyroidModel.position.y = -center.y * scale;
+        thyroidModel.position.z = -center.z * scale;
+
+        // Keep original GLB materials/colors - just enhance them
+        thyroidModel.traverse((child) => {
+          if (child.isMesh) {
+            // Keep original material but enhance it
+            if (child.material) {
+              child.material.transparent = true;
+              child.material.opacity = 0.9;
+              child.material.needsUpdate = true;
+            }
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
         });
-        const pulseGeometry = new THREE.SphereGeometry(0.9, 16, 16);
-        const pulseSphere = new THREE.Mesh(pulseGeometry, pulseMaterial);
-        pulseSphere.position.copy(position);
-        scene.add(pulseSphere);
-        
-        return { line1, line2, pulseSphere };
-      };
-      
-      const redX = createRedX(new THREE.Vector3(2.8, 0.5, 0.3));
-      
-      // Secondary nodules
-      const createNodule = (position, size, color) => {
-        const geometry = new THREE.SphereGeometry(size, 16, 16);
-        const material = new THREE.MeshPhongMaterial({ 
-          color: color,
+
+        scene.add(thyroidModel);
+
+        // Add disease marker based on the location number
+        const locationData = DISEASE_LOCATION_MAP[diseaseLocationNumber];
+        if (locationData) {
+          createDiseaseMarker(locationData);
+        }
+
+        setIs3DLoaded(true);
+      },
+      (progress) => {
+        // Loading progress
+        console.log('Loading thyroid model:', (progress.loaded / progress.total * 100).toFixed(1) + '%');
+      },
+      (error) => {
+        console.error('Error loading thyroid model:', error);
+        // Fallback to simple representation if GLB fails
+        const fallbackGeometry = new THREE.TorusGeometry(0.8, 0.3, 16, 100);
+        const fallbackMaterial = new THREE.MeshPhongMaterial({
+          color: 0x4a90d9,
           transparent: true,
-          opacity: 0.8
+          opacity: 0.85,
+          shininess: 80
         });
-        const nodule = new THREE.Mesh(geometry, material);
-        nodule.position.copy(position);
-        scene.add(nodule);
+        const fallbackMesh = new THREE.Mesh(fallbackGeometry, fallbackMaterial);
+        fallbackMesh.rotation.x = Math.PI / 2;
+        scene.add(fallbackMesh);
         
-        // Add small marker
-        const markerGeometry = new THREE.SphereGeometry(size * 0.3, 8, 8);
-        const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-        marker.position.copy(position);
-        marker.position.y += size * 1.5;
-        scene.add(marker);
+        // Still add marker
+        const locationData = DISEASE_LOCATION_MAP[diseaseLocationNumber];
+        if (locationData) {
+          createDiseaseMarker(locationData);
+        }
         
-        return nodule;
-      };
-      
-      // Add other nodules
-      const nodule2 = createNodule(new THREE.Vector3(-1.5, 0.3, 0.2), 0.4, primaryColors.red);
-      const nodule3 = createNodule(new THREE.Vector3(-2.0, -0.2, 0.1), 0.3, primaryColors.green);
-      
-      // Isthmus
-      const isthmusGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4, 32);
-      const isthmusMaterial = new THREE.MeshPhongMaterial({ 
-        color: primaryColors.blue,
-        transparent: true,
-        opacity: 0.7
-      });
-      const isthmus = new THREE.Mesh(isthmusGeometry, isthmusMaterial);
-      isthmus.position.set(0, 0, 0);
-      scene.add(isthmus);
-      
-      // Add trachea
-      const tracheaGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 16);
-      const tracheaMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0x94a3b8,
-        transparent: true,
-        opacity: 0.5
-      });
-      const trachea = new THREE.Mesh(tracheaGeometry, tracheaMaterial);
-      trachea.position.set(0, -2.5, 0);
-      scene.add(trachea);
-      
-      // Create 3D text labels
-      const create3DLabel = (text, position, color = 0x000000) => {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = 512;
-        canvas.height = 256;
-        
-        // Background
-        context.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Text
-        context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
-        context.font = 'bold 40px Arial';
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(text, canvas.width / 2, canvas.height / 2);
-        
-        // Border
-        context.strokeStyle = '#3b82f6';
-        context.lineWidth = 4;
-        context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
-        
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMaterial = new THREE.SpriteMaterial({ 
-          map: texture,
-          transparent: true 
-        });
-        const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.copy(position);
-        sprite.scale.set(3, 1.5, 1);
-        scene.add(sprite);
-        
-        return sprite;
-      };
-      
-      // Add labels for different parts
-      create3DLabel('Suspicious Nodule', new THREE.Vector3(3.5, 1.8, 0.5), primaryColors.red);
-      create3DLabel('Left Lobe', new THREE.Vector3(-3, 1.8, 0), primaryColors.blue);
-      create3DLabel('Right Lobe', new THREE.Vector3(3, -1.8, 0), primaryColors.blue);
-      create3DLabel('Trachea', new THREE.Vector3(0, -4, 0), 0x64748b);
-      
-      return { leftLobe, rightLobe, tumor, isthmus, redX, nodule2, nodule3, trachea };
-    };
-    
-    const thyroidModel = createThyroidModel();
-    setIs3DLoaded(true);
-    
+        setIs3DLoaded(true);
+      }
+    );
+
+    // Add grid helper for depth perception
+    const gridHelper = new THREE.GridHelper(4, 20, 0x1e3a5f, 0x0d1f3c);
+    gridHelper.position.y = -1.5;
+    gridHelper.material.transparent = true;
+    gridHelper.material.opacity = 0.3;
+    scene.add(gridHelper);
+
     // Animation loop
+    let animationId;
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
       
-      // Smooth rotation
-      thyroidModel.rightLobe.rotation.y += 0.002;
-      thyroidModel.leftLobe.rotation.y += 0.002;
-      
-      // Pulsing effect for tumor
       const time = Date.now() * 0.001;
-      thyroidModel.tumor.scale.x = 1 + Math.sin(time * 2) * 0.05;
-      thyroidModel.tumor.scale.y = 1 + Math.sin(time * 2) * 0.05;
-      thyroidModel.tumor.scale.z = 1 + Math.sin(time * 2) * 0.05;
       
-      // Pulsing effect for red X
-      if (thyroidModel.redX && thyroidModel.redX.pulseSphere) {
-        thyroidModel.redX.pulseSphere.scale.x = 1 + Math.sin(time * 3) * 0.2;
-        thyroidModel.redX.pulseSphere.scale.y = 1 + Math.sin(time * 3) * 0.2;
-        thyroidModel.redX.pulseSphere.scale.z = 1 + Math.sin(time * 3) * 0.2;
+      // Animate disease marker
+      if (diseaseMarker) {
+        // Pulsing scale effect
+        const pulseScale = 1 + Math.sin(time * 3) * 0.2;
+        diseaseMarker.scale.setScalar(pulseScale);
+        
+        // Glowing intensity variation
+        if (diseaseMarker.material) {
+          diseaseMarker.material.emissiveIntensity = 0.6 + Math.sin(time * 4) * 0.4;
+        }
       }
       
-      // Gentle floating animation
-      thyroidModel.rightLobe.position.y = Math.sin(time * 0.5) * 0.05;
-      thyroidModel.leftLobe.position.y = Math.sin(time * 0.5 + 1) * 0.05;
+      // Animate pulse ring
+      if (pulseRing) {
+        const ringScale = 1 + Math.sin(time * 2) * 0.3;
+        pulseRing.scale.setScalar(ringScale);
+        if (pulseRing.material) {
+          pulseRing.material.opacity = 0.3 + Math.sin(time * 2) * 0.3;
+        }
+      }
+
+      // Subtle model rotation (if not auto-rotating via controls)
+      if (thyroidModel && !controls.autoRotate) {
+        thyroidModel.rotation.y = Math.sin(time * 0.3) * 0.1;
+      }
       
       controls.update();
       renderer.render(scene, camera);
@@ -467,6 +516,7 @@ const ThyroidDiagnosisResult = () => {
     
     // Handle resize
     const handleResize = () => {
+      if (!canvasRef.current) return;
       camera.aspect = canvasRef.current.clientWidth / canvasRef.current.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
@@ -476,9 +526,11 @@ const ThyroidDiagnosisResult = () => {
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationId);
       renderer.dispose();
+      scene.clear();
     };
-  }, []);
+  }, [diseaseLocationNumber]);
 
   // Animation for scan rotation
   useEffect(() => {
