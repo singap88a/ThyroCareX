@@ -8,6 +8,7 @@ import AddPatient from './pages/Add_patient';
 import DiagnosisResults from './pages/DiagnosisResults';
 import PatientsList from './pages/PatientsList';
 import PatientDetails from './pages/PatientDetails';
+import Community from './pages/Community';
 import './App.css';
 import Footer from './components/home/Footer';
 import Navbar from './components/home/Navbar';
@@ -59,6 +60,7 @@ function App() {
             <Route path="/diagnosis-results" element={<DiagnosisResults />} />
             <Route path="/patients" element={<PatientsList />} />
             <Route path="/patients/:id" element={<PatientDetails />} />
+            <Route path="/community" element={<Community />} />
             <Route path="/pending-verification" element={<PendingVerification />} />
 
             {/* Admin Routes */}

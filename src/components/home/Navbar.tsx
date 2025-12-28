@@ -44,16 +44,7 @@ const Navbar = () => {
   const navLinks = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
-    {
-      path: "/services",
-      label: "Services",
-      dropdown: [
-        { path: "/services/ai-diagnosis", label: "AI Diagnosis" },
-        { path: "/services/doctor-consultation", label: "Doctor Consultation" },
-        { path: "/services/second-opinion", label: "Second Opinion" },
-        { path: "/services/progress-tracking", label: "Progress Tracking" },
-      ],
-    },
+    { path: "/community", label: "Community" },
     { path: "/pricing", label: "Pricing" },
     { path: "/contact", label: "Contact" },
   ];
@@ -119,65 +110,22 @@ const Navbar = () => {
 
           {/* الروابط الرئيسية - وسط الصفحة */}
           <div className="absolute hidden transform -translate-x-1/2 lg:flex left-1/2">
-            <div className="flex items-center px-4 py-2 space-x-1 border border-gray-100 shadow-lg bg-white/80 backdrop-blur-sm rounded-2xl">
+            <div className="flex items-center px-4 py-4 space-x-1 border border-gray-100 shadow-lg bg-white/80 backdrop-blur-sm rounded-2xl">
               {navLinks.map((link) => (
                 <div key={link.path} className="relative">
-                  {link.dropdown ? (
-                    // رابط مع قائمة منسدلة
-                    <div
-                      className="relative"
-                      onMouseEnter={() => setActiveDropdown(link.path)}
-                      onMouseLeave={() => setActiveDropdown(null)}
-                    >
-                      <Link
-                        to={link.path}
-                        className={`flex items-center space-x-1 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                          isActiveLink(link.path)
-                            ? "text-primary bg-primary/10 shadow-sm"
-                            : "text-gray-700 hover:text-primary hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{link.label}</span>
-                        <FaChevronDown
-                          className={`w-3 h-3 transition-transform duration-300 ${
-                            activeDropdown === link.path ? "rotate-180" : ""
-                          }`}
-                        />
-                      </Link>
-
-                      {/* القائمة المنسدلة */}
-                      {activeDropdown === link.path && (
-                        <div className="absolute left-0 w-64 py-3 mt-2 bg-white border border-gray-100 shadow-2xl top-full rounded-2xl backdrop-blur-md">
-                          {link.dropdown.map((dropdownItem) => (
-                            <Link
-                              key={dropdownItem.path}
-                              to={dropdownItem.path}
-                              className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10 group"
-                              onClick={() => setActiveDropdown(null)}
-                            >
-                              <div className="w-2 h-2 mr-3 transition-colors duration-300 rounded-full bg-primary/20 group-hover:bg-primary"></div>
-                              {dropdownItem.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // رابط عادي
-                    <Link
-                      to={link.path}
-                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                        isActiveLink(link.path)
-                          ? "text-primary"
-                          : "text-gray-700 hover:text-primary"
-                      }`}
-                    >
-                      {link.label}
-                      {isActiveLink(link.path) && (
-                        <div className="absolute bottom-0 w-6 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-primary"></div>
-                      )}
-                    </Link>
-                  )}
+                  <Link
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                      isActiveLink(link.path)
+                        ? "text-primary"
+                        : "text-gray-700 hover:text-primary"
+                    }`}
+                  >
+                    {link.label}
+                    {isActiveLink(link.path) && (
+                      <div className="absolute bottom-0 w-6 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-primary"></div>
+                    )}
+                  </Link>
                 </div>
               ))}
             </div>
@@ -308,60 +256,17 @@ const Navbar = () => {
             <div className="px-4 py-6 space-y-2">
               {navLinks.map((link) => (
                 <div key={link.path}>
-                  {link.dropdown ? (
-                    <div className="space-y-1">
-                      <button
-                        onClick={() =>
-                          setActiveDropdown(
-                            activeDropdown === link.path ? null : link.path
-                          )
-                        }
-                        className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                          isActiveLink(link.path)
-                            ? "text-primary bg-primary/10"
-                            : "text-gray-700 hover:text-primary hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{link.label}</span>
-                        <FaChevronDown
-                          className={`w-3 h-3 transition-transform duration-300 ${
-                            activeDropdown === link.path ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
-
-                      {activeDropdown === link.path && (
-                        <div className="p-2 ml-4 space-y-1 bg-gray-50 rounded-xl">
-                          {link.dropdown.map((dropdownItem) => (
-                            <Link
-                              key={dropdownItem.path}
-                              to={dropdownItem.path}
-                              className="flex items-center px-4 py-2.5 text-gray-600 hover:text-primary rounded-lg hover:bg-white transition-all duration-300"
-                              onClick={() => {
-                                setIsOpen(false);
-                                setActiveDropdown(null);
-                              }}
-                            >
-                              <div className="w-1.5 h-1.5 bg-primary/30 rounded-full mr-3"></div>
-                              {dropdownItem.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link
-                      to={link.path}
-                      className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                        isActiveLink(link.path)
-                          ? "text-primary bg-primary/10"
-                          : "text-gray-700 hover:text-primary hover:bg-gray-50"
-                      }`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  )}
+                  <Link
+                    to={link.path}
+                    className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                      isActiveLink(link.path)
+                        ? "text-primary bg-primary/10"
+                        : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
                 </div>
               ))}
 
