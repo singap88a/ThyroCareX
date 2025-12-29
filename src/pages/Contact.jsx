@@ -1,10 +1,7 @@
 "use client";
-import { useState } from "react";
- import {
-  FaEnvelope,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaClock,
+import React, { useState } from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import {
   FaUpload,
   FaTwitter,
   FaLinkedin,
@@ -20,12 +17,13 @@ const ContactPage = () => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState(null);
- 
+
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Please enter your name.";
     if (!form.email.trim()) e.email = "Please enter your email.";
-    else if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = "Invalid email address.";
+    else if (!/^\S+@\S+\.\S+$/.test(form.email))
+      e.email = "Invalid email address.";
     if (!form.subject.trim()) e.subject = "Please enter a subject.";
     if (!form.message.trim() || form.message.trim().length < 10)
       e.message = "Please enter a message (at least 10 characters).";
@@ -55,92 +53,72 @@ const ContactPage = () => {
     setForm((s) => ({ ...s, [k]: e.target.value }));
   };
 
- 
-
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden text-white bg-primary">
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary w-96 h-96 opacity-10"></div>
-        <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full bg-primary w-80 h-80 opacity-10"></div>
 
-        <div className="relative px-4 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
-          <div className="inline-flex items-center px-4 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary backdrop-blur-sm">
-            📞 GET IN TOUCH
+      {/* Hero Section */}
+      <section className="relative py-3 overflow-visible mt-12">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-5">
+          <div className="relative overflow-hidden rounded-[3rem] min-h-[450px]">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url('/bg1.jpg')" }}
+            ></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-teal-500/60 to-cyan-500/40"></div>
+
+            <div className="relative grid items-start h-full gap-8 px-6 py-12 md:grid-cols-2 text-white">
+              <div className="z-10 text-left ml-20 mt-20">
+                <h1 className="mb-4 text-4xl font-bold md:text-5xl lg:text-5xl">
+                  Contact Us
+                </h1>
+                <p className="max-w-lg text-lg text-white/90 leading-relaxed md:text-xl">
+                  We're here to help you with any questions about thyroid cancer diagnosis, AI technology, or partnership opportunities. Reach out to us anytime.
+                </p>
+              </div>
+            </div>
+
+
           </div>
-          <h1 className="mb-6 text-5xl font-bold text-white md:text-6xl">
-            Contact
-            <span className="block text-white">
-              ThyroCareX
-            </span>
-          </h1>
-          <p className="max-w-3xl mx-auto text-xl leading-relaxed text-white">
-            We're here to help you with any questions about thyroid cancer diagnosis,
-            AI technology, or partnership opportunities. Reach out to us anytime.
-          </p>
+
+          <img
+            src="/doctor.png"
+            alt="Doctor"
+            className="absolute top-[47%] -translate-y-1/2 -right-4 h-[330px] md:h-[430px] lg:h-[530px] w-auto object-contain drop-shadow-2xl pointer-events-none"
+
+
+
+
+          />
         </div>
       </section>
 
+
       {/* Main Content */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-3">
-            
-            {/* Left Column - Contact Cards & Info */}
-            <div className="space-y-6">
-              {/* Contact Cards */}
-              <div className="space-y-4">
-                <ContactCard
-                  title="Email Support"
-                  detail="support@thyrocarex.ai"
-                  icon={<FaEnvelope className="w-5 h-5 text-primary" />}
-                  hint="Typical reply within a few hours"
-                />
-                <ContactCard
-                  title="Call Us"
-                  detail="+1 (800) 555-2049"
-                  icon={<FaPhoneAlt className="w-5 h-5 text-green-600" />}
-                  hint="Available 24/7 for urgent clinical support"
-                />
-                <ContactCard
-                  title="Office (HQ)"
-                  detail="ThyroCareX HQ, 123 Medical Way, San Francisco, CA"
-                  icon={<FaMapMarkerAlt className="w-5 h-5 text-purple-600" />}
-                  hint="By appointment — clinical consultations available"
-                />
-                <ContactCard
-                  title="Working Hours"
-                  detail="24 / 7"
-                  icon={<FaClock className="w-5 h-5 text-orange-500" />}
-                  hint="Clinical team available around the clock"
-                />
-              </div>
+          <div className="grid gap-8 lg:grid-cols-3 lg:items-start">
 
-              {/* Social Media */}
-              <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
-                <div className="mb-4 text-lg font-semibold text-gray-900">Follow Us</div>
-                <div className="flex gap-4">
-                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
-                    <FaTwitter className="w-5 h-5" />
-                  </a>
-                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
-                    <FaLinkedin className="w-5 h-5" />
-                  </a>
-                  <a className="p-3 transition-colors text-primary bg-primary/10 rounded-xl hover:bg-primary/20" href="#">
-                    <FaFacebookF className="w-5 h-5" />
-                  </a>
-                </div>
-              </div>
-
- 
+            {/* Left Column - Lottie Animation */}
+            <div className="flex items-center justify-center order-1 w-full lg:order-none">
+              <DotLottieReact
+                src="https://lottie.host/3d03a661-9736-4630-8012-2fd110ee9bb8/OeAkVAOXq4.lottie"
+                loop
+                autoplay
+                className="w-[300px] md:w-[450px] lg:w-[600px] h-[400px] md:h-[600px] lg:h-[800px]"
+              />
             </div>
 
-            {/* Middle Column - Contact Form */}
-            <div className="lg:col-span-2">
+
+            {/* Right Column - Contact Form */}
+            <div className="lg:col-span-2 order-2">
               <div className="p-8 bg-white border border-gray-200 shadow-lg rounded-2xl">
                 <div className="mb-6">
-                  <h2 className="mb-2 text-2xl font-bold text-gray-900">Send us a Message</h2>
-                  <p className="text-gray-600">We'll get back to you as soon as possible</p>
+                  <h2 className="mb-2 text-2xl font-bold text-gray-900">
+                    Send us a Message
+                  </h2>
+                  <p className="text-gray-600">
+                    We'll get back to you as soon as possible
+                  </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -152,12 +130,15 @@ const ContactPage = () => {
                       <input
                         value={form.name}
                         onChange={handleChange("name")}
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.name ? "border-red-400" : "border-gray-300"
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? "border-red-400" : "border-gray-300"
+                          }`}
                         placeholder="Jane Doe"
                       />
-                      {errors.name && <div className="mt-1 text-sm text-red-500">{errors.name}</div>}
+                      {errors.name && (
+                        <div className="mt-1 text-sm text-red-500">
+                          {errors.name}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -167,13 +148,16 @@ const ContactPage = () => {
                       <input
                         value={form.email}
                         onChange={handleChange("email")}
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.email ? "border-red-400" : "border-gray-300"
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? "border-red-400" : "border-gray-300"
+                          }`}
                         placeholder="you@example.com"
                         type="email"
                       />
-                      {errors.email && <div className="mt-1 text-sm text-red-500">{errors.email}</div>}
+                      {errors.email && (
+                        <div className="mt-1 text-sm text-red-500">
+                          {errors.email}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -184,12 +168,15 @@ const ContactPage = () => {
                     <input
                       value={form.subject}
                       onChange={handleChange("subject")}
-                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.subject ? "border-red-400" : "border-gray-300"
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.subject ? "border-red-400" : "border-gray-300"
+                        }`}
                       placeholder="How can we help you?"
                     />
-                    {errors.subject && <div className="mt-1 text-sm text-red-500">{errors.subject}</div>}
+                    {errors.subject && (
+                      <div className="mt-1 text-sm text-red-500">
+                        {errors.subject}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -200,29 +187,37 @@ const ContactPage = () => {
                       value={form.message}
                       onChange={handleChange("message")}
                       rows={6}
-                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                        errors.message ? "border-red-400" : "border-gray-300"
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${errors.message ? "border-red-400" : "border-gray-300"
+                        }`}
                       placeholder="Please describe your inquiry in detail..."
                     />
-                    {errors.message && <div className="mt-1 text-sm text-red-500">{errors.message}</div>}
+                    {errors.message && (
+                      <div className="mt-1 text-sm text-red-500">
+                        {errors.message}
+                      </div>
+                    )}
                   </div>
 
-                  {/* File Upload */}
                   <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
                     <div className="flex items-center justify-center w-12 h-12 rounded-lg text-primary bg-primary/10">
                       <FaUpload className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-700">Attach files (optional)</div>
-                      <div className="text-sm text-gray-500">Max 25MB • JPG, PNG, PDF</div>
+                      <div className="text-sm font-medium text-gray-700">
+                        Attach files (optional)
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Max 25MB • JPG, PNG, PDF
+                      </div>
                     </div>
-                    <button type="button" className="px-4 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20"
+                    >
                       Browse
                     </button>
                   </div>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={status === "sending"}
@@ -241,13 +236,16 @@ const ContactPage = () => {
                     )}
                   </button>
 
-                  {/* Status Messages */}
                   {status === "success" && (
                     <div className="flex items-center gap-3 p-4 border border-green-200 bg-green-50 rounded-xl">
                       <FaCheckCircle className="w-5 h-5 text-green-600" />
                       <div className="text-green-800">
-                        <div className="font-medium">Message sent successfully!</div>
-                        <div className="text-sm">We'll get back to you within 24 hours.</div>
+                        <div className="font-medium">
+                          Message sent successfully!
+                        </div>
+                        <div className="text-sm">
+                          We'll get back to you within 24 hours.
+                        </div>
                       </div>
                     </div>
                   )}
@@ -263,51 +261,28 @@ const ContactPage = () => {
                   )}
                 </form>
               </div>
-
- 
             </div>
           </div>
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="py-16 bg-white">
-        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
- 
-          <div className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl">
- 
-            
-            <div className="h-96">
-              <iframe
-                title="ThyroCareX HQ Map"
-                className="w-full h-full"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.0193407399086!2d-122.40569468468045!3d37.78799477975688!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858064d7978b5f%3A0x1e7f1b9a2f6f0d4f!2sSalesforce%20Tower%2C%20415%20Mission%20St%2C%20San%20Francisco%2C%20CA%2094105%2C%20USA!5e0!3m2!1sen!2seg!4v1697040000000!5m2!1sen!2seg"
-                loading="lazy"
-              />
-            </div>
+      {/* Bottom Animation Section */}
+      <section className="pt-0 pb-8 bg-white">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 -mt-8">
+          <div className="flex justify-center h-[250px] md:h-[350px] lg:h-[450px]">
+            <DotLottieReact
+              src="https://lottie.host/8c6dca52-3d55-4c56-975a-0bc59cf53aa6/DnB3kn2ZgX.lottie"
+              loop
+              autoplay
+              style={{ width: "100%", height: "100%" }}
+            />
           </div>
         </div>
       </section>
 
- 
-    </main>
+
+    </main >
   );
 };
 
 export default ContactPage;
-
-/* Helper Components */
-function ContactCard({ title, detail, icon, hint }) {
-  return (
-    <div className="flex items-start gap-4 p-6 transition-shadow duration-300 bg-white border border-gray-200 shadow-sm rounded-2xl hover:shadow-md">
-      <div className="flex items-center justify-center w-12 h-12 text-primary bg-primary/10 rounded-xl">
-        {icon}
-      </div>
-      <div className="flex-1">
-        <div className="mb-1 text-sm font-medium text-gray-500">{title}</div>
-        <div className="mb-1 text-lg font-semibold text-gray-900">{detail}</div>
-        {hint && <div className="text-sm text-gray-500">{hint}</div>}
-      </div>
-    </div>
-  );
-}
