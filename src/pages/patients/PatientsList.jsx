@@ -19,7 +19,8 @@ import {
   CheckCircle,
   XCircle,
   RefreshCcw,
-  History
+  History,
+  LayoutDashboard
 } from 'lucide-react';
 
 const PatientsList = () => {
@@ -436,26 +437,14 @@ const PatientsList = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-1">
                         <Link 
-                          to={`/patients/${patient.id}`}
-                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
-                          title="View Details"
+                          to={`/patients/${patient.id}/dashboard`}
+                          className="flex items-center gap-2 px-3 py-1.5 transition-all rounded-lg bg-admin-primary/10 text-admin-primary hover:bg-admin-primary hover:text-white font-medium text-sm"
+                          title="View Patient Dashboard"
                         >
-                          <Eye className="w-4 h-4" />
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>Dashboard</span>
                         </Link>
-                        <Link 
-                          to={`/patients/${patient.id}/rediagnose`}
-                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
-                          title="Re-Diagnose Patient"
-                        >
-                          <RefreshCcw className="w-4 h-4" />
-                        </Link>
-                        <Link 
-                          to={`/patients/${patient.id}/history`}
-                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                          title="Diagnosis History"
-                        >
-                          <History className="w-4 h-4" />
-                        </Link>
+
                         <button 
                           className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
                           title="Send Message"

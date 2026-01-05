@@ -25,7 +25,8 @@ import {
   Thermometer,
   Target,
   RefreshCcw,
-  ArrowRightLeft
+  ArrowRightLeft,
+  History
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -33,14 +34,23 @@ import CountUp from 'react-countup';
 import ComparisonCard from '../../components/diagnosis/ComparisonCard';
 import ProgressIndicator, { ProgressBar } from '../../components/diagnosis/ProgressIndicator';
 
-const DiagnosisComparison = () => {
+const DiagnosisComparison = ({ dashboardMode = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
   const [activeSection, setActiveSection] = useState('overview');
+  const [selectedComparison, setSelectedComparison] = useState(null);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);
+
+  // Mock list of comparisons
+  const pastComparisons = [
+    { id: 'comp-1', date: '2024-09-20', title: 'Post-Treatment Progress', statusChange: 'MALIGNANT → BENIGN', improvement: '+75%' },
+    { id: 'comp-2', date: '2024-06-15', title: 'Mid-Treatment Review', statusChange: 'MALIGNANT → SUSPICIOUS', improvement: '+40%' },
+    { id: 'comp-3', date: '2024-03-10', title: 'Initial Baseline', statusChange: 'MALIGNANT → MALIGNANT', improvement: '0%' }
+  ];
 
   // Mock comparison data
   const comparisonData = {
@@ -136,58 +146,120 @@ const DiagnosisComparison = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Decorative Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-      </div>
+    <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50'}`}>
+      {!dashboardMode && (
+        /* Decorative Background */
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+        </div>
+      )}
 
-      <div className="relative max-w-7xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
+      <div className={`relative max-w-7xl mx-auto sm:px-6 lg:px-8 ${dashboardMode ? 'px-0 py-0' : 'px-4 py-8'}`}>
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
+        {!dashboardMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
           >
-            <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-            Back
-          </button>
-          
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-                <ArrowRightLeft className="w-8 h-8" />
-                Diagnosis Comparison
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Comparing diagnoses from {comparisonData.previous.date} to {comparisonData.current.date}
-                <span className="ml-2 px-2 py-0.5 text-sm bg-blue-100 text-blue-700 rounded-full">
-                  {daysBetween} days apart
-                </span>
-              </p>
-            </div>
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+              Back
+            </button>
             
-            <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <Download className="w-4 h-4" />
-                Export Report
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <Share2 className="w-4 h-4" />
-                Share
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
+                  <ArrowRightLeft className="w-8 h-8" />
+                  Diagnosis Comparison
+                </h1>
+                {viewMode === 'detail' && (
+                  <p className="mt-2 text-gray-600">
+                    Comparing diagnoses from {comparisonData.previous.date} to {comparisonData.current.date}
+                    <span className="ml-2 px-2 py-0.5 text-sm bg-blue-100 text-blue-700 rounded-full">
+                      {daysBetween} days apart
+                    </span>
+                  </p>
+                )}
+                {viewMode === 'list' && (
+                  <p className="mt-2 text-gray-600">
+                    Select a previous comparison to view detailed analytical results
+                  </p>
+                )}
+              </div>
+              
+              {viewMode === 'detail' && (
+                <div className="flex gap-3">
+                  <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    <Download className="w-4 h-4" />
+                    Export Report
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    <Printer className="w-4 h-4" />
+                    Print
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {viewMode === 'list' ? (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+              <History className="w-6 h-6 text-primary" />
+              Previous Comparisons
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastComparisons.map((comp, i) => (
+                <motion.div
+                  key={comp.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -5 }}
+                  onClick={() => {
+                    setSelectedComparison(comp.id);
+                    setViewMode('detail');
+                  }}
+                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-all group"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+                      <ArrowRightLeft size={24} className="text-primary group-hover:text-white" />
+                    </div>
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{comp.improvement} Improvement</span>
+                  </div>
+                  <h3 className="font-bold text-gray-800 mb-1">{comp.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4">{comp.date}</p>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
+                    <span className="text-xs text-gray-400">Status Change</span>
+                    <span className="text-xs font-bold text-gray-700">{comp.statusChange}</span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </motion.div>
+        ) : (
+          /* Detail View */
+          <>
+            {dashboardMode && (
+              <button 
+                onClick={() => setViewMode('list')}
+                className="mb-6 flex items-center gap-2 text-primary hover:underline font-medium"
+              >
+                <ArrowLeft size={16} />
+                Back to Comparison List
+              </button>
+            )}
 
         {/* Patient Info Bar */}
         <motion.div
@@ -719,6 +791,8 @@ const DiagnosisComparison = () => {
               </div>
             </div>
           </motion.div>
+        )}
+          </>
         )}
       </div>
     </div>

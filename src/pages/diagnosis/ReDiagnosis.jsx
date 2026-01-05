@@ -24,7 +24,7 @@ import {
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-const ReDiagnosis = () => {
+const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -89,8 +89,13 @@ const ReDiagnosis = () => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
-    // Navigate to comparison page
-    navigate(`/patients/${id}/compare`);
+    
+    if (onComplete) {
+      onComplete();
+    } else {
+      // Navigate to comparison page
+      navigate(`/patients/${id}/compare`);
+    }
   };
 
   const steps = [
@@ -101,48 +106,54 @@ const ReDiagnosis = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Decorative Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative max-w-6xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-            Back to Patients
-          </button>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-                <RefreshCcw className="w-8 h-8" />
-                Re-Diagnosis
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Initiate a new diagnosis for comparison with previous results
-              </p>
-            </div>
-            
-            <Link
-              to={`/patients/${id}/history`}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-            >
-              <History className="w-4 h-4" />
-              View History ({patientData.totalDiagnoses})
-            </Link>
+    <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50'}`}>
+      {!dashboardMode && (
+        <>
+          {/* Decorative Background */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
           </div>
-        </motion.div>
+        </>
+      )}
+
+      <div className={`relative mx-auto sm:px-6 lg:px-8 ${dashboardMode ? 'max-w-full px-0 py-0' : 'max-w-6xl px-4 py-8'}`}>
+        {/* Header */}
+        {!dashboardMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+              Back to Patients
+            </button>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
+                  <RefreshCcw className="w-8 h-8" />
+                  Re-Diagnosis
+                </h1>
+                <p className="mt-2 text-gray-600">
+                  Initiate a new diagnosis for comparison with previous results
+                </p>
+              </div>
+              
+              <Link
+                to={`/patients/${id}/history`}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                <History className="w-4 h-4" />
+                View History ({patientData.totalDiagnoses})
+              </Link>
+            </div>
+          </motion.div>
+        )}
 
         {/* Progress Steps */}
         <motion.div

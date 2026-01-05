@@ -50,7 +50,7 @@ import 'aos/dist/aos.css';
 import CountUp from 'react-countup';
 import { motion } from 'framer-motion';
 
-const ThyroidDiagnosisResult = () => {
+const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
   const { patientId } = useParams();
   const navigate = useNavigate();
   const canvasRef = useRef(null);
@@ -573,52 +573,58 @@ const ThyroidDiagnosisResult = () => {
 
   return (
     <div className="min-h-screen overflow-hidden text-gray-800 bg-gradient-to-br from-gray-50 to-white">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-100 rounded-full w-96 h-96 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full w-96 h-96 bg-cyan-100 blur-3xl"></div>
-      </div>
+      {!dashboardMode && (
+        <>
+          {/* Animated Background Elements */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-100 rounded-full w-96 h-96 blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full w-96 h-96 bg-cyan-100 blur-3xl"></div>
+          </div>
+        </>
+      )}
 
-      <div className="relative px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div className={`relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 ${dashboardMode ? 'pt-0 pb-8' : 'pt-8 pb-16'}`}>
         
-        {/* Header */}
-        <div className="flex flex-col items-start justify-between mb-8 lg:flex-row lg:items-center" data-aos="fade-down">
-          <div>
-            <button 
-              onClick={() => navigate(-1)}
-              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2 transition-transform transform group-hover:-translate-x-1" />
-              Back
-            </button>
-            <h1 className="text-4xl font-bold text-primary ">
-              Thyroid AI Diagnosis Results
-            </h1>
-            <p className="mt-2 text-gray-600">Advanced analysis using ThyroScan AI technology</p>
-          </div>
-          
-          <div className="flex gap-3 mt-4 lg:mt-0">
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleDownloadReport}
-              className="flex items-center px-6 py-3 text-white transition-all bg-primary rounded-xl hover:shadow-lg "
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Download Report
-            </motion.button>
+        {/* Header - Only show if not in dashboardMode */}
+        {!dashboardMode && (
+          <div className="flex flex-col items-start justify-between mb-8 lg:flex-row lg:items-center" data-aos="fade-down">
+            <div>
+              <button 
+                onClick={() => navigate(-1)}
+                className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2 transition-transform transform group-hover:-translate-x-1" />
+                Back
+              </button>
+              <h1 className="text-4xl font-bold text-primary ">
+                Thyroid AI Diagnosis Results
+              </h1>
+              <p className="mt-2 text-gray-600">Advanced analysis using ThyroScan AI technology</p>
+            </div>
             
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleShareResults}
-              className="flex items-center px-6 py-3 text-white transition-all bg-blue-600 rounded-xl hover:shadow-lg hover:shadow-purple-500/25"
-            >
-              <Share2 className="w-5 h-5 mr-2" />
-              Share Results
-            </motion.button>
+            <div className="flex gap-3 mt-4 lg:mt-0">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDownloadReport}
+                className="flex items-center px-6 py-3 text-white transition-all bg-primary rounded-xl hover:shadow-lg "
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download Report
+              </motion.button>
+              
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleShareResults}
+                className="flex items-center px-6 py-3 text-white transition-all bg-blue-600 rounded-xl hover:shadow-lg hover:shadow-purple-500/25"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Share Results
+              </motion.button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Patient Information Section */}
         <motion.div 

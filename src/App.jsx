@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/home/Home';
 import About from './pages/about/About';
 import Contact from './pages/contact/Contact';
@@ -8,6 +8,7 @@ import AddPatient from './pages/patients/AddPatient';
 import DiagnosisResults from './pages/diagnosis/DiagnosisResults';
 import PatientsList from './pages/patients/PatientsList';
 import PatientDetails from './pages/patients/PatientDetails';
+import PatientDashboard from './pages/patients/PatientDashboard';
 import Community from './pages/community/Community';
 import './App.css';
 import Footer from './components/home/Footer';
@@ -41,60 +42,71 @@ import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
 import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
 import DiagnosisHistory from './pages/diagnosis/DiagnosisHistory';
 
+function AppContent() {
+  const location = useLocation();
+  const isDashboard = location.pathname.includes('/dashboard');
+
+  return (
+    <>
+      <ScrollToTop />
+      <Navbar/>
+      <div className="pt-20 App">
+         <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/profile" element={<DoctorProfile />} />
+          <Route path="/add-patient" element={<AddPatient />} />
+          <Route path="/pricing" element={<PRICING />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/diagnosis-results" element={<DiagnosisResults />} />
+          <Route path="/patients" element={<PatientsList />} />
+          <Route path="/patients/:id" element={<PatientDetails />} />
+          <Route path="/patients/:id/dashboard" element={<PatientDashboard />} />
+          {/* Re-Diagnosis Routes */}
+          <Route path="/patients/:id/rediagnose" element={<ReDiagnosis />} />
+          <Route path="/patients/:id/compare" element={<DiagnosisComparison />} />
+          <Route path="/patients/:id/history" element={<DiagnosisHistory />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/pending-verification" element={<PendingVerification />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <AdminAuthProvider>
+              <AdminThemeProvider>
+                <AdminLayout />
+              </AdminThemeProvider>
+            </AdminAuthProvider>
+          }>
+            <Route index element={<DashboardOverview />} />
+            <Route path="doctors" element={<DoctorsManager />} />
+            <Route path="patients" element={<CasesManager />} />
+            <Route path="ai-logs" element={<AILogsManager />} />
+            <Route path="subscriptions" element={<SubscriptionsManager />} />
+            <Route path="credits" element={<CreditsManager />} />
+            <Route path="media" element={<MediaManager />} />
+            <Route path="messages" element={<ContactMessages />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<SettingsManager />} />
+            <Route path="security" element={<SecurityLogs />} />
+            <Route path="announcements" element={<AnnouncementsManager />} />
+          </Route>
+        </Routes>
+      </div>
+      {!isDashboard && <Footer />}
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
-  
       <Router>
-        <ScrollToTop />
-        <Navbar/>
-        <div className="pt-20 App">
-           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/profile" element={<DoctorProfile />} />
-            <Route path="/add-patient" element={<AddPatient />} />
-            <Route path="/pricing" element={<PRICING />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/diagnosis-results" element={<DiagnosisResults />} />
-            <Route path="/patients" element={<PatientsList />} />
-            <Route path="/patients/:id" element={<PatientDetails />} />
-            {/* Re-Diagnosis Routes */}
-            <Route path="/patients/:id/rediagnose" element={<ReDiagnosis />} />
-            <Route path="/patients/:id/compare" element={<DiagnosisComparison />} />
-            <Route path="/patients/:id/history" element={<DiagnosisHistory />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/pending-verification" element={<PendingVerification />} />
-
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <AdminAuthProvider>
-                <AdminThemeProvider>
-                  <AdminLayout />
-                </AdminThemeProvider>
-              </AdminAuthProvider>
-            }>
-              <Route index element={<DashboardOverview />} />
-              <Route path="doctors" element={<DoctorsManager />} />
-              <Route path="patients" element={<CasesManager />} />
-              <Route path="ai-logs" element={<AILogsManager />} />
-              <Route path="subscriptions" element={<SubscriptionsManager />} />
-              <Route path="credits" element={<CreditsManager />} />
-              <Route path="media" element={<MediaManager />} />
-              <Route path="messages" element={<ContactMessages />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="settings" element={<SettingsManager />} />
-              <Route path="security" element={<SecurityLogs />} />
-              <Route path="announcements" element={<AnnouncementsManager />} />
-            </Route>
-          </Routes>
-        </div>
-        <Footer />
+        <AppContent />
       </Router>
      </AuthProvider>
   );
