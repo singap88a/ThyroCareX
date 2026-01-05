@@ -17,7 +17,9 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  RefreshCcw,
+  History
 } from 'lucide-react';
 
 const PatientsList = () => {
@@ -432,13 +434,27 @@ const PatientsList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
                         <Link 
                           to={`/patients/${patient.id}`}
                           className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
+                        </Link>
+                        <Link 
+                          to={`/patients/${patient.id}/rediagnose`}
+                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                          title="Re-Diagnose Patient"
+                        >
+                          <RefreshCcw className="w-4 h-4" />
+                        </Link>
+                        <Link 
+                          to={`/patients/${patient.id}/history`}
+                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                          title="Diagnosis History"
+                        >
+                          <History className="w-4 h-4" />
                         </Link>
                         <button 
                           className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"

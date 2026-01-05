@@ -36,6 +36,10 @@ import AdminUsers from './components/admin/users/AdminUsers';
 import SettingsManager from './components/admin/settings/SettingsManager';
 import SecurityLogs from './components/admin/security/SecurityLogs';
 import AnnouncementsManager from './components/admin/announcements/AnnouncementsManager';
+// Re-Diagnosis Feature Pages
+import ReDiagnosis from './pages/ReDiagnosis';
+import DiagnosisComparison from './pages/DiagnosisComparison';
+import DiagnosisHistory from './pages/DiagnosisHistory';
 
 function App() {
   return (
@@ -60,6 +64,10 @@ function App() {
             <Route path="/diagnosis-results" element={<DiagnosisResults />} />
             <Route path="/patients" element={<PatientsList />} />
             <Route path="/patients/:id" element={<PatientDetails />} />
+            {/* Re-Diagnosis Routes */}
+            <Route path="/patients/:id/rediagnose" element={<ReDiagnosis />} />
+            <Route path="/patients/:id/compare" element={<DiagnosisComparison />} />
+            <Route path="/patients/:id/history" element={<DiagnosisHistory />} />
             <Route path="/community" element={<Community />} />
             <Route path="/pending-verification" element={<PendingVerification />} />
 
