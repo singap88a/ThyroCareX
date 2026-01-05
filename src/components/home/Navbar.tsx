@@ -11,13 +11,17 @@ import {
   FaCog,
   FaUserCircle,
   FaUsers,
+  FaHome,
+  FaInfoCircle,
+  FaComments,
+  FaTag,
+  FaEnvelope,
 } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const location = useLocation();
   const { isLoggedIn, user, logout } = useAuth();
@@ -36,17 +40,30 @@ const Navbar = () => {
   // إغلاق القوائم عند تغيير الصفحة
   useEffect(() => {
     setIsOpen(false);
-    setActiveDropdown(null);
     setProfileDropdown(false);
   }, [location]);
 
+  // إغلاق القوائم عند النقر خارجها
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".profile-dropdown-container")) {
+        setProfileDropdown(false);
+      }
+    };
+    if (profileDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [profileDropdown]);
+
   // الروابط الرئيسية
   const navLinks = [
-    { path: "/", label: "Home" },
-    { path: "/about", label: "About" },
-    { path: "/community", label: "Community" },
-    { path: "/pricing", label: "Pricing" },
-    { path: "/contact", label: "Contact" },
+    { path: "/", label: "Home", icon: FaHome },
+    { path: "/about", label: "About", icon: FaInfoCircle },
+    { path: "/community", label: "Community", icon: FaComments },
+    { path: "/pricing", label: "Pricing", icon: FaTag },
+    { path: "/contact", label: "Contact", icon: FaEnvelope },
   ];
 
   const isActiveLink = (path: string) => {
@@ -56,248 +73,307 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  // تقصير اسم المستخدم - فقط الاسم الأول أو أول حرفين
+  const getShortUserName = () => {
+    if (!user?.firstName) return "User";
+    const firstName = user.firstName;
+    if (firstName.length <= 8) return firstName;
+    return `${firstName.substring(0, 6)}...`;
+  };
+
   return (
     <nav
-      className={`fixed top-0 w-full z-[500] bg-white/95 backdrop-blur-md transition-all duration-500 ${
-        isScrolled ? "shadow-2xl py-2" : "   "
+      className={`fixed top-0 left-0 right-0 z-[500] transition-all duration-300 ${
+        isScrolled
+          ? "bg-white/98 backdrop-blur-xl shadow-lg border-b border-gray-100/50"
+          : "bg-white/90 backdrop-blur-md"
       }`}
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-{/* اللوجو */}
-<Link to="/" className="flex items-center py-1 space-x-3 group">
-  <img
-    src="/logo.webp"
-    alt="ThyroCareX Logo"
-    className="object-contain w-12 transition-all duration-300 sm:w-14 md:w-14"
-  />
-  <div className="flex flex-col items-start leading-tight">
-    {/* اسم البراند */}
-    <span
-      className="text-xl font-extrabold tracking-tight sm:text-xl"
-      style={{
-        fontFamily: "'Montserrat', sans-serif",
-        color: "#ffffff",
-        WebkitTextStroke: "0.8px #4695a5",
-        letterSpacing: "-0.5px",
-      }}
-    >
-      THYRO
-      <span
-        style={{
-          color: "#4695a5",
-          WebkitTextStroke: "0.8px #4695a5",
-        }}
-      >
-        CAREX
-      </span>
-    </span>
+        <div className="flex items-center justify-between h-20">
+          {/* اللوجو - بدون تغيير */}
+          <Link
+            to="/"
+            className="z-10 flex items-center py-1 space-x-3 group"
+          >
+            <img
+              src="/logo.webp"
+              alt="ThyroCareX Logo"
+              className="object-contain w-12 transition-all duration-300 sm:w-14 md:w-14"
+            />
+            <div className="flex flex-col items-start leading-tight">
+              <span
+                className="text-xl font-extrabold tracking-tight sm:text-xl"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  color: "#ffffff",
+                  WebkitTextStroke: "0.8px #4695a5",
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                THYRO
+                <span
+                  style={{
+                    color: "#4695a5",
+                    WebkitTextStroke: "0.8px #4695a5",
+                  }}
+                >
+                  CAREX
+                </span>
+              </span>
+              <span
+                className="mt-1 italic font-semibold uppercase text-xs sm:text-[11px]"
+                style={{
+                  color: "#4695a5",
+                  fontFamily: "'Poppins', sans-serif",
+                  letterSpacing: "1px",
+                }}
+              >
+                AI THYROID DIAGNOSIS
+              </span>
+            </div>
+          </Link>
 
-    {/* الجملة اللي تحت */}
-    <span
-      className="mt-1 italic font-semibold uppercase text-xs sm:text-[11px]"
-      style={{
-        color: "#4695a5",
-        fontFamily: "'Poppins', sans-serif",
-        letterSpacing: "1px",
-      }}
-    >
-      AI THYROID DIAGNOSIS
-    </span>
-  </div>
-</Link>
-
-
-          {/* الروابط الرئيسية - وسط الصفحة */}
+          {/* الروابط الرئيسية - تصميم احترافي جديد */}
           <div className="absolute hidden transform -translate-x-1/2 lg:flex left-1/2">
-            <div className="flex items-center px-4 py-4 space-x-1 border border-gray-100 shadow-lg bg-white/80 backdrop-blur-sm rounded-2xl">
-              {navLinks.map((link) => (
-                <div key={link.path} className="relative">
+            <div className="flex items-center gap-0.5 px-2 py-2 border shadow-sm bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-xl rounded-2xl border-gray-200/60">
+              {navLinks.map((link) => {
+                const IconComponent = link.icon;
+                const isActive = isActiveLink(link.path);
+                return (
                   <Link
+                    key={link.path}
                     to={link.path}
-                    className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                      isActiveLink(link.path)
-                        ? "text-primary"
-                        : "text-gray-700 hover:text-primary"
+                    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 group ${
+                      isActive
+                        ? "text-primary bg-primary/10 shadow-sm border-2 border-primary"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100/80 border-2 border-transparent"
                     }`}
                   >
-                    {link.label}
-                    {isActiveLink(link.path) && (
-                      <div className="absolute bottom-0 w-6 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-primary"></div>
-                    )}
+                    <IconComponent
+                      className={`w-4 h-4 transition-transform duration-300 ${
+                        isActive ? "scale-110" : "group-hover:scale-110"
+                      }`}
+                    />
+                    <span className="whitespace-nowrap">{link.label}</span>
                   </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* أزرار المستخدم */}
-          <div className="items-center hidden space-x-3 lg:flex">
+          {/* أزرار المستخدم - تصميم احترافي */}
+          <div className="flex items-center gap-3 lg:gap-4">
             {isLoggedIn ? (
               <>
-                {/* Add Patient Button */}
+                {/* Add Patient Button - تصميم أنيق */}
                 <Link
                   to="/add-patient"
-                  className="flex items-center space-x-2 px-4 py-2.5 bg-primary   text-white font-medium rounded-xl  transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-105 active:scale-95"
                 >
                   <FaStethoscope className="w-4 h-4" />
                   <span>Add Patient</span>
                 </Link>
 
-                {/* Profile section when logged in */}
-                <div className="relative">
+                {/* Profile Dropdown - تصميم احترافي */}
+                <div className="relative profile-dropdown-container">
                   <button
                     onClick={() => setProfileDropdown(!profileDropdown)}
-                    className="flex items-center px-4 py-2 space-x-3 transition-all duration-300 rounded-xl hover:bg-gray-50"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-gray-50/80 active:scale-95"
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-primary">
-                      <FaUser className="w-5 h-5 text-white" />
+                    <div className="flex items-center justify-center rounded-full shadow-md w-9 h-9 bg-primary ring-2 ring-primary/20">
+                      <FaUser className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-medium text-gray-700">
-                      {user?.firstName} {user?.lastName}
+                    <span className="hidden xl:block font-medium text-sm text-gray-700 max-w-[60px] truncate">
+                      {getShortUserName()}
                     </span>
                     <FaChevronDown
-                      className={`w-3 h-3 text-gray-500 transition-transform duration-300 ${
+                      className={`hidden xl:block w-3 h-3 text-gray-400 transition-transform duration-300 ${
                         profileDropdown ? "rotate-180" : ""
                       }`}
                     />
                   </button>
 
-                  {/* Profile Dropdown */}
+                  {/* Profile Dropdown Menu */}
                   {profileDropdown && (
-                    <div className="absolute right-0 w-56 py-2 mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl backdrop-blur-md">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">
+                    <div className="absolute right-0 w-64 mt-2 overflow-hidden duration-200 border shadow-2xl bg-white/95 backdrop-blur-xl rounded-2xl border-gray-200/60 animate-in fade-in slide-in-from-top-2">
+                      {/* User Info Header */}
+                      <div className="px-4 py-4 border-b border-gray-100 bg-gradient-to-br from-primary/5 to-transparent">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
                           {user?.firstName} {user?.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">{user?.email}</p>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">
+                          {user?.email}
+                        </p>
                       </div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
-                        onClick={() => setProfileDropdown(false)}
-                      >
-                        <FaUserCircle className="w-4 h-4 mr-3" />
-                        Profile
-                      </Link>
-                      <Link
-                        to="/add-patient"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
-                        onClick={() => setProfileDropdown(false)}
-                      >
-                        <FaStethoscope className="w-4 h-4 mr-3" />
-                        Add Patient
-                      </Link>
-                      <Link
-                        to="/patients"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
-                        onClick={() => setProfileDropdown(false)}
-                      >
-                        <FaUsers className="w-4 h-4 mr-3" />
-                        All Patients
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="flex items-center px-4 py-3 text-gray-700 transition-all duration-300 hover:text-primary hover:bg-primary/10"
-                        onClick={() => setProfileDropdown(false)}
-                      >
-                        <FaCog className="w-4 h-4 mr-3" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={() => {
-                          logout();
-                          setProfileDropdown(false);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-gray-700 transition-all duration-300 hover:text-red-600 hover:bg-red-50"
-                      >
-                        <FaSignOutAlt className="w-4 h-4 mr-3" />
-                        Logout
-                      </button>
+
+                      {/* Menu Items */}
+                      <div className="py-2">
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-all duration-200 hover:text-primary hover:bg-primary/5"
+                          onClick={() => setProfileDropdown(false)}
+                        >
+                          <FaUserCircle className="w-4 h-4 text-gray-400" />
+                          <span>Profile</span>
+                        </Link>
+                        <Link
+                          to="/add-patient"
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-all duration-200 hover:text-primary hover:bg-primary/5"
+                          onClick={() => setProfileDropdown(false)}
+                        >
+                          <FaStethoscope className="w-4 h-4 text-gray-400" />
+                          <span>Add Patient</span>
+                        </Link>
+                        <Link
+                          to="/patients"
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-all duration-200 hover:text-primary hover:bg-primary/5"
+                          onClick={() => setProfileDropdown(false)}
+                        >
+                          <FaUsers className="w-4 h-4 text-gray-400" />
+                          <span>All Patients</span>
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-all duration-200 hover:text-primary hover:bg-primary/5"
+                          onClick={() => setProfileDropdown(false)}
+                        >
+                          <FaCog className="w-4 h-4 text-gray-400" />
+                          <span>Settings</span>
+                        </Link>
+                        <div className="my-1 border-t border-gray-100"></div>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setProfileDropdown(false);
+                          }}
+                          className="flex items-center w-full gap-3 px-4 py-3 text-sm text-gray-700 transition-all duration-200 hover:text-red-600 hover:bg-red-50/50"
+                        >
+                          <FaSignOutAlt className="w-4 h-4 text-gray-400" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              // Login/Register buttons when not logged in
+              // Login/Register buttons - تصميم احترافي
               <>
                 <Link
                   to="/login"
-                  className="flex items-center space-x-2 px-6 py-2.5 text-gray-700 hover:text-primary font-medium rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-200 hover:border-primary"
+                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-primary font-medium text-sm rounded-xl transition-all duration-300 hover:bg-gray-50/80 border border-gray-200/60 hover:border-primary/30"
                 >
                   <FaUser className="w-4 h-4" />
                   <span>Login</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-105 active:scale-95"
                 >
                   <FaUserPlus className="w-4 h-4" />
                   <span>Get Started</span>
                 </Link>
               </>
             )}
-          </div>
 
-          {/* زر القائمة للشاشات الصغيرة */}
-          <div className="lg:hidden">
+            {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 bg-gray-100 hover:bg-gray-200 rounded-xl hover:scale-105"
+              className="flex items-center justify-center w-10 h-10 text-gray-700 transition-all duration-300 lg:hidden bg-gray-100/80 hover:bg-gray-200/80 rounded-xl active:scale-95"
             >
-              {isOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+              {isOpen ? (
+                <FaTimes className="w-5 h-5" />
+              ) : (
+                <FaBars className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* القائمة المنسدلة للشاشات الصغيرة */}
+        {/* Mobile Menu - تصميم احترافي */}
         {isOpen && (
-          <div className="absolute left-0 right-0 border-t border-gray-200 shadow-2xl lg:hidden top-full bg-white/95 backdrop-blur-md">
-            <div className="px-4 py-6 space-y-2">
-              {navLinks.map((link) => (
-                <div key={link.path}>
+          <div className="border-t lg:hidden border-gray-200/60 bg-white/98 backdrop-blur-xl">
+            <div className="px-4 py-6 space-y-1">
+              {navLinks.map((link) => {
+                const IconComponent = link.icon;
+                const isActive = isActiveLink(link.path);
+                return (
                   <Link
+                    key={link.path}
                     to={link.path}
-                    className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                      isActiveLink(link.path)
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                      isActive
                         ? "text-primary bg-primary/10"
-                        : "text-gray-700 hover:text-primary hover:bg-gray-50"
+                        : "text-gray-700 hover:text-primary hover:bg-gray-50/80"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
-                    {link.label}
+                    <IconComponent className="w-4 h-4" />
+                    <span>{link.label}</span>
                   </Link>
-                </div>
-              ))}
+                );
+              })}
 
-              {/* أزرار المستخدم للجوال */}
-              <div className="pt-4 space-y-3 border-t border-gray-200">
-                {isLoggedIn && (
-                  <Link
-                    to="/add-patient"
-                    className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-0.5"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <FaStethoscope className="w-4 h-4 mr-2" />
-                    Add Patient
-                  </Link>
+              {/* Mobile User Actions */}
+              <div className="pt-4 mt-4 space-y-2 border-t border-gray-200/60">
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      to="/add-patient"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 active:scale-95"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaStethoscope className="w-4 h-4" />
+                      <span>Add Patient</span>
+                    </Link>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-3 px-4 py-3.5 text-gray-700 font-medium text-sm rounded-xl transition-all duration-200 hover:bg-gray-50/80"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaUserCircle className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link
+                      to="/patients"
+                      className="flex items-center gap-3 px-4 py-3.5 text-gray-700 font-medium text-sm rounded-xl transition-all duration-200 hover:bg-gray-50/80"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaUsers className="w-4 h-4" />
+                      <span>All Patients</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-3.5 text-red-600 font-medium text-sm rounded-xl transition-all duration-200 hover:bg-red-50/80"
+                    >
+                      <FaSignOutAlt className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 text-gray-700 font-medium text-sm rounded-xl transition-all duration-200 border border-gray-200/60 hover:border-primary/30 hover:bg-gray-50/80"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaUser className="w-4 h-4" />
+                      <span>Login</span>
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 active:scale-95"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaUserPlus className="w-4 h-4" />
+                      <span>Get Started</span>
+                    </Link>
+                  </>
                 )}
-                <Link
-                  to="/login"
-                  className="flex items-center justify-center w-full px-4 py-3 font-medium text-gray-700 transition-all duration-300 border border-gray-300 rounded-xl hover:border-primary hover:text-primary"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <FaUser className="w-4 h-4 mr-2" />
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-primary to-primaryHover text-white font-medium rounded-xl hover:from-primaryHover hover:to-primary transition-all duration-300 transform hover:-translate-y-0.5"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <FaUserPlus className="w-4 h-4 mr-2" />
-                  Get Started Free
-                </Link>
               </div>
             </div>
           </div>
