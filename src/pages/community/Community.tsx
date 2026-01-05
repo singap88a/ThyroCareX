@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import CreatePost from '../components/community/CreatePost';
-import PostCard from '../components/community/PostCard';
+import CreatePost from '../../components/community/CreatePost';
+import PostCard from '../../components/community/PostCard';
 import { FaSearch, FaUsers, FaHashtag, FaChartLine, FaBolt } from 'react-icons/fa';
 
 const Community = () => {

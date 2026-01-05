@@ -30,8 +30,8 @@ import {
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import CountUp from 'react-countup';
-import ComparisonCard from '../components/diagnosis/ComparisonCard';
-import ProgressIndicator, { ProgressBar } from '../components/diagnosis/ProgressIndicator';
+import ComparisonCard from '../../components/diagnosis/ComparisonCard';
+import ProgressIndicator, { ProgressBar } from '../../components/diagnosis/ProgressIndicator';
 
 const DiagnosisComparison = () => {
   const { id } = useParams();

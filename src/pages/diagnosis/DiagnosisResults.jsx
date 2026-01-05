@@ -1,5 +1,5 @@
  
-import PatientDetails from '../pages/PatientDetails';
+import PatientDetails from '../patients/PatientDetails';
 
 const DiagnosisResults = () => {
  

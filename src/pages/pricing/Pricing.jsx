@@ -15,7 +15,7 @@ import {
   Users,
   Award
 } from 'lucide-react';
-import Newsletter from '../components/home/Newsletter';
+import Newsletter from '../../components/home/Newsletter';
 
 // --- Components ---
 

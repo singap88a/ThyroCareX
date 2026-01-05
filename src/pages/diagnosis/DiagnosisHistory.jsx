@@ -22,8 +22,8 @@ import {
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import DiagnosisTimeline from '../components/diagnosis/DiagnosisTimeline';
-import ProgressIndicator from '../components/diagnosis/ProgressIndicator';
+import DiagnosisTimeline from '../../components/diagnosis/DiagnosisTimeline';
+import ProgressIndicator from '../../components/diagnosis/ProgressIndicator';
 
 const DiagnosisHistory = () => {
   const { id } = useParams();

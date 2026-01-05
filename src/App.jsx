@@ -1,25 +1,25 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import DoctorProfile from './pages/DoctorProfile';
-import AddPatient from './pages/Add_patient';
-import DiagnosisResults from './pages/DiagnosisResults';
-import PatientsList from './pages/PatientsList';
-import PatientDetails from './pages/PatientDetails';
-import Community from './pages/Community';
+import Home from './pages/home/Home';
+import About from './pages/about/About';
+import Contact from './pages/contact/Contact';
+import DoctorProfile from './pages/profile/DoctorProfile';
+import AddPatient from './pages/patients/AddPatient';
+import DiagnosisResults from './pages/diagnosis/DiagnosisResults';
+import PatientsList from './pages/patients/PatientsList';
+import PatientDetails from './pages/patients/PatientDetails';
+import Community from './pages/community/Community';
 import './App.css';
 import Footer from './components/home/Footer';
 import Navbar from './components/home/Navbar';
-import PRICING from './pages/PRICING';
-import Checkout from './pages/Checkout';
-import ScrollToTop from './components/ScrollToTop';
+import PRICING from './pages/pricing/Pricing';
+import Checkout from './pages/pricing/Checkout';
+import ScrollToTop from './components/common/ScrollToTop';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import PendingVerification from './components/auth/PendingVerification';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Terms from './pages/Terms';
+import PrivacyPolicy from './pages/legal/PrivacyPolicy';
+import Terms from './pages/legal/Terms';
 import { AuthProvider } from './contexts/AuthContext';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import { AdminThemeProvider } from './contexts/AdminThemeContext';
@@ -37,9 +37,9 @@ import SettingsManager from './components/admin/settings/SettingsManager';
 import SecurityLogs from './components/admin/security/SecurityLogs';
 import AnnouncementsManager from './components/admin/announcements/AnnouncementsManager';
 // Re-Diagnosis Feature Pages
-import ReDiagnosis from './pages/ReDiagnosis';
-import DiagnosisComparison from './pages/DiagnosisComparison';
-import DiagnosisHistory from './pages/DiagnosisHistory';
+import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
+import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
+import DiagnosisHistory from './pages/diagnosis/DiagnosisHistory';
 
 function App() {
   return (
