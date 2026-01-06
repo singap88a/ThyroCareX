@@ -5,18 +5,15 @@ import {
   LayoutDashboard,
   Stethoscope,
   Users,
-  Activity,
   CreditCard,
   Coins,
   Image,
   MessageSquare,
   Shield,
-  Settings,
-  FileText,
-  Bell,
   Menu,
   X,
-  LogOut
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import { useAdminAuth } from '../../../contexts/AdminAuthContext';
@@ -38,8 +35,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       title: 'MANAGEMENT',
       items: [
         { path: '/admin/doctors', icon: Stethoscope, label: 'Doctors', count: 3 },
+        { path: '/admin/doctor-requests', icon: UserCheck, label: 'Doctor Requests', count: 5 },
         { path: '/admin/patients', icon: Users, label: 'Patients & Cases', count: 12 },
-        { path: '/admin/ai-logs', icon: Activity, label: 'AI Diagnosis Logs', count: 24 },
       ]
     },
     {
@@ -60,9 +57,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       title: 'SYSTEM',
       items: [
         { path: '/admin/users', icon: Shield, label: 'Admin Users', count: 0 },
-        { path: '/admin/security', icon: FileText, label: 'Security Logs', count: 1 },
-        { path: '/admin/announcements', icon: Bell, label: 'Announcements', count: 0 },
-        { path: '/admin/settings', icon: Settings, label: 'Settings', count: 0 },
       ]
     },
   ];

@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Plus, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DoctorCard from './DoctorCard';
-import DoctorDetails from './DoctorDetails';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 
 const DoctorsManager = () => {
   const { isDarkMode } = useAdminTheme();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Mock Data
   const [doctors, setDoctors] = useState([
@@ -32,23 +31,12 @@ const DoctorsManager = () => {
   });
 
   const handleEdit = (doctor) => {
-    setSelectedDoctor(doctor);
-    setIsDetailsOpen(true);
+    navigate(`/admin/doctors/${doctor.id}`);
   };
 
   const handleToggleStatus = (doctor) => {
     const newStatus = doctor.status === 'active' ? 'suspended' : 'active';
     setDoctors(doctors.map(d => d.id === doctor.id ? { ...d, status: newStatus } : d));
-  };
-
-  const handleSaveDetails = (updatedDoctor) => {
-    setDoctors(doctors.map(d => d.id === updatedDoctor.id ? updatedDoctor : d));
-    setIsDetailsOpen(false);
-  };
-
-  const handleResetCredits = (doctorId) => {
-    setDoctors(doctors.map(d => d.id === doctorId ? { ...d, credits: 5 } : d)); // Reset to default 5
-    // You might want to show a toast notification here
   };
 
   return (
@@ -123,15 +111,6 @@ const DoctorsManager = () => {
           <p className={`text-lg ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No doctors found matching your criteria.</p>
         </div>
       )}
-
-      {/* Details Modal */}
-      <DoctorDetails 
-        doctor={selectedDoctor} 
-        isOpen={isDetailsOpen} 
-        onClose={() => setIsDetailsOpen(false)} 
-        onSave={handleSaveDetails}
-        onResetCredits={handleResetCredits}
-      />
     </div>
   );
 };

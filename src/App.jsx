@@ -28,15 +28,14 @@ import AdminLayout from './components/admin/layout/AdminLayout';
 import DashboardOverview from './components/admin/dashboard/DashboardOverview';
 import DoctorsManager from './components/admin/doctors/DoctorsManager';
 import CasesManager from './components/admin/patients/CasesManager';
-import AILogsManager from './components/admin/ai/AILogsManager';
 import SubscriptionsManager from './components/admin/subscriptions/SubscriptionsManager';
 import CreditsManager from './components/admin/credits/CreditsManager';
 import MediaManager from './components/admin/media/MediaManager';
 import ContactMessages from './components/admin/messages/ContactMessages';
 import AdminUsers from './components/admin/users/AdminUsers';
-import SettingsManager from './components/admin/settings/SettingsManager';
-import SecurityLogs from './components/admin/security/SecurityLogs';
-import AnnouncementsManager from './components/admin/announcements/AnnouncementsManager';
+import DoctorRequests from './components/admin/doctors/DoctorRequests';
+import DoctorDetailsPage from './components/admin/doctors/DoctorDetailsPage';
+import DoctorRequestDetails from './components/admin/doctors/DoctorRequestDetails';
 // Re-Diagnosis Feature Pages
 import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
 import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
@@ -84,16 +83,15 @@ function AppContent() {
           }>
             <Route index element={<DashboardOverview />} />
             <Route path="doctors" element={<DoctorsManager />} />
+            <Route path="doctors/:id" element={<DoctorDetailsPage />} />
+            <Route path="doctor-requests" element={<DoctorRequests />} />
+            <Route path="doctor-requests/:id" element={<DoctorRequestDetails />} />
             <Route path="patients" element={<CasesManager />} />
-            <Route path="ai-logs" element={<AILogsManager />} />
             <Route path="subscriptions" element={<SubscriptionsManager />} />
             <Route path="credits" element={<CreditsManager />} />
             <Route path="media" element={<MediaManager />} />
             <Route path="messages" element={<ContactMessages />} />
             <Route path="users" element={<AdminUsers />} />
-            <Route path="settings" element={<SettingsManager />} />
-            <Route path="security" element={<SecurityLogs />} />
-            <Route path="announcements" element={<AnnouncementsManager />} />
           </Route>
         </Routes>
       </div>
