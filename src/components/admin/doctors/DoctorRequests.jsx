@@ -231,7 +231,7 @@ const DoctorRequests = () => {
               <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={(e) => handleApprove(request.id, e)}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <CheckCircle size={16} /> Approve
                 </button>
@@ -251,7 +251,7 @@ const DoctorRequests = () => {
                 handleViewRequest(request.id);
               }}
               className={`w-full mt-2 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
-                ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-50 hover:bg-blue-100 text-blue-600'}`}
+                ${isDarkMode ? 'bg-primary hover:bg-primaryHover text-white' : 'bg-primary/10 hover:bg-primary/20 text-primary'}`}
             >
               <Eye size={16} /> View Details
             </button>

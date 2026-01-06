@@ -19,8 +19,8 @@ const DoctorCard = ({ doctor, onEdit, onToggleStatus }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       whileHover={{ y: -5 }}
-      className={`relative p-5 rounded-2xl border shadow-lg transition-all duration-300 group
-        ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border hover:border-blue-500/50' : 'bg-white border-gray-100 hover:border-blue-200'}`}
+        className={`relative p-5 rounded-2xl border shadow-lg transition-all duration-300 group
+        ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border hover:border-primary/50' : 'bg-white border-gray-100 hover:border-primary/50'}`}
     >
       {/* Header & Actions */}
       <div className="flex justify-between items-start mb-4">
@@ -35,14 +35,14 @@ const DoctorCard = ({ doctor, onEdit, onToggleStatus }) => {
       {/* Profile Info */}
       <div className="flex flex-col items-center text-center mb-6">
         <div className="relative mb-3">
-          <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-blue-500 to-purple-500">
+          <div className="w-20 h-20 rounded-full p-1 bg-primary">
             <img 
               src={doctor.avatar || `https://ui-avatars.com/api/?name=${doctor.name}&background=random`} 
               alt={doctor.name} 
               className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800"
             />
           </div>
-          <div className="absolute bottom-0 right-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 text-white text-xs font-bold">
+          <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 text-white text-xs font-bold">
             {doctor.subscription === 'Pro' ? 'P' : doctor.subscription === 'Enterprise' ? 'E' : 'F'}
           </div>
         </div>
@@ -73,7 +73,7 @@ const DoctorCard = ({ doctor, onEdit, onToggleStatus }) => {
         <button 
           onClick={() => onEdit(doctor)}
           className={`py-2 rounded-lg text-sm font-medium transition-colors
-            ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-50 hover:bg-blue-100 text-blue-600'}`}
+            ${isDarkMode ? 'bg-primary hover:bg-primaryHover text-white' : 'bg-primary/10 hover:bg-primary/20 text-primary'}`}
         >
           View Details
         </button>

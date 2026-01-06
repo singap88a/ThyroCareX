@@ -120,7 +120,7 @@ const CasesManager = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleViewCase(caseData)}
-                        className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-900/20' : 'text-blue-600 hover:bg-blue-50'}`}
+                        className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-primary hover:bg-primary/20' : 'text-primary hover:bg-primary/10'}`}
                         title="View Details"
                       >
                         <Eye size={18} />

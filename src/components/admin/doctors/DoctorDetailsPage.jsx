@@ -94,7 +94,7 @@ const DoctorDetailsPage = () => {
       {/* Doctor Header Section */}
       <div className={`rounded-2xl border overflow-hidden shadow-lg
         ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border' : 'bg-white border-gray-100'}`}>
-        <div className="relative h-48 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="relative h-48 bg-primary">
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="flex items-end gap-6">
               <div className="w-32 h-32 rounded-full p-2 bg-white dark:bg-gray-800">
@@ -106,7 +106,7 @@ const DoctorDetailsPage = () => {
               </div>
               <div className="mb-4">
                 <h1 className="text-3xl font-bold text-white mb-2">{doctor.name}</h1>
-                <div className="flex items-center gap-4 text-blue-100">
+                <div className="flex items-center gap-4 text-white/90">
                   <span className="flex items-center gap-1">
                     <MapPin size={16} /> {doctor.country}
                   </span>
@@ -128,7 +128,7 @@ const DoctorDetailsPage = () => {
           {/* Contact Information */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <Mail size={20} className="text-blue-500" /> Contact Information
+              <Mail size={20} className="text-primary" /> Contact Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
@@ -156,7 +156,7 @@ const DoctorDetailsPage = () => {
           {doctor.address && (
             <section>
               <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                <MapPin size={20} className="text-purple-500" /> Address
+                <MapPin size={20} className="text-primary" /> Address
               </h3>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
@@ -169,16 +169,16 @@ const DoctorDetailsPage = () => {
           {/* Subscription & Credits */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <CreditCard size={20} className="text-emerald-500" /> Subscription & Usage
+              <CreditCard size={20} className="text-primary" /> Subscription & Usage
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Current Plan</label>
-                <p className="font-bold text-purple-500">{doctor.subscription}</p>
+                <p className="font-bold text-primary">{doctor.subscription}</p>
               </div>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Credits Remaining</label>
-                <p className="font-bold text-emerald-500">{doctor.credits}</p>
+                <p className="font-bold text-primary">{doctor.credits}</p>
               </div>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Total Diagnoses</label>
@@ -194,7 +194,7 @@ const DoctorDetailsPage = () => {
         ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border' : 'bg-white border-gray-100'}`}>
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className={`text-2xl font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            <User size={24} className="text-blue-500" />
+            <User size={24} className="text-primary" />
             Patients Diagnosed ({patients.length})
           </h2>
         </div>

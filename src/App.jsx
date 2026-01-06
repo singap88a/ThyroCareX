@@ -44,12 +44,13 @@ import DiagnosisHistory from './pages/diagnosis/DiagnosisHistory';
 function AppContent() {
   const location = useLocation();
   const isDashboard = location.pathname.includes('/dashboard');
+  const isAdmin = location.pathname.includes('/admin');
 
   return (
     <>
       <ScrollToTop />
-      <Navbar/>
-      <div className="pt-20 App">
+      {!isAdmin && <Navbar/>}
+      <div className={!isAdmin ? "pt-20 App" : "App"}>
          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -95,7 +96,7 @@ function AppContent() {
           </Route>
         </Routes>
       </div>
-      {!isDashboard && <Footer />}
+      {!isDashboard && !isAdmin && <Footer />}
     </>
   );
 }

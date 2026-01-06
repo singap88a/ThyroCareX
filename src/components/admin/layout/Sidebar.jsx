@@ -108,7 +108,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="text-xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600"
+                  className="text-xl font-bold tracking-wide text-primary"
                 >
                   ThyroCareX
                 </motion.span>
@@ -119,7 +119,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`absolute -right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 z-50
-              ${isDarkMode ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-white text-blue-600 border border-blue-100 hover:bg-blue-50'}`}
+              ${isDarkMode ? 'bg-primary text-white hover:bg-primaryHover' : 'bg-white text-primary border border-primary/20 hover:bg-primary/5'}`}
           >
             {isOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
@@ -154,16 +154,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                       whileTap={{ scale: 0.98 }}
                       className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden shadow-sm
                         ${isActive
-                          ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-500 shadow-blue-500/10'
-                          : 'hover:bg-gray-500/10 text-gray-500 hover:text-blue-500 hover:shadow-md'
+                          ? 'bg-primary/20 text-primary shadow-primary/10'
+                          : 'hover:bg-gray-500/10 text-gray-500 hover:text-primary hover:shadow-md'
                         }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="activeTab"
-                          className="absolute top-0 bottom-0 left-0 w-1 rounded-r-full bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600"
+                          className="absolute top-0 bottom-0 left-0 w-1 rounded-r-full bg-primary"
                           style={{
-                            boxShadow: '0 0 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                            boxShadow: '0 0 12px rgba(var(--primary-color-rgb), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                           }}
                         />
                       )}
@@ -179,9 +179,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                             <div className="flex items-center flex-1 gap-3 overflow-hidden">
                               <item.icon
                                 size={20}
-                                className={`min-w-[20px] transition-colors duration-200 ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500'}`}
+                                className={`min-w-[20px] transition-colors duration-200 ${isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary'}`}
                               />
-                              <span className={`whitespace-nowrap font-black text-sm tracking-wide ${isActive ? 'text-blue-500' : ''}`}>
+                              <span className={`whitespace-nowrap font-black text-sm tracking-wide ${isActive ? 'text-primary' : ''}`}>
                                 {item.label}
                               </span>
                             </div>
@@ -194,7 +194,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                                 transition={{ delay: 0.1 }}
                                 className={`px-2.5 py-1 text-xs rounded-full font-bold shadow-sm
                                   ${isActive
-                                    ? 'bg-blue-500 text-white shadow-blue-500/30'
+                                    ? 'bg-primary text-white shadow-primary/30'
                                     : isDarkMode
                                       ? 'bg-slate-700 text-slate-200 shadow-slate-700/30'
                                       : 'bg-slate-200 text-slate-700 shadow-slate-200/30'
@@ -210,12 +210,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                       {!isOpen && (
                         <item.icon
                           size={20}
-                          className={`min-w-[20px] transition-colors duration-200 ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500'}`}
+                          className={`min-w-[20px] transition-colors duration-200 ${isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary'}`}
                         />
                       )}
 
                       {/* Hover Glow Effect */}
-                      <div className="absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none rounded-xl bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-purple-400/0 group-hover:opacity-100" />
+                      <div className="absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none rounded-xl bg-primary/5 group-hover:opacity-100" />
                     </motion.div>
                   </Link>
                 );

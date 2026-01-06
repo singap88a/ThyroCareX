@@ -20,7 +20,7 @@ const CaseCard = ({ caseData, onView, onDelete }) => {
       exit={{ opacity: 0, scale: 0.9 }}
       whileHover={{ y: -5 }}
       className={`relative overflow-hidden rounded-2xl border shadow-lg group transition-all duration-300
-        ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border hover:border-blue-500/50' : 'bg-white border-gray-100 hover:border-blue-200'}`}
+        ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border hover:border-primary/50' : 'bg-white border-gray-100 hover:border-primary/50'}`}
     >
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden bg-gray-900">
@@ -65,7 +65,7 @@ const CaseCard = ({ caseData, onView, onDelete }) => {
           <button 
             onClick={() => onView(caseData)}
             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
-              ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-50 hover:bg-blue-100 text-blue-600'}`}
+              ${isDarkMode ? 'bg-primary hover:bg-primaryHover text-white' : 'bg-primary/10 hover:bg-primary/20 text-primary'}`}
           >
             <Eye size={16} /> View Details
           </button>

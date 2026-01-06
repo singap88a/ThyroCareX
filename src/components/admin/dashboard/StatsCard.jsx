@@ -7,17 +7,17 @@ const StatsCard = ({ title, value, icon: Icon, trend, trendValue, color, delay =
   const { isDarkMode } = useAdminTheme();
 
   const colors = {
-    blue: 'from-blue-500 to-blue-600',
-    purple: 'from-purple-500 to-purple-600',
-    green: 'from-emerald-500 to-emerald-600',
+    blue: 'from-primary to-primary',
+    purple: 'from-primary to-primary',
+    green: 'from-primary to-primary',
     orange: 'from-orange-500 to-orange-600',
     red: 'from-red-500 to-red-600',
   };
 
   const bgColors = {
-    blue: 'bg-blue-500/10 text-blue-500',
-    purple: 'bg-purple-500/10 text-purple-500',
-    green: 'bg-emerald-500/10 text-emerald-500',
+    blue: 'bg-primary/10 text-primary',
+    purple: 'bg-primary/10 text-primary',
+    green: 'bg-primary/10 text-primary',
     orange: 'bg-orange-500/10 text-orange-500',
     red: 'bg-red-500/10 text-red-500',
   };

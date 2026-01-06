@@ -52,7 +52,7 @@ const DoctorsManager = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
+          <button className="px-4 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/30">
             <Plus size={18} /> Add Doctor
           </button>
           <button className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border

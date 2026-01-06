@@ -34,14 +34,14 @@ const Header = ({ toggleSidebar }) => {
 
         <div className="relative w-full max-w-md hidden md:block group">
           <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors
-            ${isDarkMode ? 'text-gray-400 group-focus-within:text-blue-500' : 'text-gray-400 group-focus-within:text-blue-500'}`} />
+            ${isDarkMode ? 'text-gray-400 group-focus-within:text-primary' : 'text-gray-400 group-focus-within:text-primary'}`} />
           <input 
             type="text" 
             placeholder="Search anything..." 
             className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none transition-all duration-300
               ${isDarkMode 
-                ? 'bg-admin-dark-card border-admin-dark-border text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white'}`}
+                ? 'bg-admin-dark-card border-admin-dark-border text-white focus:border-primary focus:ring-2 focus:ring-primary/20' 
+                : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white'}`}
           />
         </div>
       </div>
@@ -55,7 +55,7 @@ const Header = ({ toggleSidebar }) => {
           whileTap={{ scale: 0.95 }}
           onClick={toggleTheme}
           className={`p-2.5 rounded-xl transition-all duration-300 relative overflow-hidden
-            ${isDarkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}
+            ${isDarkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -77,7 +77,7 @@ const Header = ({ toggleSidebar }) => {
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowNotifications(!showNotifications)}
             className={`p-2.5 rounded-xl transition-all duration-300 relative
-              ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-blue-600'}`}
+              ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-primary'}`}
           >
             <Bell size={20} />
             <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -94,12 +94,12 @@ const Header = ({ toggleSidebar }) => {
               >
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                   <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Notifications</h3>
-                  <span className="text-xs text-blue-500 font-medium cursor-pointer hover:underline">Mark all read</span>
+                  <span className="text-xs text-primary font-medium cursor-pointer hover:underline">Mark all read</span>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
                   {[1, 2, 3].map((_, i) => (
                     <div key={i} className={`p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer flex gap-3`}>
-                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary shrink-0">
                         <Bell size={18} />
                       </div>
                       <div>
@@ -111,7 +111,7 @@ const Header = ({ toggleSidebar }) => {
                   ))}
                 </div>
                 <div className="p-3 text-center border-t border-gray-100 dark:border-gray-700">
-                  <button className="text-sm text-blue-500 font-medium hover:underline">View All Notifications</button>
+                  <button className="text-sm text-primary font-medium hover:underline">View All Notifications</button>
                 </div>
               </motion.div>
             )}
@@ -124,7 +124,7 @@ const Header = ({ toggleSidebar }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500 p-0.5"
+            className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary p-0.5"
           >
             <img 
               src="https://ui-avatars.com/api/?name=Admin+User&background=random" 

@@ -63,7 +63,7 @@ const ContactMessages = () => {
               onClick={() => setFilterStatus('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                 ${filterStatus === 'all' 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-primary text-white' 
                   : (isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}`}
             >
               All
@@ -72,7 +72,7 @@ const ContactMessages = () => {
               onClick={() => setFilterStatus('unread')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                 ${filterStatus === 'unread' 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-primary text-white' 
                   : (isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}`}
             >
               Unread
@@ -81,7 +81,7 @@ const ContactMessages = () => {
               onClick={() => setFilterStatus('starred')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                 ${filterStatus === 'starred' 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-primary text-white' 
                   : (isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}`}
             >
               Starred
@@ -93,7 +93,7 @@ const ContactMessages = () => {
               type="text" 
               placeholder="Search messages..." 
               className={`w-full pl-9 pr-4 py-2 rounded-lg border outline-none text-sm transition-colors
-                ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500' : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-500'}`}
+                ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white focus:border-primary' : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-primary'}`}
             />
           </div>
         </div>
@@ -106,7 +106,7 @@ const ContactMessages = () => {
               onClick={() => handleSelectMessage(msg)}
               className={`p-4 border-b cursor-pointer transition-colors relative group
                 ${isDarkMode ? 'border-gray-700 hover:bg-gray-800/50' : 'border-gray-100 hover:bg-gray-50'}
-                ${selectedMessage?.id === msg.id ? (isDarkMode ? 'bg-gray-800' : 'bg-blue-50') : ''}
+                ${selectedMessage?.id === msg.id ? (isDarkMode ? 'bg-gray-800' : 'bg-primary/10') : ''}
                 ${msg.status === 'unread' ? (isDarkMode ? 'bg-gray-800/20' : 'bg-white') : ''}`}
             >
               <div className="flex justify-between items-start mb-1">
@@ -133,7 +133,7 @@ const ContactMessages = () => {
               </div>
               
               {msg.status === 'unread' && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               )}
             </div>
           ))}
@@ -148,13 +148,13 @@ const ContactMessages = () => {
             {/* Detail Header */}
             <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
                   {selectedMessage.name.charAt(0)}
                 </div>
                 <div>
                   <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedMessage.subject}</h2>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    From: <span className="font-medium text-blue-500">{selectedMessage.name}</span> &lt;{selectedMessage.email}&gt;
+                    From: <span className="font-medium text-primary">{selectedMessage.name}</span> &lt;{selectedMessage.email}&gt;
                   </p>
                 </div>
               </div>
@@ -185,10 +185,10 @@ const ContactMessages = () => {
                   <textarea 
                     placeholder="Type your reply..." 
                     className={`w-full p-4 rounded-xl border outline-none resize-none h-32 transition-colors
-                      ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500' : 'bg-white border-gray-200 text-gray-800 focus:border-blue-500'}`}
+                      ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white focus:border-primary' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`}
                   />
                   <div className="flex justify-end mt-3">
-                    <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <button className="px-6 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg font-medium transition-colors flex items-center gap-2">
                       <Reply size={18} /> Send Reply
                     </button>
                   </div>

@@ -52,7 +52,7 @@ const CaseDetails = ({ caseData, isOpen, onClose, onDelete }) => {
                     {caseData.result}
                   </span>
                   <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Confidence: <span className="font-bold text-blue-500">{caseData.confidence}%</span>
+                    Confidence: <span className="font-bold text-primary">{caseData.confidence}%</span>
                   </span>
                 </div>
               </div>
@@ -62,14 +62,14 @@ const CaseDetails = ({ caseData, isOpen, onClose, onDelete }) => {
                 <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                   <label className="block mb-1 text-xs text-gray-500">Attending Doctor</label>
                   <div className="flex items-center gap-2">
-                    <User size={14} className="text-blue-500" />
+                    <User size={14} className="text-primary" />
                     <span className="text-sm font-medium">Dr. {caseData.doctorName}</span>
                   </div>
                 </div>
                 <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                   <label className="block mb-1 text-xs text-gray-500">Date & Time</label>
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-purple-500" />
+                    <Calendar size={14} className="text-primary" />
                     <span className="text-sm font-medium">{caseData.date}</span>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ const CaseDetails = ({ caseData, isOpen, onClose, onDelete }) => {
               </button>
               <button
                 onClick={onClose}
-                className="px-6 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="px-6 py-2 font-medium text-white transition-colors bg-primary rounded-lg hover:bg-primaryHover"
               >
                 Close
               </button>

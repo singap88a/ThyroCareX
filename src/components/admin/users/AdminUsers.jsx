@@ -50,7 +50,7 @@ const AdminUsers = () => {
         </div>
         <button 
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30"
+          className="px-4 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/30"
         >
           <UserPlus size={18} /> Add New Admin
         </button>
@@ -82,9 +82,9 @@ const AdminUsers = () => {
                     <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{admin.email}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider
-                        ${admin.role === 'Super Admin' ? 'bg-purple-500/10 text-purple-500' : 
-                          admin.role === 'Support' ? 'bg-blue-500/10 text-blue-500' : 
-                          'bg-emerald-500/10 text-emerald-500'}`}>
+                        ${admin.role === 'Super Admin' ? 'bg-primary/10 text-primary' : 
+                          admin.role === 'Support' ? 'bg-primary/10 text-primary' : 
+                          'bg-primary/10 text-primary'}`}>
                         {admin.role}
                       </span>
                       <span className={`text-xs flex items-center gap-1 ${admin.status === 'active' ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -116,7 +116,7 @@ const AdminUsers = () => {
         {/* Audit Log */}
         <div className={`p-6 rounded-xl border h-fit ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border' : 'bg-white border-gray-100'}`}>
           <h3 className={`text-lg font-bold mb-6 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-            <Activity size={20} className="text-blue-500" /> Recent Activity
+            <Activity size={20} className="text-primary" /> Recent Activity
           </h3>
           <div className="space-y-6 relative">
             {/* Timeline Line */}
@@ -125,10 +125,10 @@ const AdminUsers = () => {
             {auditLog.map((log) => (
               <div key={log.id} className="relative pl-8">
                 <div className={`absolute left-0 top-1.5 w-4 h-4 rounded-full border-2 z-10
-                  ${isDarkMode ? 'bg-gray-900 border-blue-500' : 'bg-white border-blue-500'}`} />
+                  ${isDarkMode ? 'bg-gray-900 border-primary' : 'bg-white border-primary'}`} />
                 
                 <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  <span className="font-bold text-blue-500">{log.admin}</span> {log.action}
+                  <span className="font-bold text-primary">{log.admin}</span> {log.action}
                 </p>
                 <p className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Target: {log.target}
@@ -139,7 +139,7 @@ const AdminUsers = () => {
               </div>
             ))}
           </div>
-          <button className="w-full mt-6 py-2 text-sm text-blue-500 font-medium hover:underline">
+          <button className="w-full mt-6 py-2 text-sm text-primary font-medium hover:underline">
             View Full Log
           </button>
         </div>
@@ -169,7 +169,7 @@ const AdminUsers = () => {
               </div>
               <div className="flex gap-3 mt-6">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancel</button>
-                <button type="submit" className="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors">Create Account</button>
+                <button type="submit" className="flex-1 py-2 rounded-lg bg-primary hover:bg-primaryHover text-white transition-colors">Create Account</button>
               </div>
             </form>
           </div>

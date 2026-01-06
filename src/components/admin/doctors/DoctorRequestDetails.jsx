@@ -94,7 +94,7 @@ const DoctorRequestDetails = () => {
             </button>
             <button
               onClick={handleApprove}
-              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               <CheckCircle size={18} /> Approve Request
             </button>
@@ -105,15 +105,15 @@ const DoctorRequestDetails = () => {
       {/* Request Header */}
       <div className={`rounded-2xl border overflow-hidden shadow-lg
         ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border' : 'bg-white border-gray-100'}`}>
-        <div className="relative h-32 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="relative h-32 bg-primary">
           <div className="absolute bottom-0 left-0 right-0 p-6">
             <div className="flex items-end gap-4">
               <div className="w-20 h-20 rounded-full p-2 bg-white dark:bg-gray-800 flex items-center justify-center">
-                <User size={40} className="text-blue-600" />
+                <User size={40} className="text-primary" />
               </div>
               <div className="mb-2">
                 <h1 className="text-2xl font-bold text-white mb-1">{request.fullName}</h1>
-                <div className="flex items-center gap-4 text-blue-100">
+                <div className="flex items-center gap-4 text-white/90">
                   <span className="flex items-center gap-1">
                     <Mail size={14} /> {request.email}
                   </span>
@@ -135,7 +135,7 @@ const DoctorRequestDetails = () => {
           {/* Personal Information */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <User size={20} className="text-blue-500" /> Personal Information
+              <User size={20} className="text-primary" /> Personal Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
@@ -176,7 +176,7 @@ const DoctorRequestDetails = () => {
           {/* Address */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <MapPin size={20} className="text-purple-500" /> Address
+                <MapPin size={20} className="text-primary" /> Address
             </h3>
             <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,13 +203,13 @@ const DoctorRequestDetails = () => {
           {/* Medical History */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <FileText size={20} className="text-emerald-500" /> Medical History
+              <FileText size={20} className="text-primary" /> Medical History
             </h3>
             <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {Object.entries(request.medicalHistory).map(([key, value]) => (
                   <div key={key} className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${value ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
+                    <div className={`w-2 h-2 rounded-full ${value ? 'bg-primary' : 'bg-gray-300'}`}></div>
                     <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                     </span>
@@ -242,7 +242,7 @@ const DoctorRequestDetails = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors
-                        ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-50 hover:bg-blue-100 text-blue-600'}`}
+                        ${isDarkMode ? 'bg-primary hover:bg-primaryHover text-white' : 'bg-primary/10 hover:bg-primary/20 text-primary'}`}
                     >
                       <Download size={16} /> {request.identityFile.name}
                     </a>
@@ -270,7 +270,7 @@ const DoctorRequestDetails = () => {
                   <p className={`font-medium flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                     {request.termsAccepted ? (
                       <>
-                        <CheckCircle size={16} className="text-emerald-500" /> Yes
+                        <CheckCircle size={16} className="text-primary" /> Yes
                       </>
                     ) : (
                       <>
