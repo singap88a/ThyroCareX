@@ -16,6 +16,7 @@ import {
   Award
 } from 'lucide-react';
 import Newsletter from '../../components/home/Newsletter';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 // --- Components ---
 
@@ -228,56 +229,94 @@ const PricingPage = () => {
       </section>
 
       {/* --- FAQ Section --- */}
-      <section className="relative z-10 px-6 py-24 ">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl text-slate-900">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-slate-500">
-              Everything you need to know about our pricing and services.
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-[#4695a5]/30 transition-colors"
-              >
-                <button
-                  onClick={() => toggleFaq(index)}
-                  className="flex items-center justify-between w-full p-6 text-left"
+      {/* --- FAQ Section --- */}
+      <section className="relative z-10 px-6 py-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            
+            {/* Left Column: Header & Animation */}
+            <div className="relative">
+              <div className="relative z-10">
+                <span className="text-[#4695a5] font-bold tracking-wider uppercase text-sm mb-2 block">
+                  Support & Help
+                </span>
+                <h2 className="mb-6 text-3xl font-extrabold md:text-5xl text-slate-900 leading-tight">
+                  Frequently Asked <br />
+                  <span className="text-[#4695a5]">Questions</span>
+                </h2>
+                <p className="text-lg text-slate-500 mb-8 leading-relaxed max-w-lg">
+                  Find answers to common questions about our plans, security, and medical accuracy. Need more help? Our team is available 24/7.
+                </p>
+                
+                <div className="w-full max-w-[500px] -ml-4">
+                  <div className="relative w-full h-full filter drop-shadow-xl opacity-90 hover:opacity-100 transition-opacity duration-500">
+                    <DotLottieReact
+                      src="https://lottie.host/264bce94-3b27-4892-afc8-d7065a84135e/I7XCnE1Ghd.lottie"
+                      loop
+                      autoplay
+                    />
+                  </div>
+                </div>
+              </div>
+
+               {/* Decorative Gradient Blob behind left column */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#4695a5]/5 blur-3xl rounded-full -z-10 pointer-events-none" />
+            </div>
+
+            {/* Right Column: FAQs */}
+            <div className="space-y-4 relative z-10">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
+                    openFaqIndex === index 
+                      ? 'border-[#4695a5] shadow-lg shadow-[#4695a5]/10 ring-1 ring-[#4695a5]/20' 
+                      : 'border-slate-200 hover:border-[#4695a5]/40 hover:shadow-md'
+                  }`}
                 >
-                  <span className="text-lg font-semibold text-slate-800">
-                    {faq.q}
-                  </span>
-                  {openFaqIndex === index ? (
-                    <ChevronUp className="w-5 h-5 text-[#4695a5]" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-slate-400" />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {openFaqIndex === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="p-6 pt-0 leading-relaxed border-t text-slate-500 border-slate-100">
-                        {faq.a}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="flex items-start justify-between w-full p-6 text-left group"
+                  >
+                    <span className={`text-lg font-bold transition-colors duration-300 pr-8 ${
+                      openFaqIndex === index ? 'text-[#4695a5]' : 'text-slate-800 group-hover:text-[#4695a5]'
+                    }`}>
+                      {faq.q}
+                    </span>
+                    <span className={`flex-shrink-0 p-2 rounded-full transition-all duration-300 ${
+                       openFaqIndex === index ? 'bg-[#4695a5]/10 rotate-180' : 'bg-slate-50 group-hover:bg-[#4695a5]/10'
+                    }`}>
+                      {openFaqIndex === index ? (
+                        <ChevronUp className="w-5 h-5 text-[#4695a5]" />
+                      ) : (
+                        <ChevronDown className={`w-5 h-5 transition-colors ${
+                          openFaqIndex === index ? 'text-[#4695a5]' : 'text-slate-400 group-hover:text-[#4695a5]'
+                        }`} />
+                      )}
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {openFaqIndex === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <div className="p-6 pt-0 leading-relaxed text-slate-500 text-base border-t border-transparent">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+
           </div>
         </div>
       </section>
