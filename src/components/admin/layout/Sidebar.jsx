@@ -152,10 +152,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     <motion.div
                       whileHover={{ x: 5, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden shadow-sm
+                      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden shadow-sm border
                         ${isActive
-                          ? 'bg-primary/20 text-primary shadow-primary/10'
-                          : 'hover:bg-gray-500/10 text-gray-500 hover:text-primary hover:shadow-md'
+                          ? 'bg-primary/20 text-primary shadow-primary/10 border-primary'
+                          : 'hover:bg-gray-500/10 text-gray-500 hover:text-primary hover:shadow-md border-transparent'
                         }`}
                     >
                       {isActive && (
