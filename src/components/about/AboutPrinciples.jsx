@@ -1,441 +1,312 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaRocket, FaGlobe, FaHeartbeat, FaAward, FaUsers, FaLightbulb } from "react-icons/fa";
+import { 
+  FaChevronLeft, FaChevronRight, FaHeartbeat, FaLightbulb, 
+  FaAward, FaShieldAlt, FaUserMd, FaChartLine, 
+  FaClock, FaBrain, FaCheckCircle, FaUsers 
+} from "react-icons/fa";
 
-const AboutPrinciples = () => {
+const FloatingCard = ({ children, delay = 0, className = "" }) => (
+  <motion.div
+    initial={{ y: 0, opacity: 0 }}
+    animate={{ 
+      y: [0, -15, 0],
+      opacity: 1,
+      rotate: [0, 1, 0, -1, 0]
+    }}
+    transition={{ 
+      y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay },
+      opacity: { duration: 0.8, delay: 1 },
+      rotate: { duration: 8, repeat: Infinity, ease: "easeInOut", delay }
+    }}
+    className={`absolute z-20 backdrop-blur-xl bg-white/90 border border-white/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2rem] p-5 ${className}`}
+  >
+    {children}
+  </motion.div>
+);
+
+const DecorativeSquare = ({ className = "", delay = 0 }) => (
+  <motion.div
+    initial={{ scale: 0, opacity: 0, rotate: 0 }}
+    animate={{ scale: 1, opacity: 0.1, rotate: 45 }}
+    transition={{ duration: 1, delay }}
+    className={`absolute w-32 h-32 border-2 border-primary rounded-3xl pointer-events-none ${className}`}
+  />
+);
+
+const AboutPrinciplesModern = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   const timelineData = [
-        {
+    {
       year: "Our Values",
       title: "Ethics & Accuracy in Patient Care",
       subtitle: "Trust & Transparency",
-      description:
-        "We are committed to the highest standards of medical ethics and transparency in developing AI technologies. We prioritize patient privacy and data security, and work to deliver accurate and reliable results that help make the right medical decisions.",
-      icon: <FaHeartbeat className="w-7 h-7" />,
-      gradient: "from-teal-500 via-cyan-600 to-blue-600",
-      images: [
-        "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=300&fit=crop",
-      ],
+      description: "We are committed to the highest standards of medical ethics and transparency in developing AI technologies. We prioritize patient privacy and data security, and work to deliver accurate and reliable results that empower better medical decisions.",
+      icon: <FaHeartbeat className="w-10 h-10" />,
+      color: "var(--primary-color)",
+      image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&h=600&fit=crop&auto=format",
+      stats: [
+        { label: "Data Security", value: "HIPAA ", icon: <FaShieldAlt className="text-primary" /> },
+        { label: "Medical Experts", value: "50+Specialists", icon: <FaUserMd className="text-primary" /> },
+        { label: "Accuracy Rate", value: "98.5%", icon: <FaCheckCircle className="text-primary" /> }
+      ]
     },
     {
       year: "Our Vision",
       title: "Future of AI-Powered Medical Diagnosis",
       subtitle: "Healthcare Innovation",
-      description:
-        "We strive to transform the future of thyroid cancer diagnosis through advanced artificial intelligence technologies. Our vision is to make early and accurate diagnosis accessible to everyone, contributing to saving lives and improving the quality of life for patients worldwide.",
-      icon: <FaLightbulb className="w-7 h-7" />,
-      gradient: "from-blue-500 via-blue-600 to-cyan-600",
-      images: [
-        "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1582719471137-c3967ffb1c42?w=400&h=300&fit=crop",
-      ],
+      description: "We strive to transform the future of thyroid cancer diagnosis through advanced AI. Our vision is to make early and accurate diagnosis accessible to everyone, contributing to saving lives and improving global health quality.",
+      icon: <FaLightbulb className="w-10 h-10" />,
+      color: "var(--primary-color)",
+      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop&auto=format",
+      stats: [
+        { label: "AI Models", value: "15+ Trained", icon: <FaBrain className="text-primary" /> },
+        { label: "Diagnosis Time", value: "< 5 min", icon: <FaClock className="text-primary" /> },
+        { label: "Global Reach", value: "30+ Countries", icon: <FaChartLine className="text-primary" /> }
+      ]
     },
     {
       year: "Our Mission",
       title: "Empowering Doctors with AI Tools",
       subtitle: "Accuracy & Speed in Diagnosis",
-      description:
-        "Our mission is to provide doctors and specialists with advanced AI tools to diagnose thyroid cancer with high accuracy. We believe that technology should be a partner to the physician, not a replacement, to achieve the best medical outcomes for patients.",
-      icon: <FaAward className="w-7 h-7" />,
-      gradient: "from-purple-500 via-purple-600 to-pink-600",
-      images: [
-        "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400&h=300&fit=crop",
-      ],
+      description: "Our mission is to provide doctors with advanced AI tools to diagnose thyroid cancer with high accuracy. We believe technology should be a partner to the physician, ensuring the best outcomes for every patient.",
+      icon: <FaAward className="w-10 h-10" />,
+      color: "var(--primary-color)",
+      image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?w=800&h=600&fit=crop&auto=format",
+      stats: [
+        { label: " Trained", value: "500+", icon: <FaUsers className="text-primary" /> },
+        { label: "Success Rate", value: "96.7%", icon: <FaCheckCircle className="text-primary" /> },
+        { label: "Time Saved", value: "70% Faster", icon: <FaClock className="text-primary" /> }
+      ]
     },
-
   ];
+
+  const nextSlide = useCallback(() => {
+    setDirection(1);
+    setActiveIndex((prev) => (prev + 1) % timelineData.length);
+  }, [timelineData.length]);
+
+  const prevSlide = useCallback(() => {
+    setDirection(-1);
+    setActiveIndex((prev) => (prev - 1 + timelineData.length) % timelineData.length);
+  }, [timelineData.length]);
 
   const activeItem = timelineData[activeIndex];
 
   return (
-    <section className="relative overflow-hidden py-20 bg-white">
-      <div className="relative px-6 mx-auto max-w-7xl sm:px-8 lg:px-12">
-        {/* Section Header */}
-        <div className="relative mb-20 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center px-6 py-2.5 mb-6 text-sm font-semibold rounded-full bg-primary text-white shadow-lg"
+    <section className="relative min-h-screen py-24 overflow-hidden bg-white selection:bg-primary selection:text-white">
+      {/* Subtle Background Text */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden opacity-[0.02] flex items-center justify-center">
+        <span className="text-[20rem] font-black uppercase tracking-tighter select-none whitespace-nowrap">
+          ThyroCare
+        </span>
+      </div>
+
+      <div className="relative px-6 mx-auto max-w-7xl">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="max-w-2xl"
           >
-            ✨ About Us
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-[2px] bg-primary" />
+              <span className="text-sm font-bold tracking-[0.2em] text-primary uppercase">
+                Our Foundation
+              </span>
+            </div>
+            <h2 className="text-5xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight">
+              Driven by <span className="text-primary">Purpose</span> & Innovation
+            </h2>
           </motion.div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-            className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-6xl lg:text-7xl"
-          >
-            Our Vision{" "}
-            <span className="text-transparent bg-clip-text bg-primary">
-              & Mission
-            </span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed"
-          >
-            We believe in the power of artificial intelligence to improve healthcare and save lives through early and accurate diagnosis of thyroid cancer
-          </motion.p>
+          <div className="flex items-center gap-3 p-1.5 bg-gray-50 border border-gray-100 rounded-2xl shadow-sm">
+            {timelineData.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setDirection(index > activeIndex ? 1 : -1);
+                  setActiveIndex(index);
+                }}
+                className={`relative px-8 py-3 text-xs font-bold tracking-widest uppercase transition-all duration-500 rounded-xl ${
+                  activeIndex === index ? "text-white" : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                {activeIndex === index && (
+                  <motion.div
+                    layoutId="activeTabV3"
+                    className="absolute inset-0 bg-primary rounded-xl shadow-lg shadow-primary/20"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">{item.year}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Timeline Container */}
-        <div className="relative flex gap-12 md:gap-20 items-center min-h-[600px]">
-          {/* Professional Vertical Timeline Sidebar */}
-          <div className="relative flex-shrink-0 w-40">
-            {/* Top Arrow Indicator */}
+        {/* Main Content Area */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left Side: Content */}
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              key={activeIndex}
+              custom={direction}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute left-1/2 -translate-x-1/2 -top-8 z-20"
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="space-y-10"
             >
- 
-            </motion.div>
+              <div className="flex items-center gap-6">
+                <div className="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
+                  {activeItem.icon}
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-primary/60 uppercase tracking-widest mb-1">
+                    {activeItem.subtitle}
+                  </div>
+                  <h3 className="text-4xl font-black text-gray-900">
+                    {activeItem.year}
+                  </h3>
+                </div>
+              </div>
 
-            {/* Clean Professional Timeline Line */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 rounded-full overflow-visible">
-              {/* Main Gradient Line */}
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-500 via-purple-500 to-cyan-500 rounded-full" />
-              
-              {/* Subtle Inner Highlight */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-transparent rounded-full" />
-              
-              {/* Smooth Energy Flow */}
-              <motion.div
-                animate={{
-                  y: ["0%", "100%"],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4,
-                  ease: "linear",
-                }}
-                className="absolute left-0 right-0 h-20 bg-gradient-to-b from-white/0 via-white/50 to-white/0"
-              />
-            </div>
+              <div className="space-y-6">
+                <p className="text-2xl font-bold text-gray-800 leading-snug">
+                  {activeItem.title}
+                </p>
+                <p className="text-lg text-gray-500 leading-relaxed font-medium">
+                  {activeItem.description}
+                </p>
+              </div>
 
-            {/* Bottom Arrow Indicator */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="absolute left-1/2 -translate-x-1/2 -bottom-8 z-20"
-            >
-         
-            </motion.div>
-
-            {/* Year Markers with Clean Design */}
-            <div className="relative space-y-32 py-8">
-              {timelineData.map((item, index) => (
-                <motion.button
-                  key={item.year}
-                  onClick={() => setActiveIndex(index)}
-                  className="relative group flex flex-col items-center w-full"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                >
-                  {/* Year Label */}
+              {/* Achievement Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {activeItem.stats.map((stat, idx) => (
                   <motion.div
-                    className={`mb-4 px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
-                      activeIndex === index
-                        ? `text-white bg-gradient-to-r ${item.gradient} shadow-lg scale-105`
-                        : "text-gray-500 bg-white shadow-md group-hover:bg-gray-50 group-hover:text-gray-700"
-                    }`}
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + idx * 0.08 }}
+                    className="flex items-center gap-2 p-4 bg-white border border-gray-100 rounded-2xl transition-all duration-300 hover:bg-gray-50/50"
                   >
-                    {item.year}
-                  </motion.div>
-
-                  {/* Circular Node */}
-                  <motion.div
-                    className="relative z-10"
-                    animate={activeIndex === index ? {
-                      scale: [1, 1.1, 1],
-                    } : {}}
-                    transition={activeIndex === index ? { 
-                      repeat: Infinity, 
-                      duration: 2, 
-                      ease: "easeInOut" 
-                    } : {}}
-                  >
-                    {/* Subtle Glow */}
-                    {activeIndex === index && (
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.3, 0.5, 0.3],
-                        }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                        className={`absolute -inset-4 rounded-full bg-gradient-to-br ${item.gradient} blur-lg`}
-                      />
-                    )}
-                    
-                    {/* Main Circle */}
-                    <div
-                      className={`relative w-16 h-16 rounded-full bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white shadow-lg transition-all duration-300 ${
-                        activeIndex === index 
-                          ? "ring-4 ring-white/60 ring-offset-2 shadow-xl" 
-                          : "opacity-40 group-hover:opacity-70 group-hover:shadow-md"
-                      }`}
-                    >
-                      {/* Inner Subtle Glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-                      
-                      {/* Icon */}
-                      <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                        className="relative z-10 text-xl"
-                      >
-                        {item.icon}
-                      </motion.div>
+                    <div className="flex items-center justify-center w-9 h-9 text-base bg-primary/5 text-primary rounded-lg transition-colors group-hover:bg-primary/10">
+                      {stat.icon}
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+                        {stat.label}
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {stat.value}
+                      </div>
                     </div>
                   </motion.div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
 
-          {/* Fixed Position Content Card Area */}
-          <div className="flex-1 relative" style={{ minHeight: "600px" }}>
+              {/* Slide Controls */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={prevSlide}
+                  className="flex items-center justify-center w-12 h-12 transition-all duration-300 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:scale-105 active:scale-95"
+                >
+                  <FaChevronLeft className="text-gray-500 hover:text-primary transition-colors" />
+                </button>
+
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-full shadow-inner mx-2">
+                  {timelineData.map((_, i) => (
+                    <motion.div
+                      key={i}
+                      onClick={() => setActiveIndex(i)}
+                      initial={false}
+                      animate={{
+                        width: activeIndex === i ? 36 : 10,
+                        backgroundColor: activeIndex === i ? "var(--primary-color)" : "#e5e7eb",
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                      className="h-2.5 rounded-full cursor-pointer"
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={nextSlide}
+                  className="flex items-center justify-center w-12 h-12 transition-all duration-300 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:scale-105 active:scale-95"
+                >
+                  <FaChevronRight className="text-gray-500 hover:text-primary transition-colors" />
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Right Side: Proportional Focused Image */}
+          <div className="relative h-full min-h-[450px]">
             <AnimatePresence mode="wait">
-              {/* Content Card - Always in Same Position */}
               <motion.div
                 key={activeIndex}
-                initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                exit={{ opacity: 0, scale: 0.9, rotateY: 15 }}
-                transition={{ 
-                  duration: 0.7,
-                  ease: [0.43, 0.13, 0.23, 0.96]
-                }}
-                className="relative top-1/2 -translate-y-1/2"
+                initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 1.05, x: -20 }}
+                transition={{ duration: 0.6, ease: "circOut" }}
+                className="relative z-10 w-full h-full"
               >
-                <motion.div
-                  whileHover={{ 
-                    y: -5,
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-                  }}
-                  className="relative bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20"
+                {/* Decorative Elements - Refined */}
+                <DecorativeSquare className="-top-6 -right-6 !w-24 !h-24" delay={0.2} />
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/5 rounded-[3rem] -z-10 blur-2xl" />
+                
+                {/* Image Wrapper with specific height constraint */}
+                <div className="relative h-full w-full rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)] group border-4 border-white">
+                  <img 
+                    src={activeItem.image} 
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                    alt={activeItem.title} 
+                  />
+                  
+                  {/* Glassmorph Overlay Badge */}
+                  <div className="absolute top-6 right-6 backdrop-blur-md bg-white/20 border border-white/30 rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
+                      <FaChartLine />
+                    </div>
+                    <div>
+                      <div className="text-lg font-black text-white leading-none">98.5%</div>
+                      <div className="text-[8px] font-bold text-white/80 uppercase tracking-widest mt-1">Accuracy</div>
+                    </div>
+                  </div>
+
+                  {/* Geometric Work - Overlaid Shapes */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-primary/20 rounded-tr-[2.5rem]" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 border-b-2 border-l-2 border-primary/20 rounded-bl-[2.5rem]" />
+                  </div>
+                </div>
+
+                {/* Floating Elements - More Integrated */}
+                <motion.div 
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -bottom-8 left-12 z-20"
                 >
-                  {/* Animated Background Pattern */}
-                  <div className="absolute inset-0 opacity-5">
-                    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                      <defs>
-                        <pattern id={`pattern-${activeIndex}`} x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                          <circle cx="20" cy="20" r="1" fill={`url(#${activeItem.gradient.replace('from-', '').replace('via-', '').replace('to-', '').split(' ')[0]})`} />
-                        </pattern>
-                      </defs>
-                      <rect x="0" y="0" width="100%" height="100%" fill={`url(#pattern-${activeIndex})`} />
-                    </svg>
-                  </div>
-
-                  {/* Gradient Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${activeItem.gradient} opacity-5`} />
-                  
-                  {/* Animated Particles Background */}
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(15)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          y: [0, -100],
-                          x: [0, Math.sin(i) * 30],
-                          opacity: [0, 1, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 2 + i * 0.2,
-                          delay: i * 0.1,
-                        }}
-                        className={`absolute w-2 h-2 rounded-full ${i % 3 === 0 ? 'bg-blue-500/30' : i % 3 === 1 ? 'bg-purple-500/30' : 'bg-pink-500/30'}`}
-                        style={{
-                          left: `${(i * 7) % 100}%`,
-                          top: `${(i * 8) % 100}%`,
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Content */}
-                  <div className="relative p-8 md:p-12">
-                    {/* Enhanced Subtitle Badge with Connection Animation */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2, type: "spring" }}
-                      className="inline-flex items-center gap-3 mb-6"
-                    >
-                      {/* Animated Connection Dot */}
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.6, 1, 0.6]
-                        }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        className={`w-3 h-3 rounded-full bg-gradient-to-r ${activeItem.gradient}`}
-                      />
-                      
-                      <span className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-white bg-gradient-to-r ${activeItem.gradient} rounded-full shadow-lg`}>
-                        {activeItem.subtitle}
-                      </span>
-                      
-                      {/* Animated Line */}
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: 40 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
-                        className="h-0.5 bg-gradient-to-r from-gray-300 to-transparent"
-                      />
-                    </motion.div>
-
-                    {/* Title with Advanced Animation */}
-                    <motion.h3
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-4xl md:text-5xl font-bold mb-6 leading-tight"
-                    >
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-700">
-                        {activeItem.title}
-                      </span>
-                    </motion.h3>
-
-                    {/* Description with Staggered Text Animation */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4, staggerChildren: 0.05 }}
-                      className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 bg-white/60 backdrop-blur-sm p-6 rounded-2xl shadow-inner"
-                    >
-                      {activeItem.description.split('. ').map((sentence, i) => (
-                        <motion.p
-                          key={i}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 + i * 0.1 }}
-                          className="mb-3 last:mb-0"
-                        >
-                          {sentence}
-                          {i < activeItem.description.split('. ').length - 1 ? '. ' : ''}
-                        </motion.p>
-                      ))}
-                    </motion.div>
-
-                    {/* Images Grid with Enhanced Animation */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      className="grid grid-cols-3 gap-4"
-                    >
-                      {activeItem.images.map((image, imgIndex) => (
-                        <motion.div
-                          key={imgIndex}
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{ delay: 0.7 + imgIndex * 0.15, type: "spring" }}
-                          whileHover={{ 
-                            scale: 1.08, 
-                            zIndex: 10,
-                            transition: { type: "spring", stiffness: 300 }
-                          }}
-                          className="relative aspect-video rounded-xl overflow-hidden shadow-xl group/img"
-                        >
-                          {/* Image */}
-                          <motion.img
-                            src={image}
-                            alt={`${activeItem.title} - Image ${imgIndex + 1}`}
-                            className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.5 }}
-                          />
-                          
-                          {/* Gradient Overlay */}
-                          <div className={`absolute inset-0 bg-gradient-to-t ${activeItem.gradient} opacity-0 group-hover/img:opacity-30 transition-opacity duration-500`} />
-                          
-                          {/* Shine Effect */}
-                          <motion.div
-                            initial={{ x: "-100%" }}
-                            whileHover={{ x: "200%" }}
-                            transition={{ duration: 0.8 }}
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                          />
-                          
-                          {/* Image Number Badge */}
-                          <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                            <span className="text-xs font-bold text-white">{imgIndex + 1}</span>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  </div>
-
-                  {/* Enhanced Decorative Elements */}
-                  <div className={`absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br ${activeItem.gradient} opacity-5 rounded-full blur-3xl`} />
-                  <div className={`absolute -bottom-16 -left-16 w-64 h-64 bg-gradient-to-tr ${activeItem.gradient} opacity-5 rounded-full blur-3xl`} />
-                  
-                  {/* Corner Accents with Animation */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className={`absolute top-0 right-0 w-32 h-32 overflow-hidden`}
-                  >
-                    <div className={`absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br ${activeItem.gradient} opacity-20`} />
-                  </motion.div>
-                  
-                  {/* Bottom Navigation Indicator */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 mb-6 flex gap-2">
-                    {timelineData.map((_, index) => (
-                      <motion.button
-                        key={index}
-                        onClick={() => setActiveIndex(index)}
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="relative"
-                      >
-                        <motion.div
-                          animate={activeIndex === index ? {
-                            scale: [1, 1.3, 1],
-                          } : {}}
-                          transition={{ repeat: Infinity, duration: 1.5 }}
-                          className={`w-2 h-2 rounded-full ${
-                            activeIndex === index 
-                              ? `bg-gradient-to-r ${activeItem.gradient}` 
-                              : 'bg-gray-300'
-                          }`}
-                        />
-                        {activeIndex === index && (
-                          <motion.div
-                            layoutId="activeIndicator"
-                            className="absolute -inset-1 rounded-full border border-gray-300"
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          />
-                        )}
-                      </motion.button>
-                    ))}
+                  <div className="backdrop-blur-xl bg-white/90 border border-white shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                      <FaUsers className="text-xl" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-black text-gray-900 tracking-tighter">50K+</div>
+                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Consultations</div>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>
             </AnimatePresence>
+            
+     
           </div>
         </div>
       </div>
@@ -443,4 +314,4 @@ const AboutPrinciples = () => {
   );
 };
 
-export default AboutPrinciples;
+export default AboutPrinciplesModern;

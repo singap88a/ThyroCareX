@@ -1,16 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
-/* CSS Custom Properties for Colors */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
 :root {
   --primary-color: #4695a5;
   --primary-hover: #00A2C2;
-  --secondary-color: #00B4D8; /* Gray-100 */
-  --accent-color: #dc2626; /* Red-600 */
-  --text-primary: #111827; /* Gray-900 */
-  --text-secondary: #6b7280; /* Gray-500 */
-  --background: #ffffff; /* White */
+  --secondary-color: #00B4D8;
+  --accent-color: #dc2626;
+  --text-primary: #1a3d44; /* Deep Primary/Teal */
+  --text-secondary: #4a7d87; /* Muted Primary/Teal */
+  --background: #ffffff;
+}
+
+@layer base {
+  html, body {
+    @apply font-['Plus_Jakarta_Sans',sans-serif] text-primary antialiased;
+  }
 }
 
 /* Custom Scrollbar */

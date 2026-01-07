@@ -198,8 +198,8 @@ const Hero = () => {
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
           <h1 className="mb-8 text-5xl font-bold leading-tight text-gray-900 md:text-6xl lg:text-7xl font-inter">
-            <span className="block opacity-0 animate-text">Thyroid Cancer</span>
-            <span className="block mt-4 opacity-0 text-primary animate-text">
+            <span className="block opacity-0 animate-text italic font-black  ">Thyroid Cancer</span>
+            <span className="block mt-4 opacity-0 text-primary animate-text italic font-black">
               Detection Reimagined
             </span>
           </h1>

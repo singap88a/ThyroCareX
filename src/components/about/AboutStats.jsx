@@ -131,7 +131,7 @@ const AboutStats = () => {
       </div>
       
       {/* أنماط CSS مخصصة */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes lineMove {
           0% {
             transform: translateX(-100%);
@@ -165,7 +165,7 @@ const AboutStats = () => {
         .float-element {
           animation: float 6s ease-in-out infinite;
         }
-      `}</style>
+      `}} />
     </section>
   );
 };

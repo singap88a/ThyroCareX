@@ -80,7 +80,7 @@ const AboutTeam = () => {
   ];
 
   return (
-    <section className="relative py-24 bg-white overflow-hidden">
+    <section className="relative py-5 bg-white overflow-hidden">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         
         {/* ===== Enhanced Header ===== */}
@@ -107,6 +107,7 @@ const AboutTeam = () => {
             modules={[Navigation, Autoplay, Pagination]}
             spaceBetween={30}
             slidesPerView={1}
+            slidesPerGroup={1}
             pagination={{
               clickable: true,
               el: '.custom-pagination',
@@ -122,12 +123,12 @@ const AboutTeam = () => {
             }}
             breakpoints={{
               640: { slidesPerView: 1, spaceBetween: 20 },
-              1024: { slidesPerView: 2, spaceBetween: 40 },
+              1024: { slidesPerView: 2, spaceBetween: 30, slidesPerGroup: 1 },
             }}
-            className="!overflow-visible"
+            className="w-full overflow-hidden"
           >
             {teamMembers.map((member, index) => (
-              <SwiperSlide key={index} className="h-full pt-4 pb-12">
+              <SwiperSlide key={index} className="h-full  pt-2 px-1">
                 {/* ===== DETAILED HORIZONTAL CARD ===== */}
                 <div className="group relative w-full h-full bg-white   rounded-[2.5rem] p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_60px_-15px_rgba(var(--primary-color-rgb),0.15)] transition-all duration-500 hover:-translate-y-1 overflow-hidden  border border-primary/20  border-primary">
                   
