@@ -233,43 +233,51 @@ const ProfessionalAnalyticsSection = () => {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-8">
-          {/* Left Section: Split Color Image */}
-          <div className="relative group">
-            <div className="relative h-[630px] overflow-hidden rounded-3xl">
-              {/* Main Image */}
-              <img
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-                alt="Medical Technology Interface"
-                className="object-cover w-full transition-all duration-700 h-3/4 group-hover:scale-105"
-              />
+{/* Left Section: Split Color Image */}
+<div className="relative group">
+  <div className="relative h-[628px] overflow-hidden rounded-3xl">
 
-              {/* Content Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 z-30 p-8 bg-gradient-to-t from-black/90 via-black/90 to-transparent">
-                <div className="max-w-md">
-                  <h2 className="mb-4 text-2xl font-bold text-white md:text-3xl">
-                    Real-time Diagnostic Interface
-                  </h2>
-                  <p className="mb-6 text-sm leading-relaxed text-gray-300 md:text-base">
-                    Experience our intuitive dashboard that provides instant AI analysis with detailed visualization.
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleVideoOpen}
-                      className="flex items-center gap-2 px-6 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-primary to-primary rounded-xl"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                      Watch Demo
-                    </button>
-                    <button className="px-6 py-3 font-semibold text-white transition-all duration-300 border border-white/30 rounded-xl hover:bg-white/10">
-                      Learn More
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    {/* Main Image */}
+    <img
+      src="/Gland_shape.png"
+      alt="Medical Technology Interface"
+      className="object-cover w-full h-full transition-all duration-700 group-hover:scale-105"
+    />
+
+    {/* Black Gradient Overlay */}
+    <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+    {/* Content Overlay */}
+    <div className="absolute bottom-0 left-0 right-0 z-30 p-8">
+      <div className="max-w-md">
+        <h2 className="mb-4 text-2xl font-bold text-white md:text-3xl">
+          Real-time Diagnostic Interface
+        </h2>
+        <p className="mb-6 text-sm leading-relaxed text-gray-300 md:text-base">
+          Experience our intuitive dashboard that provides instant AI analysis with detailed visualization.
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleVideoOpen}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-xl bg-gradient-to-r from-primary to-primary"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Watch Demo
+          </button>
+
+          <button className="px-6 py-3 font-semibold text-white transition-all duration-300 border rounded-xl border-white/30 hover:bg-white/10">
+            Learn More
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
           {/* Right Section: Stats + Features */}
           <div className="flex flex-col gap-5">
