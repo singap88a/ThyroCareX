@@ -280,7 +280,7 @@ const GeminiSingap = ({ darkMode = false }) => {
             <FaBrain className="w-16 h-16 text-primary animate-pulse-slow" />
           </div>
           <h1 className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">
+            <span className="text-primary">
               ThyroCareX AI
             </span>
           </h1>
