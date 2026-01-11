@@ -40,6 +40,8 @@ import DoctorRequestDetails from './components/admin/doctors/DoctorRequestDetail
 import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
 import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
 import DiagnosisHistory from './pages/diagnosis/DiagnosisHistory';
+import FloatingChatbot from './components/common/FloatingChatbot';
+import GeminiSingap from './pages/GeminiSingap/GeminiSingap';
 
 function AppContent() {
   const location = useLocation();
@@ -73,6 +75,7 @@ function AppContent() {
           <Route path="/patients/:id/history" element={<DiagnosisHistory />} />
           <Route path="/community" element={<Community />} />
           <Route path="/pending-verification" element={<PendingVerification />} />
+          <Route path="/gemini" element={<GeminiSingap />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={
@@ -97,6 +100,7 @@ function AppContent() {
         </Routes>
       </div>
       {!isDashboard && !isAdmin && <Footer />}
+      <FloatingChatbot />
     </>
   );
 }
