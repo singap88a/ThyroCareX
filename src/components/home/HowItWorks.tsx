@@ -1,9 +1,7 @@
 import { FaUpload, FaRobot, FaFileAlt, FaArrowRight, FaChartBar, FaCheckCircle, FaShieldAlt, FaImages, FaClock, FaBrain, FaMicrochip, FaDatabase, FaFilePdf, FaUserMd, FaCalendarAlt } from 'react-icons/fa';
-import { motion } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 
 const HowItWorks = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   
   const steps = [
@@ -54,109 +52,17 @@ const HowItWorks = () => {
     }
   ];
 
-  // Professional Animated Spiral Background - Adjusted Opacity (lighter)
-  const AnimatedSpiralBackground = ({ color }: { color: string }) => (
-    <div className="absolute inset-0 overflow-hidden rounded-3xl z-0 pointer-events-none">
-      {/* Dynamic Hand-drawn style Spirals - Slightly reduced opacity */}
-      <motion.svg 
-        className="absolute top-0 right-0 w-[500px] h-[500px] opacity-10" 
-        viewBox="0 0 400 400"
-        fill="none"
-      >
-        <motion.path
-          d="M200,200 m0,-150 a150,150 0 1,1 0,300 a150,150 0 1,1 0,-300"
-          stroke={color}
-          strokeWidth="3"
-          strokeDasharray="15,10"
-          animate={{
-            rotate: 360,
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          style={{ originX: "200px", originY: "200px" }}
-        />
-        <motion.path
-          d="M200,200 m0,-100 a100,100 0 1,0 0,200 a100,100 0 1,0 0,-200"
-          stroke={color}
-          strokeWidth="4"
-          strokeDasharray="25,15"
-          animate={{
-            rotate: -360,
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          style={{ originX: "200px", originY: "200px" }}
-        />
-        {/* Wavy lines */}
-        <motion.path
-          d="M0,50 Q100,150 200,50 T400,50"
-          stroke={color}
-          strokeWidth="3"
-          fill="none"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.6 }}
-          transition={{ duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-        />
-         <motion.path
-          d="M0,350 Q100,250 200,350 T400,350"
-          stroke={color}
-          strokeWidth="3"
-          fill="none"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.6 }}
-          transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }}
-        />
-      </motion.svg>
-      
-      {/* Floating Animated Shapes - Lighter */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute border-2 border-current rounded-full"
-          style={{ 
-            color: color,
-            borderColor: color,
-            width: Math.random() * 50 + 30 + 'px',
-            height: Math.random() * 50 + 30 + 'px',
-            left: Math.random() * 100 + '%',
-            top: Math.random() * 100 + '%',
-            opacity: 0.1 
-          }}
-          animate={{
-            y: [0, -80, 0],
-            rotate: 360,
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: 8 + Math.random() * 8,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-      ))}
-      
-      {/* Gradient Mesh Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-white/20" />
-    </div>
-  );
+  // Background Animation Removed for Performance
 
-  // New Professional Animated Number Indicator
+  // Professional Animated Number Indicator - Original Version
   const ProfessionalNumber = ({ number, gradient, color }: { number: string, gradient: string, color: string }) => (
     <div className="absolute top-4 right-4 z-30 w-16 h-16 pointer-events-none">
       <div className="relative flex items-center justify-center w-full h-full">
         {/* Animated Rotating Dashed Circle */}
-        <motion.svg 
+        <svg 
           viewBox="0 0 100 100" 
           className="absolute inset-0 w-full h-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          style={{ animation: 'rotate-slow 10s linear infinite' }}
         >
           <circle 
             cx="50" 
@@ -173,23 +79,27 @@ const HowItWorks = () => {
               <stop offset="100%" stopColor="#ec4899" stopOpacity="0.5" />
             </linearGradient>
           </defs>
-        </motion.svg>
+        </svg>
 
         {/* Counter-Rotating Inner Ring */}
-        <motion.div 
-          className="absolute inset-2 rounded-full border border-gray-100 opacity-50"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          style={{ borderTopColor: color, borderRightColor: 'transparent', borderBottomColor: color, borderLeftColor: 'transparent', borderWidth: '2px' }}
+        <div 
+          className="absolute inset-2 rounded-full border opacity-50"
+          style={{ 
+            borderTopColor: color, 
+            borderRightColor: 'transparent', 
+            borderBottomColor: color, 
+            borderLeftColor: 'transparent', 
+            borderWidth: '2px',
+            animation: 'rotate-slow-reverse 15s linear infinite'
+          }}
         />
 
         {/* Background Blob Animation */}
-        <motion.div
+        <div
           className={`absolute inset-1 rounded-full bg-gradient-to-br ${gradient} opacity-10`}
-          animate={{
-            scale: [1, 1.1, 1],
+          style={{
+            animation: 'pulse-blob 3s ease-in-out infinite'
           }}
-          transition={{ duration: 3, repeat: Infinity }}
         />
 
         {/* The Number */}
@@ -200,64 +110,21 @@ const HowItWorks = () => {
     </div>
   );
 
-  // Enhanced Component: Connecting line with Primary Background & Moving Animation
-  const AnimatedConnectingLine = () => (
+  // Connecting line - Animation Removed for Performance
+  const ConnectingLine = () => (
     <div className="absolute left-0 right-0 z-0 hidden h-2 transform -translate-y-1/2 lg:block top-24 pointer-events-none">
-      {/* Background - Primary Color */}
-      <div className="w-full h-full bg-blue-100/50 rounded-full overflow-hidden relative">
-        
-        {/* Main Moving Line - Primary Gradient */}
-        <motion.div 
-          className="absolute top-0 bottom-0 w-1/3 bg-gradient-to-r from-transparent via-blue-600 to-transparent"
-          animate={{
-            x: ['-100%', '400%']
-          }}
-          transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        
-        {/* Bright Glowing Head */}
-        <motion.div 
-             className="absolute top-1/2 -translate-y-1/2 w-32 h-1.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-[2px]"
-             animate={{
-                left: ['-20%', '120%']
-            }}
-            transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "linear"
-            }}
-        />
-      </div>
+      <div className="w-full h-full bg-blue-100/50 rounded-full"></div>
     </div>
   );
 
-  // Animated arrow component
-  const AnimatedArrow = ({ index }: { index: number }) => (
-    <motion.div
-      className="flex items-center justify-center w-12 h-12 bg-white border border-gray-100 rounded-full shadow-sm group"
-      whileHover={{ scale: 1.1, backgroundColor: "#f9fafb" }}
-      animate={{ x: [0, 5, 0] }}
-      transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-    >
-      <FaArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
-    </motion.div>
+  // Arrow component - Animation Removed
+  const Arrow = () => (
+    <div className="flex items-center justify-center w-12 h-12 bg-white border border-gray-100 rounded-full shadow-sm">
+      <FaArrowRight className="w-4 h-4 text-gray-400" />
+    </div>
   );
 
-  // Intersection Observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+  // Intersection Observer Removed for Performance
 
   return (
     <section 
@@ -266,122 +133,88 @@ const HowItWorks = () => {
     >
       
       <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        {/* Section Header with enhanced animations - RESTORED ORIGINAL */}
-        <motion.div 
-          className="text-center bg-gradient-to-b from-primary to-primary/10 rounded-t-[40px]  pt-10 relative overflow-hidden mb-12"
-          initial={{ opacity: 0, y: -50 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Animated particles in header */}
-          <div className="absolute inset-0">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2 h-2 bg-white/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 3 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              />
-            ))}
-          </div>
+        {/* Section Header with Professional Background Animation */}
+        <div className="text-center bg-gradient-to-b from-primary to-primary/10 rounded-t-[40px]  pt-10 relative overflow-hidden mb-12">
+          {/* Professional Animated Grid Pattern Background */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234695a5' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px',
+            animation: 'grid-move 20s linear infinite'
+          }} />
+          
+          {/* Subtle Shimmer Effect */}
+          <div 
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(70, 149, 165, 0.1) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 3s ease-in-out infinite'
+            }}
+          />
 
-          <motion.div 
-            className="inline-flex items-center px-4 py-1 mb-4 text-sm font-medium rounded-full text-primary bg-white shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            animate={{
-              scale: [1, 1.03, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-            }}
-          >
+          <div className="inline-flex items-center px-4 py-1 mb-4 text-sm font-medium rounded-full text-primary bg-white shadow-lg">
             🎯 SIMPLE 3-STEP PROCESS
-          </motion.div>
+          </div>
           
-          <motion.h2 
-            className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl"
-            initial={{ opacity: 0 }}
-            animate={isVisible ? { opacity: 1 } : {}}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
+          <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
             How Our AI Diagnosis
-            <motion.span 
-              className="block text-primary  "
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              style={{
-                backgroundSize: '200% 100%',
-              }}
-            >
+            <span className="block text-primary">
               Platform Works
-            </motion.span>
-          </motion.h2>
+            </span>
+          </h2>
           
-          <motion.p 
-            className="max-w-3xl mx-auto text-xl leading-relaxed text-gray-600"
-            initial={{ opacity: 0 }}
-            animate={isVisible ? { opacity: 1 } : {}}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
+          <p className="max-w-3xl mx-auto text-xl leading-relaxed text-gray-600">
             From medical data upload to comprehensive diagnosis - our platform makes thyroid cancer 
             detection accessible, accurate, and secure in just three simple steps.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         {/* Steps Container */}
         <div className="relative">
-          <AnimatedConnectingLine />
+          <ConnectingLine />
 
           {/* Steps Grid */}
           <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-10">
             {steps.map((step, index) => (
-              <motion.div 
+              <div 
                 key={index}
-                className={`relative overflow-hidden transition-all duration-500 bg-white rounded-3xl group hover:-translate-y-2 ${step.shadowColor} shadow-md hover:shadow-xl`}
-                initial={{ opacity: 0, y: 50 }}
-                animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.2, duration: 0.6 }}
+                className={`relative overflow-hidden bg-white rounded-3xl group ${step.shadowColor} shadow-md hover:shadow-xl`}
               >
-                {/* Animated Spiral Background - Lighter Opacity */}
-                <AnimatedSpiralBackground color={step.spiralColor} />
+                {/* Simple Background Animation */}
+                <div className="absolute inset-0 opacity-[0.08] pointer-events-none overflow-hidden rounded-3xl">
+                  <div 
+                    className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl"
+                    style={{
+                      background: `radial-gradient(circle, ${step.spiralColor} 0%, transparent 70%)`,
+                      animation: 'float-gentle 6s ease-in-out infinite'
+                    }}
+                  />
+                  <div 
+                    className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl"
+                    style={{
+                      background: `radial-gradient(circle, ${step.spiralColor} 0%, transparent 70%)`,
+                      animation: 'float-gentle 8s ease-in-out infinite reverse',
+                      animationDelay: '1s'
+                    }}
+                  />
+                </div>
 
                 {/* Card Content Container */}
                 <div className="relative h-full p-8 backdrop-blur-[1px]">
                   
-                  {/* Professional Animated Number */}
+                  {/* Professional Number */}
                   <ProfessionalNumber 
                     number={step.number} 
-                    gradient={step.gradient} 
-                    color={step.spiralColor} 
+                    gradient={step.gradient}
+                    color={step.spiralColor}
                   />
 
                   {/* Icon Area */}
-                  <motion.div 
-                    className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.bgColor} mb-6`}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <div className="text-gray-700 relative z-10 transition-transform duration-300 group-hover:scale-110">
+                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.bgColor} mb-6`}>
+                    <div className="text-gray-700 relative z-10">
                       {step.icon}
                     </div>
-                  </motion.div>
+                  </div>
 
                   {/* Text Content */}
                   <h3 className="mb-3 text-xl font-bold text-gray-900">
@@ -395,40 +228,30 @@ const HowItWorks = () => {
                   {/* Features List (Clean, No Border/Bg) */}
                   <div className="space-y-3">
                     {step.features.map((feature, featureIndex) => (
-                      <motion.div 
+                      <div 
                         key={featureIndex} 
                         className="flex items-center gap-3"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={isVisible ? { opacity: 1, x: 0 } : {}}
-                        transition={{ delay: (index * 0.2) + (featureIndex * 0.1) + 0.5 }}
                       >
                         <span className={`text-lg ${feature.color}`}>
                           {feature.icon}
                         </span>
-                        <span className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors">
+                        <span className="text-sm font-medium text-gray-600">
                           {feature.text}
                         </span>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Animated Bottom Border Line */}
-                <motion.div 
-                  className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${step.gradient}`}
-                  initial={{ width: "0%" }}
-                  whileHover={{ width: "100%" }}
-                  transition={{ duration: 0.4 }}
-                />
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          {/* Arrows */}
+          {/* Arrows - Animation Removed */}
           <div className="absolute left-0 right-0 z-0 items-center justify-between hidden px-12 lg:flex top-24 pointer-events-none">
             {steps.slice(0, -1).map((_, index) => (
               <div key={index} className="flex justify-center flex-1 transform translate-y-8 translate-x-12 opactiy-50">
-                <AnimatedArrow index={index} />
+                <Arrow />
               </div>
             ))}
           </div>
@@ -452,6 +275,38 @@ const HowItWorks = () => {
         </div>
 
       </div>
+      
+      <style>{`
+        @keyframes rotate-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes rotate-slow-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        
+        @keyframes pulse-blob {
+          0%, 100% { transform: scale(1); opacity: 0.1; }
+          50% { transform: scale(1.1); opacity: 0.15; }
+        }
+        
+        @keyframes float-gentle {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-15px) translateX(10px); }
+        }
+        
+        @keyframes grid-move {
+          0% { background-position: 0 0; }
+          100% { background-position: 60px 60px; }
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
     </section>
   );
 };

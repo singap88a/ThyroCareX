@@ -82,7 +82,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[500] transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[500] ${
         isScrolled
           ? "bg-white/98 backdrop-blur-xl shadow-lg border-b border-gray-100/50"
           : "bg-white/90 backdrop-blur-md"
@@ -143,16 +143,14 @@ const Navbar = () => {
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 group ${
+                    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm group ${
                       isActive
                         ? "text-primary bg-primary/10 shadow-sm border-2 border-primary"
                         : "text-gray-600 hover:text-primary hover:bg-gray-100/80 border-2 border-transparent"
                     }`}
                   >
                     <IconComponent
-                      className={`w-4 h-4 transition-transform duration-300 ${
-                        isActive ? "scale-110" : "group-hover:scale-110"
-                      }`}
+                      className="w-4 h-4"
                     />
                     <span className="whitespace-nowrap">{link.label}</span>
                   </Link>
@@ -168,7 +166,7 @@ const Navbar = () => {
                 {/* Add Patient Button - تصميم أنيق */}
                 <Link
                   to="/add-patient"
-                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-105 active:scale-95"
+                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:shadow-lg hover:shadow-primary/25"
                 >
                   <FaStethoscope className="w-4 h-4" />
                   <span>Add Patient</span>
@@ -178,7 +176,7 @@ const Navbar = () => {
                 <div className="relative profile-dropdown-container">
                   <button
                     onClick={() => setProfileDropdown(!profileDropdown)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-300 hover:bg-gray-50/80 active:scale-95"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50/80"
                   >
                     <div className="flex items-center justify-center rounded-full shadow-md w-9 h-9 bg-primary ring-2 ring-primary/20">
                       <FaUser className="w-4 h-4 text-white" />
@@ -187,7 +185,7 @@ const Navbar = () => {
                       {getShortUserName()}
                     </span>
                     <FaChevronDown
-                      className={`hidden xl:block w-3 h-3 text-gray-400 transition-transform duration-300 ${
+                      className={`hidden xl:block w-3 h-3 text-gray-400 ${
                         profileDropdown ? "rotate-180" : ""
                       }`}
                     />
@@ -261,14 +259,14 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-primary font-medium text-sm rounded-xl transition-all duration-300 hover:bg-gray-50/80 border border-gray-200/60 hover:border-primary/30"
+                  className="hidden lg:flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-primary font-medium text-sm rounded-xl hover:bg-gray-50/80 border border-gray-200/60 hover:border-primary/30"
                 >
                   <FaUser className="w-4 h-4" />
                   <span>Login</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-105 active:scale-95"
+                  className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:shadow-lg hover:shadow-primary/25"
                 >
                   <FaUserPlus className="w-4 h-4" />
                   <span>Get Started</span>
@@ -279,7 +277,7 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="flex items-center justify-center w-10 h-10 text-gray-700 transition-all duration-300 lg:hidden bg-gray-100/80 hover:bg-gray-200/80 rounded-xl active:scale-95"
+              className="flex items-center justify-center w-10 h-10 text-gray-700 lg:hidden bg-gray-100/80 hover:bg-gray-200/80 rounded-xl"
             >
               {isOpen ? (
                 <FaTimes className="w-5 h-5" />
@@ -301,7 +299,7 @@ const Navbar = () => {
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-sm ${
                       isActive
                         ? "text-primary bg-primary/10"
                         : "text-gray-700 hover:text-primary hover:bg-gray-50/80"
@@ -347,7 +345,7 @@ const Navbar = () => {
                         logout();
                         setIsOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-3.5 text-red-600 font-medium text-sm rounded-xl transition-all duration-200 hover:bg-red-50/80"
+                      className="flex items-center gap-3 w-full px-4 py-3.5 text-red-600 font-medium text-sm rounded-xl hover:bg-red-50/80"
                     >
                       <FaSignOutAlt className="w-4 h-4" />
                       <span>Logout</span>
@@ -357,7 +355,7 @@ const Navbar = () => {
                   <>
                     <Link
                       to="/login"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 text-gray-700 font-medium text-sm rounded-xl transition-all duration-200 border border-gray-200/60 hover:border-primary/30 hover:bg-gray-50/80"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 text-gray-700 font-medium text-sm rounded-xl border border-gray-200/60 hover:border-primary/30 hover:bg-gray-50/80"
                       onClick={() => setIsOpen(false)}
                     >
                       <FaUser className="w-4 h-4" />
