@@ -11,27 +11,13 @@ import {
   EyeOff,
   Download,
   Upload,
-  CheckCircle,
-  AlertCircle,
-  TrendingUp,
   Activity,
-  Clock,
   Users,
-  Award,
   FileText,
-  Calendar,
   Target,
   Star,
-  Zap,
-  Heart,
-  PieChart,
-  LineChart,
-  Bell,
-  Mail,
-  Smartphone,
-  Monitor,
-  Moon,
-  Sun
+  TrendingUp,
+  Bell
 } from 'lucide-react';
 import doctorService from '../../services/doctorService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -270,55 +256,74 @@ const Profile = () => {
         {/* Profile Header */}
         <div className="p-8 mb-8 transition-all duration-300 border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-3xl hover:shadow-md">
           <div className="flex flex-col items-center space-y-6 md:flex-row md:space-y-0 md:space-x-8">
-            <div className="relative group">
-              <label htmlFor="profile-image-upload" className="cursor-pointer">
-                <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden relative">
-                    {profileData.profileImage || profileData.previewImage ? (
-                        <img 
-                            src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
-                            alt="Profile" 
-                            className="w-full h-full object-cover"
-                            onError={(e) => {e.target.style.display='none';}} // Fallback to icon if error
-                        />
-                    ) : (
-                        <User className="w-12 h-12 text-white" />
-                    )}
-                </div>
-                <div className="absolute flex items-center justify-center w-10 h-10 transition-all duration-200 bg-white shadow-md rounded-xl -bottom-2 -right-2 hover:bg-slate-50 group-hover:scale-110 hover:shadow-lg">
-                    <Camera className="w-5 h-5 text-slate-600" />
-                </div>
-              </label>
-              <input 
-                id="profile-image-upload" 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageChange} 
-                className="hidden" 
-               />
+            <div className={`relative group ${!isEditing ? 'cursor-default' : ''}`}>
+              {isEditing ? (
+                  <>
+                  <label htmlFor="profile-image-upload" className="cursor-pointer">
+                    <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
+                        {profileData.profileImage || profileData.previewImage ? (
+                            <img 
+                                src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {e.target.style.display='none';}} 
+                            />
+                        ) : (
+                            <User className="w-12 h-12 text-white" />
+                        )}
+                    </div>
+                    <div className="absolute flex items-center justify-center w-10 h-10 transition-all duration-200 bg-white shadow-md rounded-xl -bottom-2 -right-2 hover:bg-slate-50 group-hover:scale-110 hover:shadow-lg">
+                        <Camera className="w-5 h-5 text-gray-600" />
+                    </div>
+                  </label>
+                  <input 
+                    id="profile-image-upload" 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange} 
+                    className="hidden" 
+                   />
+                  </>
+              ) : (
+                  <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
+                      {profileData.profileImage || profileData.previewImage ? (
+                          <img 
+                              src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {e.target.style.display='none';}}
+                          />
+                      ) : (
+                          <User className="w-12 h-12 text-white" />
+                      )}
+                  </div>
+              )}
             </div>
             
             <div className="flex-1 text-center md:text-left">
               <h2 className="mb-2 text-3xl font-bold text-slate-900">
                 {profileData.fullName || "Doctor"}
               </h2>
-              <p className="mb-2 text-xl font-semibold text-blue-600">{profileData.specialization}</p>
+              <p className="mb-2 text-xl font-semibold text-primary">{profileData.specialization}</p>
               <p className="text-slate-600">{profileData.hospital}</p>
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">Verified</span>
+                <span className="px-3 py-1 text-sm font-medium text-primary bg-primary/10 rounded-full">Verified</span>
                 <span className="px-3 py-1 text-sm font-medium rounded-full text-emerald-700 bg-emerald-100">Active</span>
                 <span className="px-3 py-1 text-sm font-medium text-purple-700 bg-purple-100 rounded-full">Premium</span>
               </div>
             </div>
             
-            <label htmlFor="profile-image-upload" className="flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 bg-white border shadow-sm text-slate-700 border-slate-300 rounded-xl hover:bg-slate-50 hover:shadow-md cursor-pointer">
-              <Upload className="w-5 h-5 text-slate-600" />
-              <span>Update Photo</span>
-            </label>
+            {isEditing && (
+                <label htmlFor="profile-image-upload" className="flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 bg-white border shadow-sm text-slate-700 border-slate-300 rounded-xl hover:bg-slate-50 hover:shadow-md cursor-pointer">
+                <Upload className="w-5 h-5 text-slate-600" />
+                <span>Update Photo</span>
+                </label>
+            )}
 
             <button 
                 onClick={() => setIsEditing(!isEditing)}
                 className={`flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 border shadow-sm rounded-xl hover:shadow-md ml-auto
-                ${isEditing ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-blue-600 text-white border-transparent hover:bg-blue-700'}`}
+                ${isEditing ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-primary text-white border-transparent hover:bg-primary/90'}`}
             >
               <Settings className="w-5 h-5" />
               <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
@@ -341,7 +346,7 @@ const Profile = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center space-x-2 px-6 py-4 border-b-2 transition-colors duration-200 whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600 bg-blue-50'
+                        ? 'border-primary text-primary bg-primary/5'
                         : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                     }`}
                   >
@@ -371,7 +376,7 @@ const Profile = () => {
                       value={profileData.fullName}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, fullName: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -381,7 +386,7 @@ const Profile = () => {
                       type="email"
                       readOnly
                       value={profileData.email}
-                      className="w-full px-4 py-3 bg-gray-50 text-gray-500 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-gray-50 text-gray-500 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -394,7 +399,7 @@ const Profile = () => {
                       value={profileData.phoneNumber}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -405,7 +410,7 @@ const Profile = () => {
                       value={profileData.medicaLicenseNumber || ''}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, medicaLicenseNumber: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -419,7 +424,7 @@ const Profile = () => {
                       value={profileData.specialization}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, specialization: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -430,7 +435,7 @@ const Profile = () => {
                       value={profileData.hospital || ''}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, hospital: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -443,7 +448,7 @@ const Profile = () => {
                     disabled={!isEditing}
                     onChange={(e) => setProfileData(prev => ({ ...prev, professionalBio: e.target.value }))}
                     rows={4}
-                    className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                    className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                   />
                 </div>
@@ -455,7 +460,7 @@ const Profile = () => {
                       value={profileData.address || ''}
                       disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
-                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary
                         ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
@@ -463,7 +468,7 @@ const Profile = () => {
                 {isEditing && (
                 <button 
                   onClick={handleSaveProfile}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-primary to-[#00A2C2] text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
                 >
                   <Save className="w-5 h-5" />
                   <span>Save Changes</span>
@@ -487,7 +492,7 @@ const Profile = () => {
                       type={showCurrentPassword ? "text" : "password"}
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                     <button
                       type="button"
@@ -506,7 +511,7 @@ const Profile = () => {
                       type={showNewPassword ? "text" : "password"}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                     <button
                       type="button"
@@ -525,7 +530,7 @@ const Profile = () => {
                       type={showConfirmPassword ? "text" : "password"}
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-12 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                     <button
                       type="button"
@@ -539,7 +544,7 @@ const Profile = () => {
 
                 <button 
                   onClick={handleChangePassword}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                  className="w-full bg-gradient-to-r from-primary to-[#00A2C2] text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                   Update Password
                 </button>
@@ -550,8 +555,8 @@ const Profile = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
                       <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-blue-100 rounded-xl">
-                          <Shield className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-primary/10 rounded-xl">
+                          <Shield className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900">Two-Factor Authentication</p>
@@ -560,14 +565,14 @@ const Profile = () => {
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" />
-                        <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                       </label>
                     </div>
 
                     <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
                       <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-green-100 rounded-xl">
-                          <Bell className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-emerald-100 rounded-xl">
+                          <Bell className="w-6 h-6 text-emerald-600" />
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900">Login Alerts</p>
@@ -576,7 +581,7 @@ const Profile = () => {
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" defaultChecked className="sr-only peer" />
-                        <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                       </label>
                     </div>
                   </div>
@@ -656,7 +661,7 @@ const Profile = () => {
                               <span>{Math.round(percentage)}%</span>
                             </div>
                             <div className="w-full h-2 rounded-full bg-slate-200">
-                              <div 
+                                <div 
                                 className={`h-2 transition-all duration-1000 ease-out rounded-full bg-gradient-to-r ${metric.color}`}
                                 style={{ width: `${percentage}%` }}
                               ></div>
@@ -671,7 +676,7 @@ const Profile = () => {
                   <div className="p-6 transition-all duration-300 transform border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-md hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-slate-900">Weekly Activity</h3>
-                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      <TrendingUp className="w-5 h-5 text-emerald-500" />
                     </div>
                     
                     <div className="space-y-4">
@@ -682,7 +687,7 @@ const Profile = () => {
                             <div className="flex space-x-1">
                               {/* Diagnoses Bar */}
                               <div 
-                                className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
+                                className="h-2 transition-all duration-500 rounded-full bg-gradient-to-r from-primary to-cyan-500"
                                 style={{ width: `${(day.diagnoses / 25) * 100}%` }}
                               ></div>
                               {/* Patients Bar */}
@@ -701,7 +706,7 @@ const Profile = () => {
                     
                     <div className="flex items-center justify-center mt-6 space-x-4 text-xs">
                       <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-cyan-500"></div>
                         <span className="text-slate-600">Diagnoses</span>
                       </div>
                       <div className="flex items-center space-x-1">
@@ -714,10 +719,10 @@ const Profile = () => {
 
                 <div className="pt-8 border-t border-slate-200">
                   <h4 className="mb-6 text-xl font-semibold text-slate-900">Data Export</h4>
-                  <div className="flex flex-col items-center justify-between p-8 border border-slate-200 sm:flex-row bg-gradient-to-r from-slate-50 to-blue-50 rounded-3xl">
+                  <div className="flex flex-col items-center justify-between p-8 border border-slate-200 sm:flex-row bg-gradient-to-r from-slate-50 to-primary/5 rounded-3xl">
                     <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-blue-100 rounded-xl">
-                        <Download className="w-6 h-6 text-blue-600" />
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Download className="w-6 h-6 text-primary" />
                       </div>
                       <div>
                         <p className="text-xl font-semibold text-slate-900">Export All Data</p>

@@ -30,6 +30,12 @@ const adminService = {
     const response = await api.get(`/AdminDoctor/${id}`);
     return response.data;
   },
+
+  // Delete Doctor
+  deleteDoctor: async (id) => {
+    const response = await api.delete(`/AdminDoctor/DeleteDoctor/${id}`);
+    return response.data;
+  },
 };
 
 export default adminService;

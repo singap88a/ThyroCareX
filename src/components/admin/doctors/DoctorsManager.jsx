@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, Download } from 'lucide-react';
+import { Search, Filter, Plus, Download, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DoctorCard from './DoctorCard';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
@@ -15,6 +15,8 @@ const DoctorsManager = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, doctorId: null, doctorName: '' });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -63,19 +65,40 @@ const DoctorsManager = () => {
     toast("Status toggle coming soon!", { icon: '🚧' });
   };
  
-  // Map backend object to DoctorCard props (if needed) or update DoctorCard to accept backend props
-  // Assuming DoctorCard expects { name, email, ... } 
-  // Backend returns { fullName, email, ... }
-  // We can map it on the fly
+  const confirmDelete = (doctor) => {
+      setDeleteModal({ isOpen: true, doctorId: doctor.doctorID, doctorName: doctor.fullName });
+  };
+
+  const handleDelete = async () => {
+      if (!deleteModal.doctorId) return;
+      setDeleteLoading(true);
+      try {
+          await adminService.deleteDoctor(deleteModal.doctorId);
+          setDoctors(prev => prev.filter(d => d.doctorID !== deleteModal.doctorId));
+          toast.success("Doctor deleted successfully");
+          setDeleteModal({ isOpen: false, doctorId: null, doctorName: '' });
+      } catch (error) {
+          console.error("Delete failed", error);
+          toast.error("Failed to delete doctor");
+      } finally {
+          setDeleteLoading(false);
+      }
+  };
+ 
+  // Map backend object to DoctorCard props
   const mapDoctorToCard = (doc) => ({
       ...doc,
-      id: doc.doctorID, // Crucial for navigation
+      id: doc.doctorID,
       name: doc.fullName || "Doctor",
-      status: doc.status || "Active", // Capitalize if needed, UI might expect lowercase
-      country: doc.city || "N/A", // Using city as country placeholder if no country in backend
-      subscription: "Standard", // Placeholder
-      credits: 0, // Placeholder
-      diagnosesCount: 0 // Placeholder
+      status: "active", // Default to active since backend doesn't seem to return status
+      phone: doc.phoneNumber,
+      // Keep original backend fields that DoctorCard now uses
+      email: doc.email,
+      address: doc.address,
+      hospital: doc.hospital,
+      specialization: doc.specialization,
+      gender: doc.gender,
+      profileImage: doc.profileImage,
   });
 
   return (
@@ -90,17 +113,7 @@ const DoctorsManager = () => {
             Manage registered doctors, subscriptions, and account status.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/30">
-            <Plus size={18} /> Add Doctor
-          </button>
-          <button 
-            onClick={() => toast.success("Exporting doctor list...")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border
-            ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-            <Download size={18} /> Export
-          </button>
-        </div>
+    
       </div>
 
       {/* Filters */}
@@ -150,6 +163,7 @@ const DoctorsManager = () => {
                 doctor={mapDoctorToCard(doctor)} 
                 onEdit={handleEdit} 
                 onToggleStatus={handleToggleStatus} 
+                onDelete={confirmDelete}
                 />
             ))}
             </AnimatePresence>
@@ -160,6 +174,55 @@ const DoctorsManager = () => {
         <div className="text-center py-20">
           <p className={`text-lg ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No doctors found matching your criteria.</p>
         </div>
+      )}
+      {!loading && filteredDoctors.length === 0 && (
+        <div className="text-center py-20">
+          <p className={`text-lg ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No doctors found matching your criteria.</p>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+             <motion.div
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 className={`w-full max-w-md p-6 rounded-2xl shadow-2xl ${isDarkMode ? 'bg-admin-dark-card border border-admin-dark-border' : 'bg-white'}`}
+             >
+                 <div className="flex flex-col items-center text-center">
+                     <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-600">
+                         <AlertTriangle size={32} />
+                     </div>
+                     <h3 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                         Delete Doctor?
+                     </h3>
+                     <p className={`mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                         Are you sure you want to permanently delete <span className="font-semibold text-red-500">{deleteModal.doctorName}</span>? This action cannot be undone.
+                     </p>
+                     
+                     <div className="flex gap-3 w-full">
+                         <button 
+                             onClick={() => setDeleteModal({ isOpen: false, doctorId: null, doctorName: '' })}
+                             disabled={deleteLoading}
+                             className={`flex-1 py-3 rounded-xl font-medium border transition-colors ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                         >
+                             Cancel
+                         </button>
+                         <button 
+                             onClick={handleDelete}
+                             disabled={deleteLoading}
+                             className="flex-1 py-3 rounded-xl font-medium text-white shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 shadow-red-500/20"
+                         >
+                             {deleteLoading ? (
+                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                             ) : (
+                                 'Yes, Delete'
+                             )}
+                         </button>
+                     </div>
+                 </div>
+             </motion.div>
+         </div>
       )}
     </div>
   );
