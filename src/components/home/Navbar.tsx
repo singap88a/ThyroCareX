@@ -75,10 +75,9 @@ const Navbar = () => {
 
   // تقصير اسم المستخدم - فقط الاسم الأول أو أول حرفين
   const getShortUserName = () => {
-    if (!user?.firstName) return "User";
-    const firstName = user.firstName;
-    if (firstName.length <= 8) return firstName;
-    return `${firstName.substring(0, 6)}...`;
+    const name = user?.firstName || user?.username || "User";
+    if (name.length <= 4) return name;
+    return `${name.substring(0, 4)}...`;
   };
 
   return (

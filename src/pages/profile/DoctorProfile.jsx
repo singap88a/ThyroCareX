@@ -33,25 +33,50 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
+import doctorService from '../../services/doctorService';
+import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('personal');
+  const [isEditing, setIsEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [toasts, setToasts] = useState([]);
   
+  const { user } = useAuth();
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    email: "dr.john.smith@example.com",
-    phone: "+1-234-567-8900",
-    licenseNumber: "MD123456",
-    specialty: "Endocrinology",
-    bio: "Board-certified endocrinologist with 15 years of experience in thyroid disease diagnosis and treatment",
-    hospital: "University Medical Center",
-    address: "New York, NY"
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    specialization: "",
+    medicaLicenseNumber: "",
+    address: "",
+    professionalBio: "",
+    hospital: "",
+    profileImage: null,
+    // Add other fields as necessary from API response
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await doctorService.getProfile();
+        if (response && response.succeeded) {
+           // The API returns PascalCase or camelCase depending on serialization. 
+           // Based on Curl: data keys are camelCase (fullName, email, etc)
+           setProfileData(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile", error);
+        toast.error("Failed to load profile data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -106,29 +131,101 @@ const Profile = () => {
     }, 5000);
   };
 
-  const handleSaveProfile = () => {
-    showToast("Profile Updated", "Your profile information has been successfully updated");
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileData(prev => ({
+        ...prev,
+        newProfileImage: file,
+        previewImage: URL.createObjectURL(file)
+      }));
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleSaveProfile = async () => {
+    try {
+        const formData = new FormData();
+        // Append all fields
+        // Note: The API requires specific keys. Based on curl: Id, FullName, Email, gender, PhoneNumber, Specialization...
+        // We might need to map them or ensure state matches.
+        // Let's assume the state keys match what we need or mapped here.
+        // But the GET response keys are camelCase, the PUT request body in prompt shows PascalCase mostly.
+        
+        // Add ID from user context (decoded token) logic
+        if (user && user.DoctorId) {
+             formData.append('Id', user.DoctorId);
+        }
+
+        if (!profileData.medicaLicenseNumber || profileData.medicaLicenseNumber.trim() === '') {
+             toast.error("Medical License Number is required");
+             return;
+        }
+
+        if (profileData.medicaLicenseNumber) {
+             formData.append('MedicaLicenseNumber', profileData.medicaLicenseNumber);
+        }
+
+        formData.append('FullName', profileData.fullName);
+        formData.append('Email', profileData.email);
+        formData.append('PhoneNumber', profileData.phoneNumber);
+        formData.append('Specialization', profileData.specialization);
+        formData.append('Address', profileData.address);
+        formData.append('Hospital', profileData.hospital || '');
+        formData.append('ProfessionalBio', profileData.professionalBio || '');
+        formData.append('gender', profileData.gender || 1); 
+        
+        // If there's a new image (we need to handle file input change separately)
+        if (profileData.newProfileImage) {
+            formData.append('ProfileImage', profileData.newProfileImage);
+        }
+
+        const response = await doctorService.updateProfile(formData);
+        if (response.succeeded) {
+            toast.success("Profile Updated Successfully");
+            setIsEditing(false);
+        } else {
+            toast.error(response.message || "Could not update profile");
+        }
+    } catch (error) {
+        console.error("Update error", error);
+        toast.error("An unexpected error occurred");
+    }
+  };
+
+  const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showToast("Password Error", "New password and confirmation do not match", "error");
+      toast.error("New password and confirmation do not match");
       return;
     }
     
-    showToast("Password Changed", "Your password has been updated successfully");
-    
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
+    try {
+        const response = await doctorService.changePassword({
+            email: profileData.email,
+            currentPassword: passwordData.currentPassword,
+            newPassword: passwordData.newPassword,
+            confirmPassword: passwordData.confirmPassword
+        });
+
+        if (response.succeeded) {
+            toast.success("Your password has been updated successfully");
+            setPasswordData({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+        } else {
+             toast.error(response.message || "Failed to change password");
+        }
+    } catch (error) {
+        console.error("Password change error", error);
+        toast.error(error.response?.data?.message || "Failed to change password");
+    }
   };
 
 
 
   const exportData = () => {
-    showToast("Data Export", "Your data export file will be sent to your email");
+    toast.success("Your data export file will be sent to your email");
   };
 
   const tabs = [
@@ -151,31 +248,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50">
       {/* Toast Notifications */}
-      <div className="fixed z-50 space-y-2 top-4 right-4">
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className={`flex items-center p-4 rounded-lg shadow-lg transform transition-all duration-300 ${
-              toast.type === 'error' 
-                ? 'bg-red-50 border-l-4 border-red-500 text-red-800' 
-                : 'bg-green-50 border-l-4 border-green-500 text-green-800'
-            }`}
-            style={{ minWidth: '300px' }}
-          >
-            <div className="flex-shrink-0">
-              {toast.type === 'error' ? (
-                <AlertCircle className="w-5 h-5 text-red-500" />
-              ) : (
-                <CheckCircle className="w-5 h-5 text-green-500" />
-              )}
-            </div>
-            <div className="ml-3">
-              <div className="font-semibold">{toast.title}</div>
-              <div className="text-sm">{toast.description}</div>
-            </div>
-          </div>
-        ))}
-      </div>
 
       {/* Header */}
       <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
@@ -199,19 +271,37 @@ const Profile = () => {
         <div className="p-8 mb-8 transition-all duration-300 border shadow-sm border-slate-200 bg-white/80 backdrop-blur-sm rounded-3xl hover:shadow-md">
           <div className="flex flex-col items-center space-y-6 md:flex-row md:space-y-0 md:space-x-8">
             <div className="relative group">
-              <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
-                <User className="w-12 h-12 text-white" />
-              </div>
-              <button className="absolute flex items-center justify-center w-10 h-10 transition-all duration-200 bg-white shadow-md rounded-xl -bottom-2 -right-2 hover:bg-slate-50 group-hover:scale-110 hover:shadow-lg">
-                <Camera className="w-5 h-5 text-slate-600" />
-              </button>
+              <label htmlFor="profile-image-upload" className="cursor-pointer">
+                <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden relative">
+                    {profileData.profileImage || profileData.previewImage ? (
+                        <img 
+                            src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {e.target.style.display='none';}} // Fallback to icon if error
+                        />
+                    ) : (
+                        <User className="w-12 h-12 text-white" />
+                    )}
+                </div>
+                <div className="absolute flex items-center justify-center w-10 h-10 transition-all duration-200 bg-white shadow-md rounded-xl -bottom-2 -right-2 hover:bg-slate-50 group-hover:scale-110 hover:shadow-lg">
+                    <Camera className="w-5 h-5 text-slate-600" />
+                </div>
+              </label>
+              <input 
+                id="profile-image-upload" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageChange} 
+                className="hidden" 
+               />
             </div>
             
             <div className="flex-1 text-center md:text-left">
               <h2 className="mb-2 text-3xl font-bold text-slate-900">
-                Dr. {profileData.firstName} {profileData.lastName}
+                {profileData.fullName || "Doctor"}
               </h2>
-              <p className="mb-2 text-xl font-semibold text-blue-600">{profileData.specialty}</p>
+              <p className="mb-2 text-xl font-semibold text-blue-600">{profileData.specialization}</p>
               <p className="text-slate-600">{profileData.hospital}</p>
               <div className="flex flex-wrap gap-2 mt-3">
                 <span className="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">Verified</span>
@@ -220,9 +310,18 @@ const Profile = () => {
               </div>
             </div>
             
-            <button className="flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 bg-white border shadow-sm text-slate-700 border-slate-300 rounded-xl hover:bg-slate-50 hover:shadow-md">
+            <label htmlFor="profile-image-upload" className="flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 bg-white border shadow-sm text-slate-700 border-slate-300 rounded-xl hover:bg-slate-50 hover:shadow-md cursor-pointer">
               <Upload className="w-5 h-5 text-slate-600" />
               <span>Update Photo</span>
+            </label>
+
+            <button 
+                onClick={() => setIsEditing(!isEditing)}
+                className={`flex items-center px-6 py-3 space-x-2 font-medium transition-all duration-200 border shadow-sm rounded-xl hover:shadow-md ml-auto
+                ${isEditing ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-blue-600 text-white border-transparent hover:bg-blue-700'}`}
+            >
+              <Settings className="w-5 h-5" />
+              <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
             </button>
           </div>
         </div>
@@ -266,102 +365,102 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">First Name</label>
+                    <label className="block mb-3 text-sm font-medium text-slate-700">Full Name</label>
                     <input
                       type="text"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={profileData.fullName}
+                      disabled={!isEditing}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, fullName: e.target.value }))}
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
-                  <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">Last Name</label>
-                    <input
-                      type="text"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <div>
                     <label className="block mb-3 text-sm font-medium text-slate-700">Email Address</label>
                     <input
                       type="email"
+                      readOnly
                       value={profileData.email}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={profileData.phone}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 bg-gray-50 text-gray-500 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">Medical License Number</label>
+                    <label className="block mb-3 text-sm font-medium text-slate-700">Phone Number</label>
                     <input
-                      type="text"
-                      value={profileData.licenseNumber}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, licenseNumber: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      type="tel"
+                      value={profileData.phoneNumber}
+                      disabled={!isEditing}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
                   <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">Specialty</label>
-                    <select 
-                      value={profileData.specialty}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, specialty: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="Endocrinology">Endocrinology</option>
-                      <option value="Internal Medicine">Internal Medicine</option>
-                      <option value="Family Medicine">Family Medicine</option>
-                      <option value="General Surgery">General Surgery</option>
-                    </select>
+                    <label className="block mb-3 text-sm font-medium text-slate-700">Medical License Number</label>
+                    <input
+                      type="text"
+                      value={profileData.medicaLicenseNumber || ''}
+                      disabled={!isEditing}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, medicaLicenseNumber: e.target.value }))}
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                   <div>
+                    <label className="block mb-3 text-sm font-medium text-slate-700">Specialization</label>
+                    <input
+                      type="text" 
+                      value={profileData.specialization}
+                      disabled={!isEditing}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, specialization: e.target.value }))}
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
+                    />
+                  </div>
+                   <div>
+                    <label className="block mb-3 text-sm font-medium text-slate-700">Hospital/Institution</label>
+                    <input
+                      type="text"
+                      value={profileData.hospital || ''}
+                      disabled={!isEditing}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, hospital: e.target.value }))}
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="block mb-3 text-sm font-medium text-slate-700">Professional Bio</label>
                   <textarea
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                    value={profileData.professionalBio || ''}
+                    disabled={!isEditing}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, professionalBio: e.target.value }))}
                     rows={4}
-                    className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                   />
                 </div>
-
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                  <div>
-                    <label className="block mb-3 text-sm font-medium text-slate-700">Hospital/Institution</label>
-                    <input
-                      type="text"
-                      value={profileData.hospital}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, hospital: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
+                
+                 <div>
                     <label className="block mb-3 text-sm font-medium text-slate-700">Address</label>
                     <input
                       type="text"
-                      value={profileData.address}
+                      value={profileData.address || ''}
+                      disabled={!isEditing}
                       onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
-                      className="w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full px-4 py-3 transition-colors duration-200 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!isEditing ? 'bg-gray-50 text-gray-500' : 'bg-white'}`}
                     />
                   </div>
-                </div>
 
+                {isEditing && (
                 <button 
                   onClick={handleSaveProfile}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
@@ -369,6 +468,7 @@ const Profile = () => {
                   <Save className="w-5 h-5" />
                   <span>Save Changes</span>
                 </button>
+                )}
               </div>
             )}
 

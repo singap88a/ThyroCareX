@@ -17,11 +17,44 @@ import {
 } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import { useAdminAuth } from '../../../contexts/AdminAuthContext';
+import adminService from '../../../services/adminService';
+import { useState, useEffect } from 'react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { isDarkMode } = useAdminTheme();
   const { logout } = useAdminAuth();
   const location = useLocation();
+  const [counts, setCounts] = useState({ doctors: 0, pendingRequests: 0, patients: 0 });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [pending, allDoctors] = await Promise.all([
+            adminService.getPendingDoctors(),
+            adminService.getAllDoctors()
+        ]);
+        
+        let pendingCount = 0;
+        if (pending && pending.succeeded && Array.isArray(pending.data)) pendingCount = pending.data.length;
+        else if (Array.isArray(pending)) pendingCount = pending.length;
+        else if (pending && Array.isArray(pending.data)) pendingCount = pending.data.length;
+
+        let doctorCount = 0;
+         if (allDoctors && allDoctors.succeeded && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
+        else if (Array.isArray(allDoctors)) doctorCount = allDoctors.length;
+        else if (allDoctors && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
+        
+        setCounts({
+            pendingRequests: pendingCount,
+            doctors: doctorCount,
+            patients: 12 // Mock for now or fetch if API exists
+        });
+      } catch (error) {
+        console.error("Failed to fetch sidebar counts", error);
+      }
+    };
+    fetchCounts();
+  }, []);
 
   // Menu items grouped by category with section titles
   const menuGroups = [
@@ -34,9 +67,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     {
       title: 'MANAGEMENT',
       items: [
-        { path: '/admin/doctors', icon: Stethoscope, label: 'Doctors', count: 3 },
-        { path: '/admin/doctor-requests', icon: UserCheck, label: 'Doctor Requests', count: 5 },
-        { path: '/admin/patients', icon: Users, label: 'Patients & Cases', count: 12 },
+        { path: '/admin/doctors', icon: Stethoscope, label: 'Doctors', count: counts.doctors },
+        { path: '/admin/doctor-requests', icon: UserCheck, label: 'Doctor Requests', count: counts.pendingRequests },
+        { path: '/admin/patients', icon: Users, label: 'Patients & Cases', count: counts.patients },
       ]
     },
     {

@@ -4,26 +4,36 @@ import { useNavigate } from "react-router-dom";
 import AuthWave from "./AuthWave";
 import { useAuth } from "../../contexts/AuthContext";
 
+import toast from 'react-hot-toast';
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate API call and login
-    // In a real app, you would validate with backend here
-    const mockUser = {
-      id: 1,
-      firstName: 'Dr. Sarah',
-      lastName: 'Connor',
-      email: formData.username || 'dr.sarah@thyrocarex.com',
-      role: 'doctor'
-    };
+    setLoading(true);
+    setError('');
+
+    const result = await login(formData.username, formData.password);
     
-    login(mockUser);
-    navigate('/'); // or dashboard
+    setLoading(false);
+    
+    if (result.success) {
+      toast.success('Logged in successfully');
+      if (result.role === 'Admin') {
+        navigate('/admin'); // Redirect to Admin Dashboard base
+      } else {
+        navigate('/'); // Redirect to Home
+      }
+    } else {
+      setError(result.message);
+      toast.error(result.message || 'Login failed. Please check your credentials.');
+    }
   };
 
   return (
@@ -66,6 +76,12 @@ const Login = () => {
               </p>
             </div>
           </div>
+
+          {error && (
+            <div className="p-4 mb-6 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+              <span className="font-medium">Error!</span> {error}
+            </div>
+          )}
 
           <form className="space-y-6" onSubmit={handleLogin}>
             
@@ -130,8 +146,10 @@ const Login = () => {
             </div>
 
             <div className="flex pt-4">
-              <button className="flex-1 py-4 px-6 bg-primary text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30">
-                Login
+              <button 
+                disabled={loading}
+                className="flex-1 py-4 px-6 bg-primary text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 disabled:opacity-70 disabled:cursor-not-allowed">
+                {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>
           </form>

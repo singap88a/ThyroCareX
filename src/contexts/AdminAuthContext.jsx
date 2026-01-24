@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const AdminAuthContext = createContext();
 
@@ -11,61 +12,50 @@ export const useAdminAuth = () => {
 };
 
 export const AdminAuthProvider = ({ children }) => {
+  const { user, login: contextLogin, logout: contextLogout, loading: authLoading } = useAuth();
   const [adminUser, setAdminUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored admin token/user
-    const storedAdmin = localStorage.getItem('adminUser');
-    if (storedAdmin) {
-      try {
-        setAdminUser(JSON.parse(storedAdmin));
-      } catch (error) {
-        console.error('Failed to parse stored admin user', error);
-        localStorage.removeItem('adminUser');
+    if (!authLoading) {
+      if (user && user.role === 'Admin') {
+        setAdminUser(user);
+      } else {
+        setAdminUser(null);
       }
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [user, authLoading]);
 
   const login = async (email, password) => {
-    // Mock login for now - replace with actual API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email === 'admin@thyrocarex.com' && password === 'admin123') {
-          const user = {
-            id: '1',
-            name: 'Super Admin',
-            email: 'admin@thyrocarex.com',
-            role: 'Super Admin', // Super Admin, Support, Finance Admin
-            avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=3b82f6&color=fff'
-          };
-          setAdminUser(user);
-          localStorage.setItem('adminUser', JSON.stringify(user));
-          resolve(user);
-        } else {
-          reject(new Error('Invalid credentials'));
-        }
-      }, 1000);
-    });
+    const result = await contextLogin(email, password);
+    if (result.success && result.role === 'Admin') {
+       return { success: true };
+    } else if (result.success && result.role !== 'Admin') {
+       // Logged in but not admin
+       contextLogout();
+       return { success: false, message: 'Access Denied: Admin privileges required.' };
+    } else {
+       return { success: false, message: result.message };
+    }
   };
 
   const logout = () => {
+    contextLogout();
     setAdminUser(null);
-    localStorage.removeItem('adminUser');
   };
 
   const value = {
     adminUser,
     login,
     logout,
-    loading,
+    loading: loading || authLoading,
     isAuthenticated: !!adminUser
   };
 
   return (
     <AdminAuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AdminAuthContext.Provider>
   );
 };

@@ -105,11 +105,14 @@ function AppContent() {
   );
 }
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <AppContent />
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       </Router>
      </AuthProvider>
   );

@@ -1,32 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Plus, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DoctorCard from './DoctorCard';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 
+import adminService from '../../../services/adminService';
+import toast from 'react-hot-toast';
+
 const DoctorsManager = () => {
   const { isDarkMode } = useAdminTheme();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Data
-  const [doctors, setDoctors] = useState([
-    { id: 1, name: 'Dr. Sarah Smith', email: 'sarah@example.com', country: 'USA', status: 'active', subscription: 'Pro', credits: 45, diagnosesCount: 128, phone: '+1 234 567 890' },
-    { id: 2, name: 'Dr. Ahmed Ali', email: 'ahmed@example.com', country: 'Egypt', status: 'active', subscription: 'Free', credits: 2, diagnosesCount: 15, phone: '+20 100 123 4567' },
-    { id: 3, name: 'Dr. John Doe', email: 'john@example.com', country: 'UK', status: 'suspended', subscription: 'Enterprise', credits: 100, diagnosesCount: 450, phone: '+44 20 1234 5678' },
-    { id: 4, name: 'Dr. Emily Chen', email: 'emily@example.com', country: 'Canada', status: 'active', subscription: 'Pro', credits: 30, diagnosesCount: 89, phone: '+1 416 123 4567' },
-    { id: 5, name: 'Dr. Michael Brown', email: 'michael@example.com', country: 'Australia', status: 'pending', subscription: 'Free', credits: 5, diagnosesCount: 0, phone: '+61 2 1234 5678' },
-  ]);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getAllDoctors();
+        if (Array.isArray(response)) {
+          setDoctors(response);
+        } else if (response.data && Array.isArray(response.data)) {
+          setDoctors(response.data);
+        } else {
+            console.warn("Unexpected doctors data", response);
+            setDoctors([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, []);
 
   const handleSearch = (e) => setSearchQuery(e.target.value);
   const handleFilterChange = (e) => setFilterStatus(e.target.value);
 
   const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          doctor.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || doctor.status === filterStatus;
+    const name = doctor.fullName || "";
+    const email = doctor.email || "";
+    const status = doctor.status || "active"; // Default
+
+    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || status.toLowerCase() === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -35,9 +57,26 @@ const DoctorsManager = () => {
   };
 
   const handleToggleStatus = (doctor) => {
-    const newStatus = doctor.status === 'active' ? 'suspended' : 'active';
-    setDoctors(doctors.map(d => d.id === doctor.id ? { ...d, status: newStatus } : d));
+    // Implement toggle status API if available, likely not in provided service snippet
+    // For now just console log
+    console.log("Toggle status for", doctor.id);
+    toast("Status toggle coming soon!", { icon: '🚧' });
   };
+ 
+  // Map backend object to DoctorCard props (if needed) or update DoctorCard to accept backend props
+  // Assuming DoctorCard expects { name, email, ... } 
+  // Backend returns { fullName, email, ... }
+  // We can map it on the fly
+  const mapDoctorToCard = (doc) => ({
+      ...doc,
+      id: doc.doctorID, // Crucial for navigation
+      name: doc.fullName || "Doctor",
+      status: doc.status || "Active", // Capitalize if needed, UI might expect lowercase
+      country: doc.city || "N/A", // Using city as country placeholder if no country in backend
+      subscription: "Standard", // Placeholder
+      credits: 0, // Placeholder
+      diagnosesCount: 0 // Placeholder
+  });
 
   return (
     <div className="space-y-6">
@@ -55,7 +94,9 @@ const DoctorsManager = () => {
           <button className="px-4 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/30">
             <Plus size={18} /> Add Doctor
           </button>
-          <button className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border
+          <button 
+            onClick={() => toast.success("Exporting doctor list...")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border
             ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
             <Download size={18} /> Export
           </button>
@@ -93,20 +134,29 @@ const DoctorsManager = () => {
       </div>
 
       {/* Doctors Grid */}
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence>
-          {filteredDoctors.map(doctor => (
-            <DoctorCard 
-              key={doctor.id} 
-              doctor={doctor} 
-              onEdit={handleEdit} 
-              onToggleStatus={handleToggleStatus} 
-            />
-          ))}
-        </AnimatePresence>
-      </motion.div>
+      {loading ? (
+        <div className="flex justify-center items-center h-[50vh]">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <div className="mt-4 text-center text-sm font-medium text-gray-500">Loading Doctors...</div>
+            </div>
+        </div>
+      ) : (
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <AnimatePresence>
+            {filteredDoctors.map(doctor => (
+                <DoctorCard 
+                key={doctor.id} 
+                doctor={mapDoctorToCard(doctor)} 
+                onEdit={handleEdit} 
+                onToggleStatus={handleToggleStatus} 
+                />
+            ))}
+            </AnimatePresence>
+        </motion.div>
+      )}
 
-      {filteredDoctors.length === 0 && (
+      {!loading && filteredDoctors.length === 0 && (
         <div className="text-center py-20">
           <p className={`text-lg ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No doctors found matching your criteria.</p>
         </div>

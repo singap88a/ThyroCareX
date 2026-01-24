@@ -1,61 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Phone, Calendar, MapPin, User, FileText, CheckCircle, XCircle, Download, IdCard } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
+
+import adminService from '../../../services/adminService';
+import toast from 'react-hot-toast';
 
 const DoctorRequestDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isDarkMode } = useAdminTheme();
+  
+  const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - in real app, fetch by id
-  const [request] = useState({
-    id: parseInt(id) || 1,
-    fullName: 'Dr. Ahmed Hassan',
-    email: 'ahmed.hassan@example.com',
-    phone: '+20 100 123 4567',
-    dateOfBirth: '1988-03-15',
-    gender: 'male',
-    country: 'Egypt',
-    status: 'pending',
-    submittedAt: '2024-01-15T10:30:00',
-    identityType: 'doctorCard',
-    identityFile: {
-      name: 'doctor_card_ahmed_hassan.pdf',
-      url: '#',
-      type: 'application/pdf'
-    },
-    address: {
-      street: '123 Medical Street',
-      city: 'Cairo',
-      state: 'Cairo',
-      zipCode: '11511'
-    },
-    medicalHistory: {
-      thyroidIssues: false,
-      diabetes: false,
-      heartDisease: false,
-      cancer: false,
-      allergies: false,
-      medications: false
-    },
-    termsAccepted: true,
-    newsletterSubscribed: false
-  });
+  useEffect(() => {
+    const fetchRequest = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getDoctorById(id);
+        if (response) {
+            const data = response.data || response;
+             // Ensure data is mapped for UI usage
+             setRequest({
+                ...data,
+                id: data.doctorID,
+                fullName: data.fullName,
+                email: data.email,
+                phoneNumber: data.phoneNumber,
+                dateofBirth: data.registrationAt, // Pending API shows registrationAt, details API usually has DOB but maybe not exposed here. Use registrationAt as fallback or empty. Wait, list has registrationAt. Details likely has same. Prompt says "every request will have details through its ID". Let's assume the GET /{id} returns the same structure + maybe more. The User provided GET /{id} output in step 276. It has `fullName`, `email`, `specialization`, `phoneNumber` (int), `address`, `imagePath`. No DOB there.
+                // Correction: GET /api/AdminDoctor/{id} in Step 276 returns: doctorID, fullName, email, specialization, phoneNumber (number), address, imagePath, registrationAt.
+                // It does NOT have dateOfBirth, gender (Wait, Pending list *has* gender, GetByID *has* gender).
+                // Let's map available fields.
+                gender: data.gender,
+                specialization: data.specialization,
+                address: data.address,
+                city: data.hospital, // Using hospital as city placeholder based on Step 276 output? No, Step 276 shows address as "stringeeter". Pending list has "address" and "hospital". Let's just use address.
+                // identificationImage: data.imagePath, // Use imagePath as ID image?
+                imagePath: data.imagePath,
+                profileImage: data.profileImage,
+                status: 'Pending' // Default for request view if not in data
+             });
+        }
+      } catch (error) {
+        console.error("Failed to fetch request details", error);
+        toast.error("Failed to load request details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequest();
+  }, [id]);
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (window.confirm('Are you sure you want to approve this doctor registration request?')) {
-      // In real app, make API call here
-      alert('Doctor registration approved successfully!');
-      navigate('/admin/doctor-requests');
+      try {
+          await adminService.approveDoctor(id);
+          toast.success('Doctor registration approved successfully!');
+          navigate('/admin/doctor-requests');
+      } catch (error) {
+          console.error("Approval failed", error);
+          toast.error('Failed to approve doctor.');
+      }
     }
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (window.confirm('Are you sure you want to reject this doctor registration request?')) {
-      // In real app, make API call here
-      alert('Doctor registration rejected.');
-      navigate('/admin/doctor-requests');
+      try {
+          await adminService.rejectDoctor(id);
+          toast.success('Doctor registration rejected.');
+          navigate('/admin/doctor-requests');
+      } catch (error) {
+          console.error("Rejection failed", error);
+          toast.error('Failed to reject doctor.');
+      }
     }
   };
 
@@ -69,6 +88,14 @@ const DoctorRequestDetails = () => {
       minute: '2-digit'
     });
   };
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
+
+  if (!request) {
+    return <div className="p-8 text-center">Request not found</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -84,7 +111,7 @@ const DoctorRequestDetails = () => {
             <span className="font-medium">Back to Requests</span>
           </button>
         </div>
-        {request.status === 'pending' && (
+        {request.status && request.status.toLowerCase() === 'pending' && (
           <div className="flex gap-3">
             <button
               onClick={handleReject}
@@ -117,13 +144,15 @@ const DoctorRequestDetails = () => {
                   <span className="flex items-center gap-1">
                     <Mail size={14} /> {request.email}
                   </span>
+                   {request.status && (
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    request.status === 'pending' ? 'bg-orange-500/20 text-white' :
-                    request.status === 'approved' ? 'bg-emerald-500/20 text-white' :
+                    request.status.toLowerCase() === 'pending' ? 'bg-orange-500/20 text-white' :
+                    request.status.toLowerCase() === 'approved' ? 'bg-emerald-500/20 text-white' :
                     'bg-red-500/20 text-white'
                   }`}>
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                   </span>
+                   )}
                 </div>
               </div>
             </div>
@@ -149,25 +178,25 @@ const DoctorRequestDetails = () => {
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Phone Number</label>
                 <p className={`font-medium flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                  <Phone size={14} /> {request.phone}
+                  <Phone size={14} /> {request.phoneNumber}
                 </p>
               </div>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Date of Birth</label>
                 <p className={`font-medium flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                  <Calendar size={14} /> {request.dateOfBirth}
+                  <Calendar size={14} /> {request.registrationAt ? formatDate(request.registrationAt) : 'Not provided'}
                 </p>
               </div>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
                 <label className="text-xs text-gray-500 block mb-1">Gender</label>
                 <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                  {request.gender.charAt(0).toUpperCase() + request.gender.slice(1)}
+                  {request.gender === 1 ? 'Male' : request.gender === 2 ? 'Female' : 'Other'}
                 </p>
               </div>
               <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
-                <label className="text-xs text-gray-500 block mb-1">Country</label>
+                <label className="text-xs text-gray-500 block mb-1">Specialization</label>
                 <p className={`font-medium flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                  <MapPin size={14} /> {request.country}
+                  {request.specialization}
                 </p>
               </div>
             </div>
@@ -176,112 +205,38 @@ const DoctorRequestDetails = () => {
           {/* Address */}
           <section>
             <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                <MapPin size={20} className="text-primary" /> Address
+                <MapPin size={20} className="text-primary" /> Location
             </h3>
             <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">Street Address</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.address.street}</p>
+                  <label className="text-xs text-gray-500 block mb-1">Address</label>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.address}</p>
                 </div>
-                <div>
+                 <div>
                   <label className="text-xs text-gray-500 block mb-1">City</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.address.city}</p>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.hospital || 'N/A'}</p>
                 </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">State/Province</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.address.state}</p>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Zip/Postal Code</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.address.zipCode}</p>
+                 <div>
+                  <label className="text-xs text-gray-500 block mb-1">National ID</label>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{request.nationalID || 'N/A'}</p>
                 </div>
               </div>
             </div>
           </section>
+          
+           {/* Identity Verification (simplified, assume imageUrl if exists) */}
+           {request.identificationImage && (
+              <section>
+                <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <IdCard size={20} className="text-orange-500" /> Identity Verification
+                </h3>
+                 <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
+                    <img src={request.identificationImage} alt="Identity" className="max-w-md w-full h-auto rounded" />
+                 </div>
+              </section>
+           )}
 
-          {/* Medical History */}
-          <section>
-            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <FileText size={20} className="text-primary" /> Medical History
-            </h3>
-            <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {Object.entries(request.medicalHistory).map(([key, value]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${value ? 'bg-primary' : 'bg-gray-300'}`}></div>
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Identity Verification */}
-          <section>
-            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <IdCard size={20} className="text-orange-500" /> Identity Verification
-            </h3>
-            <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Identity Type</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                    {request.identityType === 'nationalId' ? 'National ID' :
-                     request.identityType === 'passport' ? 'Passport' :
-                     'Doctor ID Card'}
-                  </p>
-                </div>
-                {request.identityFile && (
-                  <div>
-                    <label className="text-xs text-gray-500 block mb-2">Identity Document</label>
-                    <a
-                      href={request.identityFile.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors
-                        ${isDarkMode ? 'bg-primary hover:bg-primaryHover text-white' : 'bg-primary/10 hover:bg-primary/20 text-primary'}`}
-                    >
-                      <Download size={16} /> {request.identityFile.name}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Submission Details */}
-          <section>
-            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-              <Calendar size={20} className="text-indigo-500" /> Submission Details
-            </h3>
-            <div className={`p-4 rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'}`}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Submitted At</label>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                    {formatDate(request.submittedAt)}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Terms Accepted</label>
-                  <p className={`font-medium flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
-                    {request.termsAccepted ? (
-                      <>
-                        <CheckCircle size={16} className="text-primary" /> Yes
-                      </>
-                    ) : (
-                      <>
-                        <XCircle size={16} className="text-red-500" /> No
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </div>

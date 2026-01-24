@@ -4,40 +4,32 @@ import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone, FaCalendar, FaM
 import { useAuth } from '../../contexts/AuthContext';
 import AuthWave from './AuthWave';
 import { TermsModal, PrivacyModal } from './AuthModals';
+import toast from 'react-hot-toast';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phone: '',
-    dateOfBirth: '',
-    gender: '',
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
-    },
-    medicalHistory: {
-      thyroidIssues: false,
-      diabetes: false,
-      heartDisease: false,
-      cancer: false,
-      allergies: false,
-      medications: false
-    },
-    identityType: 'nationalId', // nationalId, passport, doctorCard
-    identityFile: null,
-    termsAccepted: false,
-    newsletterSubscribed: false
+    FullName: '',
+    Email: '',
+    Password: '',
+    ConfirmPassword: '',
+    PhoneNumber: '',
+    DateofBirth: '',
+    Gender: '', // 1 or 2 as int
+    Specialization: '',
+    Hospital: '',
+    MedicalLicenseNumber: '',
+    Address: '',
+    City: '',
+    ZipCode: '',
+    IdentificationImage: null,
+    termsAccepted: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [pageLoaded, setPageLoaded] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -82,28 +74,29 @@ const Register = () => {
     const newErrors = {};
 
     if (step === 1) {
-      if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required';
-      if (!formData.email) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Invalid email';
+      if (!formData.FullName || !formData.FullName.trim()) newErrors.FullName = 'Full Name is required';
+      if (!formData.Email) {
+        newErrors.Email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(formData.Email)) {
+        newErrors.Email = 'Invalid email';
       }
-      if (!formData.password) {
-        newErrors.password = 'Password is required';
-      } else if (formData.password.length < 8) {
-        newErrors.password = 'Min 8 chars';
+      if (!formData.Password) {
+        newErrors.Password = 'Password is required';
+      } else if (formData.Password.length < 8) {
+        newErrors.Password = 'Min 8 chars';
       }
-      if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+      if (formData.Password !== formData.ConfirmPassword) {
+        newErrors.ConfirmPassword = 'Passwords do not match';
       }
     } else if (step === 2) {
-      if (!formData.phone) newErrors.phone = 'Phone is required';
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      if (!formData.gender) newErrors.gender = 'Select gender';
+      if (!formData.PhoneNumber) newErrors.PhoneNumber = 'Phone is required';
+      if (!formData.DateofBirth) newErrors.DateofBirth = 'Date of birth is required';
+      if (!formData.Gender) newErrors.Gender = 'Select gender';
+      if (!formData.Specialization) newErrors.Specialization = 'Specialization is required';
     } else if (step === 3) {
-      if (!formData.address.street.trim()) newErrors['address.street'] = 'Street is required';
-      if (!formData.address.city.trim()) newErrors['address.city'] = 'City is required';
-      // if (!formData.identityFile) newErrors.identityFile = 'Identity document is required'; // Must be optional if not strictly required, but user asked for it. Assuming required for verification flow.
+      if (!formData.Address || !formData.Address.trim()) newErrors.Address = 'Street is required';
+      if (!formData.City || !formData.City.trim()) newErrors.City = 'City is required';
+      // if (!formData.identityFile) newErrors.identityFile = 'Identity document is required'; 
       if (!formData.termsAccepted) newErrors.termsAccepted = 'Required';
     }
 
@@ -121,16 +114,46 @@ const Register = () => {
     setCurrentStep(prev => prev - 1);
   };
 
+  const { register } = useAuth(); // Get register from context
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep(currentStep)) {
       setIsLoading(true);
+      setErrors({});
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        navigate('/pending-verification');
-      } catch {
-        setErrors({ general: 'Registration failed. Please try again.' });
+        const data = new FormData();
+        data.append('FullName', formData.FullName);
+        data.append('Email', formData.Email);
+        data.append('Password', formData.Password);
+        data.append('ConfirmPassword', formData.ConfirmPassword);
+        data.append('PhoneNumber', formData.PhoneNumber);
+        data.append('Gender', formData.Gender); // Ensure this is converted to int if needed by backend, but FormData handles strings mainly. API expects int32, usually backend parses string "1" to int 1.
+        data.append('DateofBirth', formData.DateofBirth);
+        data.append('Specialization', formData.Specialization);
+        data.append('Hospital', formData.Hospital || '');
+        data.append('MedicalLicenseNumber', formData.MedicalLicenseNumber || '');
+        data.append('Address', formData.Address);
+        data.append('City', formData.City);
+        data.append('ZipCode', formData.ZipCode);
+        if (formData.IdentificationImage) {
+            data.append('IdentificationImage', formData.IdentificationImage);
+        }
+
+        const response = await register(data);
+        
+        if (response.succeeded) {
+             toast.success(response.message || "Registration successful! Please wait for admin approval.");
+             setIsSuccess(true);
+             // navigate('/login'); 
+        } else {
+             setErrors({ general: response.message || 'Registration failed' });
+             toast.error(response.message || 'Registration failed');
+        }
+      } catch (err) {
+        console.error(err);
+        setErrors({ general: err.response?.data?.message || 'Registration failed. Please try again.' });
+        toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -147,18 +170,18 @@ const Register = () => {
         <label className="block mb-1.5 text-sm font-medium text-gray-700">Full Name *</label>
         <div className="relative">
           <input
-            name="fullName"
+            name="FullName"
             type="text"
-            value={formData.fullName}
+            value={formData.FullName}
             onChange={handleChange}
             className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.fullName ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+              errors.FullName ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
             }`}
             placeholder="Dr. John Doe"
           />
           <FaUser className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
         </div>
-        {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
+        {errors.FullName && <p className="mt-1 text-xs text-red-500">{errors.FullName}</p>}
       </div>
 
       {/* Email */}
@@ -166,18 +189,18 @@ const Register = () => {
         <label className="block mb-1.5 text-sm font-medium text-gray-700">Email *</label>
         <div className="relative">
           <input
-            name="email"
+            name="Email"
             type="email"
-            value={formData.email}
+            value={formData.Email}
             onChange={handleChange}
             className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+              errors.Email ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
             }`}
             placeholder="doctor@example.com"
           />
           <FaEnvelope className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
         </div>
-        {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+        {errors.Email && <p className="mt-1 text-xs text-red-500">{errors.Email}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -186,12 +209,12 @@ const Register = () => {
           <label className="block mb-1.5 text-sm font-medium text-gray-700">Password *</label>
           <div className="relative">
             <input
-              name="password"
+              name="Password"
               type={showPassword ? 'text' : 'password'}
-              value={formData.password}
+              value={formData.Password}
               onChange={handleChange}
               className={`w-full px-4 py-3 pl-10 pr-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-                errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+                errors.Password ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}
               placeholder="••••••••"
             />
@@ -204,7 +227,7 @@ const Register = () => {
               {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+          {errors.Password && <p className="mt-1 text-xs text-red-500">{errors.Password}</p>}
         </div>
 
         {/* Confirm Password */}
@@ -212,12 +235,12 @@ const Register = () => {
           <label className="block mb-1.5 text-sm font-medium text-gray-700">Confirm *</label>
           <div className="relative">
             <input
-              name="confirmPassword"
+              name="ConfirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
-              value={formData.confirmPassword}
+              value={formData.ConfirmPassword}
               onChange={handleChange}
               className={`w-full px-4 py-3 pl-10 pr-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-                errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+                errors.ConfirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}
               placeholder="••••••••"
             />
@@ -243,14 +266,14 @@ const Register = () => {
           <label className="block mb-1.5 text-sm font-medium text-gray-700">Phone *</label>
           <div className="relative">
             <input
-              name="phone"
+              name="PhoneNumber"
               type="tel"
-              value={formData.phone}
+              value={formData.PhoneNumber}
               onChange={handleChange}
               className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-                errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+                errors.PhoneNumber ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}
-              placeholder="(555) 123-4567"
+              placeholder="010xxxxxxx"
             />
             <FaPhone className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
           </div>
@@ -261,12 +284,12 @@ const Register = () => {
           <label className="block mb-1.5 text-sm font-medium text-gray-700">DOB *</label>
           <div className="relative">
             <input
-              name="dateOfBirth"
+              name="DateofBirth"
               type="date"
-              value={formData.dateOfBirth}
+              value={formData.DateofBirth}
               onChange={handleChange}
               className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-                errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+                errors.DateofBirth ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}
             />
             <FaCalendar className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
@@ -274,58 +297,92 @@ const Register = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+         {/* Hospital */}
+         <div>
+            <label className="block mb-1.5 text-sm font-medium text-gray-700">Hospital</label>
+            <div className="relative">
+               <input
+               name="Hospital"
+               type="text"
+               value={formData.Hospital}
+               onChange={handleChange}
+               className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                  errors.Hospital ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+               }`}
+               placeholder="Tabarak Hospital"
+               />
+               <FaMapMarker className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
+            </div>
+         </div>
+
+         {/* Medical License Number */}
+         <div>
+            <label className="block mb-1.5 text-sm font-medium text-gray-700">License Number</label>
+            <div className="relative">
+               <input
+               name="MedicalLicenseNumber"
+               type="text"
+               value={formData.MedicalLicenseNumber}
+               onChange={handleChange}
+               className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                  errors.MedicalLicenseNumber ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+               }`}
+               placeholder="000000333"
+               />
+               <FaIdCard className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
+            </div>
+         </div>
+      </div>
+
+      {/* Specialization */}
+      <div>
+          <label className="block mb-1.5 text-sm font-medium text-gray-700">Specialization *</label>
+          <div className="relative">
+            <input
+              name="Specialization"
+              type="text"
+              value={formData.Specialization}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 pl-10 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                errors.Specialization ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+              }`}
+              placeholder="e.g. Endocrinology"
+            />
+            <FaStethoscope className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3.5 top-1/2" />
+          </div>
+          {errors.Specialization && <p className="mt-1 text-xs text-red-500">{errors.Specialization}</p>}
+      </div>
+
       {/* Gender */}
       <div>
         <label className="block mb-1.5 text-sm font-medium text-gray-700">Gender *</label>
         <div className="grid grid-cols-3 gap-3">
-          {['Male', 'Female', 'Other'].map((gender) => (
-            <label key={gender} className="relative cursor-pointer">
+          {[
+              { label: 'Male', value: 1 }, 
+              { label: 'Female', value: 2 }, 
+              { label: 'Other', value: 0 } 
+          ].map((option) => (
+            <label key={option.label} className="relative cursor-pointer">
               <input
                 type="radio"
-                name="gender"
-                value={gender.toLowerCase()}
-                checked={formData.gender === gender.toLowerCase()}
+                name="Gender"
+                value={option.value}
+                checked={parseInt(formData.Gender) === option.value}
                 onChange={handleChange}
                 className="sr-only"
               />
               <div className={`py-3 px-2 border rounded-xl text-center text-sm font-medium transition-all ${
-                formData.gender === gender.toLowerCase()
+                parseInt(formData.Gender) === option.value
                   ? 'border-primary bg-primary/5 text-primary shadow-sm'
                   : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
               }`}>
-                {gender}
+                {option.label}
               </div>
             </label>
           ))}
         </div>
-        {errors.gender && <p className="mt-1 text-xs text-red-500">{errors.gender}</p>}
-      </div>
-
-       {/* Medical History */}
-       <div>
-        <h3 className="flex items-center mb-3 text-sm font-semibold text-gray-900">
-          <FaStethoscope className="w-4 h-4 mr-2 text-primary" />
-          Medical History (Optional)
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { key: 'thyroidIssues', label: 'Thyroid Issues' },
-            { key: 'diabetes', label: 'Diabetes' },
-            { key: 'heartDisease', label: 'Heart Disease' },
-            { key: 'allergies', label: 'Allergies' },
-          ].map(({ key, label }) => (
-            <label key={key} className="flex items-center p-2 border rounded-lg hover:bg-gray-50 border-gray-100">
-              <input
-                type="checkbox"
-                name={`medicalHistory.${key}`}
-                checked={formData.medicalHistory[key]}
-                onChange={handleChange}
-                className="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary"
-              />
-              <span className="ml-2 text-xs font-medium text-gray-600">{label}</span>
-            </label>
-          ))}
-        </div>
+        {errors.Gender && <p className="mt-1 text-xs text-red-500">{errors.Gender}</p>}
       </div>
     </div>
   );
@@ -336,37 +393,31 @@ const Register = () => {
       <div className="space-y-4">
         <h3 className="flex items-center text-sm font-semibold text-gray-900">
           <FaMapMarker className="w-4 h-4 mr-2 text-primary" />
-          Address
+          Location
         </h3>
         <div className="space-y-3">
           <input
-            name="address.street"
-            value={formData.address.street}
+            name="Address"
+            value={formData.Address}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             placeholder="Street Address"
           />
           <div className="grid grid-cols-3 gap-3">
             <input
-              name="address.city"
-              value={formData.address.city}
+              name="City"
+              value={formData.City}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               placeholder="City"
             />
+            {/* Using ZipCode directly */}
             <input
-              name="address.state"
-              value={formData.address.state}
+              name="ZipCode"
+              value={formData.ZipCode}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder="State"
-            />
-            <input
-              name="address.zipCode"
-              value={formData.address.zipCode}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder="Zip"
+              placeholder="Zip Code"
             />
           </div>
         </div>
@@ -376,60 +427,39 @@ const Register = () => {
        <div className="space-y-3 pt-2">
         <h3 className="flex items-center text-sm font-semibold text-gray-900">
           <FaIdCard className="w-4 h-4 mr-2 text-primary" />
-          Identity Verification
+          Identification Image
         </h3>
         
-        <div className="grid grid-cols-3 gap-2 mb-2">
-          {[
-            { id: 'nationalId', label: 'National ID' },
-            { id: 'passport', label: 'Passport' },
-            { id: 'doctorCard', label: 'Doctor ID' }
-          ].map(type => (
-            <button
-              key={type.id}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, identityType: type.id }))}
-              className={`py-2 px-1 text-xs font-medium rounded-lg border transition-all ${
-                formData.identityType === type.id
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              {type.label}
-            </button>
-          ))}
-        </div>
-
         <div className="relative">
           <input
             type="file"
-            name="identityFile"
-            id="identityFile"
+            name="IdentificationImage"
+            id="IdentificationImage"
             className="hidden"
-            accept="image/*,.pdf"
+            accept="image/*"
             onChange={handleChange}
           />
           <label 
-            htmlFor="identityFile"
+            htmlFor="IdentificationImage"
             className={`flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-              formData.identityFile ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
+              formData.IdentificationImage ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
             }`}
           >
-            {formData.identityFile ? (
+            {formData.IdentificationImage ? (
                <div className="flex items-center text-primary">
                  <FaIdCard className="w-5 h-5 mr-2" />
-                 <span className="text-sm font-medium truncate max-w-[200px]">{formData.identityFile.name}</span>
+                 <span className="text-sm font-medium truncate max-w-[200px]">{formData.IdentificationImage.name}</span>
                </div>
             ) : (
               <div className="text-center">
                 <FaUpload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500">Upload Document</p>
-                <p className="text-xs text-gray-400 mt-1">Images or PDF</p>
+                <p className="text-sm text-gray-500">Upload Image</p>
+                <p className="text-xs text-gray-400 mt-1">.jpg, .png</p>
               </div>
             )}
           </label>
         </div>
-        {errors.identityFile && <p className="text-xs text-red-500">{errors.identityFile}</p>}
+        {errors.IdentificationImage && <p className="text-xs text-red-500">{errors.IdentificationImage}</p>}
       </div>
 
       {/* Terms */}
@@ -462,97 +492,129 @@ const Register = () => {
       <div className="z-20 flex flex-col justify-center w-full lg:w-[55%] h-full px-4 sm:px-12 lg:px-24 mt-4 mb-4 overflow-y-auto custom-scrollbar">
         <div className="w-full max-w-xl mx-auto animate-fadeIn py-6">
           
-          {/* Header & Steps */}
-          <div className="mb-10">
-             <div className="flex items-end justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center mb-2">
-                    {/* Icon from Login */}
-                    <div className="flex items-center justify-center w-10 h-10 mr-3 shadow-sm bg-gradient-to-br from-blue-50 to-primary/10 rounded-xl">
-                      <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                      </svg>
+          {/* Success Screen */}
+          {isSuccess ? (
+             <div className="flex flex-col items-center justify-center p-8 bg-white border border-green-100 shadow-xl shadow-green-50 rounded-2xl animate-fadeIn text-center space-y-6">
+                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-2">
+                   <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                   </svg>
+                </div>
+                <div>
+                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
+                   <p className="text-gray-600 max-w-sm mx-auto">
+                      Your account has been created and is currently under review by our administrators.
+                   </p>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 w-full max-w-sm">
+                   <p className="text-sm text-blue-800 font-medium">
+                      Please wait for admin approval. You will be notified once your account is active.
+                   </p>
+                </div>
+
+                <Link 
+                   to="/login" 
+                   className="w-full max-w-sm px-6 py-3 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform transition-all hover:-translate-y-0.5"
+                >
+                   Go to Login
+                </Link>
+             </div>
+          ) : (
+            <>
+                {/* Header & Steps */}
+                <div className="mb-10">
+                    <div className="flex items-end justify-between mb-4">
+                        <div className="flex-1">
+                        <div className="flex items-center mb-2">
+                            {/* Icon from Login */}
+                            <div className="flex items-center justify-center w-10 h-10 mr-3 shadow-sm bg-gradient-to-br from-blue-50 to-primary/10 rounded-xl">
+                            <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            </div>
+                            <h1 className="text-[1.5rem] lg:text-[1.7rem] font-bold tracking-tight text-gray-900 leading-tight">
+                            <span className="relative font-extrabold text-primary">
+                                Create Account
+                                <span className="absolute -bottom-2 left-0 w-full h-[4px] bg-gradient-to-r from-primary via-primary/70 to-transparent rounded-full transform -translate-y-1"></span>
+                            </span>
+                            <span className="ml-2 font-extrabold text-gray-700 block sm:inline sm:ml-2">
+                                to Thyro Carex
+                            </span>
+                            </h1>
+                        </div>
+                        <p className="  text-sm font-medium text-gray-600">
+                            Join our professional medical network
+                        </p>
+                        </div>
+
+                        {/* Step Indicator */}
+                        <div className="hidden sm:block text-right ml-4 mb-2">
+                        <span className="text-sm font-bold text-primary">Step {currentStep}</span>
+                        <span className="text-sm text-gray-400">/3</span>
+                        </div>
                     </div>
-                    <h1 className="text-[1.5rem] lg:text-[1.7rem] font-bold tracking-tight text-gray-900 leading-tight">
-                      <span className="relative font-extrabold text-primary">
-                        Create Account
-                        <span className="absolute -bottom-2 left-0 w-full h-[4px] bg-gradient-to-r from-primary via-primary/70 to-transparent rounded-full transform -translate-y-1"></span>
-                      </span>
-                      <span className="ml-2 font-extrabold text-gray-700 block sm:inline sm:ml-2">
-                        to Thyro Carex
-                      </span>
-                    </h1>
-                  </div>
-                  <p className="  text-sm font-medium text-gray-600">
-                    Join our professional medical network
-                  </p>
+                    
+                    {/* Progress Bar */}
+                    <div className="bg-gray-100 h-1.5 w-full rounded-full overflow-hidden mt-4">
+                        <div 
+                        className="h-full bg-primary transition-all duration-500 ease-out rounded-full"
+                        style={{ width: `${(currentStep / 3) * 100}%` }}
+                        ></div>
+                    </div>
                 </div>
 
-                {/* Step Indicator */}
-                <div className="hidden sm:block text-right ml-4 mb-2">
-                  <span className="text-sm font-bold text-primary">Step {currentStep}</span>
-                  <span className="text-sm text-gray-400">/3</span>
+                {/* Registration Form */}
+                <div className="p-6 bg-white border border-gray-100 shadow-xl shadow-primary/5 rounded-2xl relative">
+                    <form onSubmit={handleSubmit}>
+                    {currentStep === 1 && renderStep1()}
+                    {currentStep === 2 && renderStep2()}
+                    {currentStep === 3 && renderStep3()}
+
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between mt-8 pt-4 border-t border-gray-50">
+                        {currentStep > 1 ? (
+                        <button
+                            type="button"
+                            onClick={handlePrev}
+                            className="px-5 py-2.5 text-sm font-medium text-gray-600 transition-all border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900"
+                        >
+                            Back
+                        </button>
+                        ) : (
+                        <div></div> // Spacer
+                        )}
+
+                        {currentStep < 3 ? (
+                        <button
+                            type="button"
+                            onClick={handleNext}
+                            className="px-6 py-2.5 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform transition-all hover:-translate-y-0.5"
+                        >
+                            Next Step
+                        </button>
+                        ) : (
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="px-8 py-2.5 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? 'Processing...' : 'Complete Registration'}
+                        </button>
+                        )}
+                    </div>
+                    </form>
+
+                    {/* Login Link */}
+                    <div className="mt-6 text-center">
+                    <p className="text-xs text-gray-500">
+                        Already have an account?{' '}
+                        <Link to="/login" className="font-semibold text-primary hover:underline">Sign In</Link>
+                    </p>
+                    </div>
                 </div>
-             </div>
-             
-             {/* Progress Bar */}
-             <div className="bg-gray-100 h-1.5 w-full rounded-full overflow-hidden mt-4">
-                <div 
-                  className="h-full bg-primary transition-all duration-500 ease-out rounded-full"
-                  style={{ width: `${(currentStep / 3) * 100}%` }}
-                ></div>
-             </div>
-          </div>
-
-          {/* Registration Form */}
-          <div className="p-6 bg-white border border-gray-100 shadow-xl shadow-primary/5 rounded-2xl relative">
-            <form onSubmit={handleSubmit}>
-              {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-4 border-t border-gray-50">
-                {currentStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={handlePrev}
-                    className="px-5 py-2.5 text-sm font-medium text-gray-600 transition-all border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900"
-                  >
-                    Back
-                  </button>
-                ) : (
-                  <div></div> // Spacer
-                )}
-
-                {currentStep < 3 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="px-6 py-2.5 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform transition-all hover:-translate-y-0.5"
-                  >
-                    Next Step
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-8 py-2.5 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? 'Processing...' : 'Complete Registration'}
-                  </button>
-                )}
-              </div>
-            </form>
-
-            {/* Login Link */}
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
-                Already have an account?{' '}
-                <Link to="/login" className="font-semibold text-primary hover:underline">Sign In</Link>
-              </p>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 

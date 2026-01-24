@@ -50,12 +50,7 @@ const FAQ = () => {
     <section className="py-20 bg-gradient-to-b ">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-16 text-center"
-        >
+        <div className="mb-16 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border rounded-full border-primary/20 bg-primary/10">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
             <span className="text-sm font-medium text-primary">FAQ</span>
@@ -69,18 +64,15 @@ const FAQ = () => {
           <p className="max-w-2xl mx-auto text-xl leading-relaxed text-gray-600">
             Find answers to common questions about ThyroCareX AI diagnosis and services.
           </p>
-        </motion.div>
+        </div>
 
         {/* Two Column FAQ Grid */}
         <div className="grid max-w-6xl gap-8 mx-auto lg:grid-cols-2 lg:gap-12">
           {/* Left Column */}
           <div className="space-y-4">
             {leftColumnFaqs.map((faq, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="transition-all duration-300 bg-white border border-gray-200 shadow-sm rounded-2xl hover:shadow-md"
               >
                 <button
@@ -117,7 +109,7 @@ const FAQ = () => {
                     )}
                   </div>
                 </button>
-              </motion.div>
+              </div>
             ))}
           </div>
 
@@ -126,11 +118,8 @@ const FAQ = () => {
             {rightColumnFaqs.map((faq, index) => {
               const adjustedIndex = index + leftColumnFaqs.length;
               return (
-                <motion.div
+                <div
                   key={adjustedIndex}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="transition-all duration-300 bg-white border border-gray-200 shadow-sm rounded-2xl hover:shadow-md"
                 >
                   <button
@@ -167,7 +156,7 @@ const FAQ = () => {
                       )}
                     </div>
                   </button>
-                </motion.div>
+                </div>
               );
             })}
           </div>

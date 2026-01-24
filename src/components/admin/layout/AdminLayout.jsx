@@ -16,7 +16,7 @@ const AdminLayout = () => {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      // navigate('/admin/login'); // Uncomment when login page is ready
+       navigate('/login'); 
     }
   }, [isAuthenticated, loading, navigate]);
 

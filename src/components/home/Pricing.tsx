@@ -1,182 +1,184 @@
-import { FaCheck, FaCrown, FaStar, FaRocket } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaCheck, FaStar, FaCrown, FaUserMd, FaHandHoldingMedical, FaArrowRight } from 'react-icons/fa';
+import { FaShieldHeart } from 'react-icons/fa6';
 
 const Pricing = () => {
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
   const plans = [
     {
       name: 'Basic',
-      price: 'Free',
+      label: 'Entry Level',
+      price: '$0',
       period: 'forever',
+      description: 'Essential thyroid health monitoring for individuals.',
       features: [
-        'Basic thyroid scan upload',
-        'AI-powered initial analysis', 
-        'Summary report with insights',
-        'Email support within 24 hours',
-        'Community forum access'
+        'Standard scan uploads',
+        'AI insights summary',
+        'Email health tips', 
+        'Community access'
       ],
-      cta: 'Get Started Free',
-      icon: <FaRocket className="w-6 h-6" />,
-      gradient: 'from-gray-500 to-gray-700',
-      bgColor: 'bg-gray-50'
+      cta: 'Start Free',
+      icon: <FaHandHoldingMedical size={18} />,
+      isPopular: false
     },
     {
       name: 'Advanced',
-      price: '$49',
+      label: 'Recommended',
+      price: billingCycle === 'monthly' ? '$49' : '$39',
       period: 'per month',
+      description: 'Complete care with specialist consultations and priority.',
       features: [
-        'Everything in Basic plan',
-        'Detailed AI diagnosis report',
-        'Video consultation with specialists',
-        'Priority email & chat support',
-        'Personalized follow-up reports',
-        'Medical record storage'
+        'Detailed AI diagnosis',
+        'Video consultations',
+        'Priority 24/7 support',
+        'Secure record storage'
       ],
-      cta: 'Choose Advanced',
-      popular: true,
-      icon: <FaStar className="w-6 h-6" />,
-      gradient: 'from-primary to-primary',
-      bgColor: 'bg-primary/10'
+      cta: 'Get Started',
+      icon: <FaShieldHeart size={18} />,
+      isPopular: true
     },
     {
       name: 'Professional',
-      price: '$99',
+      label: 'Elite Care',
+      price: billingCycle === 'monthly' ? '$99' : '$89',
       period: 'per month',
+      description: 'The ultimate package for comprehensive family wellness.',
       features: [
-        'Everything in Advanced plan',
-        'Unlimited video consultations',
-        '24/7 dedicated support line',
-        'Second opinion from top experts',
-        'Personalized treatment plans',
+        'Unlimited consultations',
+        'Second-opinion reviews',
         'Family plan coverage',
-        'Emergency response team'
+        'Personalized treatment'
       ],
-      cta: 'Choose Professional',
-      icon: <FaCrown className="w-6 h-6" />,
-      gradient: 'from-orange-500 to-red-500',
-      bgColor: 'bg-orange-50'
+      cta: 'Consult Sales',
+      icon: <FaCrown size={18} />,
+      isPopular: false
     }
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden ">
- 
-      
-      <div className="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="mb-16 text-center">
-          <div className="inline-flex items-center px-4 py-2 mb-4 text-sm font-medium rounded-full text-primary bg-primary/10">
-            💰 TRANSPARENT PRICING
-          </div>
-          <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
-            Choose Your
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">
-              Healthcare Plan
-            </span>
-          </h2>
-          <p className="max-w-3xl mx-auto text-xl leading-relaxed text-gray-600">
-            Select the perfect plan for your thyroid health journey. 
-            All plans include our industry-leading AI diagnosis technology.
-          </p>
+    <section className="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+      {/* Decorative Top Border */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent"></div>
+
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+        {/* Split Header Layout */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-20">
+           {/* Left Content */}
+           <div className="max-w-2xl text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
+                 <FaUserMd /> Pricing & Plans
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+                 Flexible <span className="text-primary italic font-light">Healthcare</span> Plans
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm md:text-base">
+                 Select a transparent pricing model tailored to your thyroid health needs. 
+                 Switch or cancel at any time without hidden fees.
+              </p>
+           </div>
+
+           {/* Right Actions */}
+           <div className="flex flex-col items-center lg:items-end gap-6">
+              <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 group">
+                 View All Benefits <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+              </button>
+              
+              <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                 <button 
+                   onClick={() => setBillingCycle('monthly')}
+                   className={`px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${billingCycle === 'monthly' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-400'}`}
+                 >
+                   Monthly
+                 </button>
+                 <button 
+                   onClick={() => setBillingCycle('yearly')}
+                   className={`px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-400'}`}
+                 >
+                   Yearly <span className="text-green-500 text-[10px] font-bold">SAVE 20%</span>
+                 </button>
+              </div>
+           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid max-w-6xl grid-cols-1 gap-8 mx-auto lg:grid-cols-3">
-          {plans.map((plan, index) => (
+        {/* Unified Cards Grid - No Shadows, Snappy Transitions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {plans.map((plan, idx) => (
             <div 
-              key={index}
-              className={`relative group ${
-                plan.popular ? 'lg:scale-105 lg:-translate-y-4' : ''
-              } transition-all duration-500`}
+              key={idx}
+              className={`relative flex flex-col p-10 rounded-[2.5rem] border-2 transition-all duration-200 group shadow-none
+                ${plan.isPopular 
+                  ? 'bg-white dark:bg-slate-900 border-primary' 
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary'}`}
             >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute z-20 transform -translate-x-1/2 -top-4 left-1/2">
-                  <div className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-primary to-primary">
-                    <FaStar className="w-4 h-4" />
-                    MOST POPULAR
-                  </div>
-                </div>
-              )}
-
-              {/* Pricing Card */}
-              <div className={`relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 border-2 ${
-                plan.popular ? 'border-primary' : 'border-transparent'
-              } ${
-                plan.name === 'Basic' ? 'group-hover:border-gray-500' : plan.name === 'Professional' ? 'group-hover:border-orange-500' : ''
-              } overflow-hidden`}>
-                
-                {/* Gradient Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-r ${plan.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-
-                <div className="relative p-8">
-                  {/* Header */}
-                  <div className="mb-8 text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${plan.bgColor} mb-4 mx-auto`}>
-                      <div className={`text-gray-700`}>
-                        {plan.icon}
-                      </div>
-                    </div>
-                    <h3 className="mb-2 text-2xl font-bold text-gray-900">{plan.name}</h3>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                      <span className={`text-4xl md:text-5xl font-bold bg-gradient-to-r ${plan.gradient} bg-clip-text text-transparent`}>
-                        {plan.price}
-                      </span>
-                      {plan.period && (
-                        <span className="text-lg text-gray-500">/{plan.period}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Features List */}
-                  <ul className="mb-8 space-y-4">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className={`w-6 h-6 rounded-full bg-gradient-to-r ${plan.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                          <FaCheck className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="leading-relaxed text-gray-600">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA Button */}
-                  <button className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform group-hover:-translate-y-1 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-primary to-primary text-white shadow-lg hover:shadow-xl hover:from-primary/90 hover:to-primary/90'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gradient-to-r hover:from-primary hover:to-primary hover:text-white hover:shadow-lg'
-                  }`}>
-                    {plan.cta}
-                  </button>
-                </div>
-
-                {/* Hover Effect Border */}
-                <div className={`absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r ${plan.gradient} group-hover:w-full transition-all duration-500`}></div>
+              {/* Border Title Badge */}
+              <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 px-6 py-1.5 border-2 transition-all duration-200
+                ${plan.isPopular 
+                  ? 'bg-primary border-primary text-white' 
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 group-hover:bg-primary group-hover:border-primary group-hover:text-white'} 
+                rounded-full text-[10px] font-black uppercase tracking-[0.25em] whitespace-nowrap z-20`}>
+                 {plan.name}
               </div>
+
+              {/* Icon & Label Header */}
+              <div className="flex items-center gap-4 mb-8">
+                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 border-2
+                   ${plan.isPopular ? 'bg-primary text-white border-primary/10' : 'bg-primary/5 text-primary border-primary/5 group-hover:bg-primary group-hover:text-white group-hover:border-primary/10'}`}>
+                   {plan.icon}
+                 </div>
+                 <div>
+                    <span className="block text-[10px] uppercase tracking-widest font-black text-primary mb-0.5 opacity-60">Plan Level</span>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-none">{plan.label}</h4>
+                 </div>
+              </div>
+
+              {/* Description */}
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed min-h-[40px] mb-8 pr-4">
+                 {plan.description}
+              </p>
+
+              {/* Price */}
+              <div className="mb-10 flex items-baseline gap-1">
+                 <span className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter transition-colors duration-200 group-hover:text-primary">
+                    {plan.price}
+                 </span>
+                 <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-[0.2em] ml-2">
+                    /{plan.period === 'forever' ? 'life' : 'mo'}
+                 </span>
+              </div>
+
+              {/* Features List */}
+              <ul className="space-y-4 mb-12 flex-1">
+                 {plan.features.map((feature, fIdx) => (
+                   <li key={fIdx} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300 group/item">
+                      <div className="w-5 h-5 rounded-full bg-primary/5 dark:bg-primary/10 border border-primary/10 flex items-center justify-center flex-shrink-0 transition-colors group-hover/item:bg-primary/20">
+                         <FaCheck size={9} className="text-primary" />
+                      </div>
+                      <span className="font-medium group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors">{feature}</span>
+                   </li>
+                 ))}
+              </ul>
+
+              {/* CTA - Professional Styling */}
+              <button className={`w-full py-5 rounded-[1.25rem] font-black text-[10px] uppercase tracking-[0.25em] transition-all duration-200 active:scale-[0.97]
+                ${plan.isPopular 
+                  ? 'bg-primary text-white border-2 border-primary hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-900 border-transparent hover:-translate-y-1 shadow-none' 
+                  : 'bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white hover:border-primary hover:text-primary hover:-translate-y-1 shadow-none'}`}>
+                {plan.cta}
+              </button>
             </div>
           ))}
         </div>
 
-        {/* Guarantee Section */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex flex-wrap items-center justify-center max-w-2xl gap-8 px-8 py-6 mx-auto bg-white border border-gray-100 shadow-lg rounded-2xl">
-            <div className="flex items-center gap-3 text-gray-700">
-              <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
-                <FaCheck className="w-5 h-5 text-green-600" />
-              </div>
-              <span className="font-semibold">30-Day Money Back</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-700">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                <FaCheck className="w-5 h-5 text-blue-600" />
-              </div>
-              <span className="font-semibold">No Hidden Fees</span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-700">
-              <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
-                <FaCheck className="w-5 h-5 text-purple-600" />
-              </div>
-              <span className="font-semibold">Cancel Anytime</span>
-            </div>
-          </div>
+        {/* Minimal Footer */}
+        <div className="mt-12 flex flex-col items-center">
+           <div className="w-80 h-[2px] bg-gradient-to-r from-transparent via-primary/40 dark:via-primary/30 to-transparent mb-10"></div>
+           <div className="flex flex-wrap justify-center items-center gap-12 text-slate-400 dark:text-slate-600 font-bold tracking-[0.2em] uppercase text-[10px] transition-all duration-500 grayscale opacity-70 hover:grayscale-0 hover:opacity-100">
+              <span>Clinic One</span>
+              <span>NeuroHealth</span>
+              <span>MedSaaS</span>
+              <span>ThyroCare Pro</span>
+           </div>
         </div>
       </div>
     </section>
