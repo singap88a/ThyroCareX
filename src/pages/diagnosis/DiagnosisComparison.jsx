@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   User,
   Calendar,
   Activity,
   AlertCircle,
-  CheckCircle,
+  CircleCheck,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -40,6 +40,8 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
   const [activeSection, setActiveSection] = useState('overview');
   const [selectedComparison, setSelectedComparison] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isCompareMode, setIsCompareMode] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -115,7 +117,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
         bg: 'bg-gradient-to-r from-green-500 to-green-600',
         text: 'text-green-600',
         lightBg: 'bg-green-100',
-        icon: CheckCircle
+        icon: CircleCheck
       },
       SUSPICIOUS: {
         bg: 'bg-gradient-to-r from-yellow-500 to-yellow-600',
@@ -144,6 +146,24 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
     { id: 'nodules', label: 'Nodules', icon: Target },
     { id: 'recommendations', label: 'Recommendations', icon: Stethoscope }
   ];
+  
+  const handleItemSelect = (itemId) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } else if (selectedItems.length < 2) {
+      setSelectedItems([...selectedItems, itemId]);
+    } else {
+      // Replace oldest selection
+      setSelectedItems([selectedItems[1], itemId]);
+    }
+  };
+
+  const handleStartComparison = () => {
+    if (selectedItems.length === 2) {
+      setIsCompareMode(true);
+      setViewMode('detail');
+    }
+  };
 
   return (
     <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50'}`}>
@@ -179,9 +199,21 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                 </h1>
                 {viewMode === 'detail' && (
                   <p className="mt-2 text-gray-600">
-                    Comparing diagnoses from {comparisonData.previous.date} to {comparisonData.current.date}
-                    <span className="ml-2 px-2 py-0.5 text-sm bg-blue-100 text-blue-700 rounded-full">
-                      {daysBetween} days apart
+                    {isCompareMode && selectedItems.length === 2 ? (
+                      <>
+                        Comparing diagnoses from 
+                        <span className="font-black mx-1 text-primary">{pastComparisons.find(p => p.id === selectedItems[0])?.date}</span>
+                        and 
+                        <span className="font-black mx-1 text-primary">{pastComparisons.find(p => p.id === selectedItems[1])?.date}</span>
+                      </>
+                    ) : (
+                      `Comparing diagnoses from ${comparisonData.previous.date} to ${comparisonData.current.date}`
+                    )}
+                    <span className="ml-2 px-2 py-0.5 text-sm bg-primary/10 text-primary rounded-full">
+                      {isCompareMode && selectedItems.length === 2 ? 
+                        Math.abs(Math.floor((new Date(pastComparisons.find(p => p.id === selectedItems[1])?.date) - new Date(pastComparisons.find(p => p.id === selectedItems[0])?.date)) / (1000 * 60 * 60 * 24))) :
+                        daysBetween
+                      } days apart
                     </span>
                   </p>
                 )}
@@ -214,38 +246,90 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
 
         {viewMode === 'list' ? (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
-              <History className="w-6 h-6 text-primary" />
-              Previous Comparisons
-            </h2>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <History className="w-6 h-6 text-primary" />
+                Previous Diagnosis Points
+              </h2>
+              
+              <AnimatePresence>
+                {selectedItems.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex items-center gap-4 p-2 bg-primary/10 rounded-2xl border border-primary/20"
+                  >
+                    <span className="text-sm font-bold text-primary pl-2">
+                      {selectedItems.length} selected
+                    </span>
+                    <button
+                      onClick={handleStartComparison}
+                      disabled={selectedItems.length !== 2}
+                      className={`px-6 py-2 rounded-xl font-bold transition-all ${
+                        selectedItems.length === 2 
+                          ? 'bg-primary text-white shadow-lg shadow-primary/30 active:scale-95' 
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Compare Selected
+                    </button>
+                    <button 
+                      onClick={() => setSelectedItems([])}
+                      className="text-xs font-bold text-gray-500 hover:text-red-500 pr-2"
+                    >
+                      Clear
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastComparisons.map((comp, i) => (
-                <motion.div
-                  key={comp.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -5 }}
-                  onClick={() => {
-                    setSelectedComparison(comp.id);
-                    setViewMode('detail');
-                  }}
-                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-all group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
-                      <ArrowRightLeft size={24} className="text-primary group-hover:text-white" />
+              {pastComparisons.map((comp, i) => {
+                const isSelected = selectedItems.includes(comp.id);
+                return (
+                  <motion.div
+                    key={comp.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{ y: -5 }}
+                    onClick={() => handleItemSelect(comp.id)}
+                    className={`bg-white p-6 rounded-3xl border-2 transition-all group relative cursor-pointer ${
+                      isSelected 
+                        ? 'border-primary shadow-xl shadow-primary/10 bg-primary/5' 
+                        : 'border-transparent shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    {/* Selection Indicator */}
+                    <div className={`absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      isSelected ? 'bg-primary border-primary' : 'border-gray-200 bg-white group-hover:border-primary/50'
+                    }`}>
+                      {isSelected && <CircleCheck size={14} className="text-white" />}
                     </div>
-                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{comp.improvement} Improvement</span>
-                  </div>
-                  <h3 className="font-bold text-gray-800 mb-1">{comp.title}</h3>
-                  <p className="text-sm text-gray-500 mb-4">{comp.date}</p>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                    <span className="text-xs text-gray-400">Status Change</span>
-                    <span className="text-xs font-bold text-gray-700">{comp.statusChange}</span>
-                  </div>
-                </motion.div>
-              ))}
+
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3 rounded-2xl transition-colors ${
+                        isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
+                      }`}>
+                        <ArrowRightLeft size={24} />
+                      </div>
+                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{comp.improvement} improvement</span>
+                    </div>
+                    
+                    <h3 className="font-bold text-gray-800 mb-1">{comp.title}</h3>
+                    <p className="text-sm text-gray-500 mb-4">{comp.date}</p>
+                    
+                    <div className={`flex items-center justify-between p-3 rounded-2xl transition-colors ${
+                      isSelected ? 'bg-white' : 'bg-gray-50'
+                    }`}>
+                      <span className="text-xs text-gray-400">Status Change</span>
+                      <span className="text-xs font-bold text-gray-700">{comp.statusChange}</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -485,7 +569,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
             {/* Quick Stats */}
             <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Days Since Last', value: daysBetween, suffix: '', icon: Calendar, color: 'text-blue-600' },
+                { label: 'Days Since Last', value: daysBetween, suffix: '', icon: Calendar, color: 'text-primary' },
                 { label: 'Confidence Change', value: (comparisonData.current.confidence - comparisonData.previous.confidence).toFixed(1), suffix: '%', icon: Brain, color: 'text-purple-600' },
                 { label: 'Nodules Reduced', value: comparisonData.previous.nodules.total - comparisonData.current.nodules.total, suffix: '', icon: Target, color: 'text-green-600' },
                 { label: 'Overall Progress', value: comparisonData.overallProgress, suffix: '%', icon: TrendingUp, color: 'text-primary' }
@@ -613,7 +697,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CircleCheck className="w-4 h-4 text-green-500" />
                     <span className="text-sm text-green-600">
                       {comparisonData.current.nodules.suspicious === 0 ? 'No suspicious nodules detected!' : `${comparisonData.previous.nodules.suspicious - comparisonData.current.nodules.suspicious} cleared`}
                     </span>
@@ -677,7 +761,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                     </div>
                     {comparisonData.current.nodules.suspicious === 0 && (
                       <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 text-white" />
+                        <CircleCheck className="w-4 h-4 text-white" />
                       </div>
                     )}
                   </div>
@@ -689,7 +773,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
 
               <div className="p-4 bg-green-100 border border-green-200 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <CircleCheck className="w-6 h-6 text-green-600" />
                   <div>
                     <p className="font-semibold text-green-800">Excellent Progress!</p>
                     <p className="text-sm text-green-700">

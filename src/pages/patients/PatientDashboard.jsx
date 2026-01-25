@@ -13,7 +13,10 @@ import {
   LogOut,
   Search,
   Scale,
-  FileSearch
+  FileSearch,
+  CircleCheck,
+  Target,
+  Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -35,8 +38,8 @@ const PatientDashboard = () => {
       label: 'Diagnosis Result', 
       labelAr: 'نتيجة التشخيص', 
       icon: Activity,
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10'
+      color: 'text-primary',
+      bg: 'bg-primary/10'
     },
     { 
       id: 'info', 
@@ -45,6 +48,14 @@ const PatientDashboard = () => {
       icon: FileText,
       color: 'text-purple-500',
       bg: 'bg-purple-500/10'
+    },
+    { 
+      id: 'history', 
+      label: 'Diagnosis History', 
+      labelAr: 'تاريخ التشخيص', 
+      icon: History,
+      color: 'text-green-500',
+      bg: 'bg-green-500/10'
     },
     { 
       id: 'compare', 
@@ -61,14 +72,6 @@ const PatientDashboard = () => {
       icon: RefreshCcw,
       color: 'text-red-500',
       bg: 'bg-red-500/10'
-    },
-    { 
-      id: 'history', 
-      label: 'Diagnosis History', 
-      labelAr: 'تاريخ التشخيص', 
-      icon: History,
-      color: 'text-green-500',
-      bg: 'bg-green-500/10'
     }
   ];
 
@@ -79,49 +82,154 @@ const PatientDashboard = () => {
       case 'info':
         return (
           <div className="p-8 space-y-8 duration-500 animate-in fade-in slide-in-from-bottom-4">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* Extended Patient Banner */}
+            <div className="flex flex-col gap-6 p-8 bg-white border border-gray-100 shadow-sm md:flex-row dark:bg-admin-dark-card rounded-3xl dark:border-admin-dark-border">
+              <div className="relative group">
+                <img 
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop" 
+                  alt="Patient" 
+                  className="w-32 h-32 object-cover rounded-2xl ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all"
+                />
+                <div className="absolute -bottom-2 -right-2 p-2 bg-green-500 text-white rounded-lg shadow-lg">
+                  <CircleCheck size={16} />
+                </div>
+              </div>
+              <div className="flex-1 space-y-4">
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                  <div>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white">Sarah Johnson</h2>
+                    <p className="text-primary font-bold flex items-center gap-2">
+                       <Scale size={16} /> Patient Record ID: {id}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-green-600 bg-green-50 dark:bg-green-900/20 rounded-xl">Active Patient</span>
+                    <span className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 rounded-xl">O+ Blood Type</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50 md:grid-cols-4 dark:border-admin-dark-border">
+                  {[
+                    { label: 'Age', value: '34 Years', icon: User },
+                    { label: 'Gender', value: 'Female', icon: Activity },
+                    { label: 'Last Visit', value: '2024-09-20', icon: Calendar },
+                    { label: 'Next Appt', value: '2024-10-25', icon: Bell }
+                  ].map((stat, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="p-2 bg-gray-50 dark:bg-admin-dark-hover rounded-lg">
+                        <stat.icon size={14} className="text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-gray-400">{stat.label}</p>
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{stat.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {[
-                { title: 'Personal Info', icon: User, items: ['Age: 34', 'Gender: Female', 'Blood Type: A+'] },
-                { title: 'Diagnosis Summary', icon: Activity, items: ['Status: Benign', 'Confidence: 91.2%', 'Last Scan: 2024-09-20'] },
-                { title: 'Imaging Data', icon: FileSearch, items: ['Ultrasound: Completed', 'CT Scan: Pending', 'MRI: N/A'] }
+                { 
+                  title: 'Clinical Vitals', 
+                  icon: Activity, 
+                  color: 'text-blue-500',
+                  items: [
+                    { label: 'Blood Pressure', value: '120/80 mmHg' },
+                    { label: 'Heart Rate', value: '72 bpm' },
+                    { label: 'Temperature', value: '36.8 °C' },
+                    { label: 'Weight', value: '62 kg' }
+                  ] 
+                },
+                { 
+                  title: 'Thyroid Metrics', 
+                  icon: Target, 
+                  color: 'text-purple-500',
+                  items: [
+                    { label: 'TSH Level', value: '2.1 mIU/L' },
+                    { label: 'T4 Level', value: '8.5 μg/dL' },
+                    { label: 'T3 Level', value: '150 ng/dL' },
+                    { label: 'Thyroglobulin', value: '35 ng/mL' }
+                  ] 
+                },
+                { 
+                  title: 'Diagnosis Status', 
+                  icon: FileSearch, 
+                  color: 'text-orange-500',
+                  items: [
+                    { label: 'Current View', value: 'Benign' },
+                    { label: 'Confidence', value: '91.2%' },
+                    { label: 'Severity', value: 'Mild' },
+                    { label: 'Risk Level', value: 'Low' }
+                  ] 
+                }
               ].map((card, i) => (
                 <motion.div 
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="p-6 bg-white border border-gray-100 shadow-sm dark:bg-admin-dark-card rounded-3xl dark:border-admin-dark-border"
+                  className="p-6 bg-white border border-gray-100 shadow-sm dark:bg-admin-dark-card rounded-3xl dark:border-admin-dark-border group"
                 >
-                  <div className="flex items-center justify-center w-12 h-12 mb-4 bg-primary/10 rounded-2xl">
-                    <card.icon className="w-6 h-6 text-primary" />
+                  <div className={`flex items-center justify-center w-12 h-12 mb-6 rounded-2xl ${card.color.replace('text', 'bg')}/10 group-hover:scale-110 transition-transform`}>
+                    <card.icon className={`w-6 h-6 ${card.color}`} />
                   </div>
-                  <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">{card.title}</h3>
-                  <ul className="space-y-2">
+                  <h3 className="mb-6 text-xl font-black text-gray-900 dark:text-white">{card.title}</h3>
+                  <div className="space-y-4">
                     {card.items.map((item, j) => (
-                      <li key={j} className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                        {item}
-                      </li>
+                      <div key={j} className="flex items-center justify-between pb-2 border-b border-gray-50 dark:border-admin-dark-border last:border-0 hover:translate-x-1 transition-transform cursor-default">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{item.label}</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-admin-dark-hover px-2 py-1 rounded-lg">{item.value}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </motion.div>
               ))}
             </div>
             
-            <div className="p-8 bg-white border border-gray-100 shadow-sm dark:bg-admin-dark-card rounded-3xl dark:border-admin-dark-border">
-              <h3 className="mb-6 text-xl font-bold">Recent Medical Notes</h3>
-              <div className="space-y-4">
-                {[1, 2].map(i => (
-                  <div key={i} className="p-4 border border-gray-100 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl dark:border-admin-dark-border">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold">Dr. Sarah Thompson</span>
-                      <span className="text-xs text-gray-400">Oct {10 + i}, 2024</span>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="p-8 bg-white border border-gray-100 shadow-sm dark:bg-admin-dark-card rounded-3xl dark:border-admin-dark-border">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Recent Clinical Notes</h3>
+                  <button className="text-xs font-bold text-primary hover:underline">View All</button>
+                </div>
+                <div className="space-y-6">
+                  {[
+                    { doctor: 'Dr. Sarah Thompson', date: 'Oct 12, 2024', note: 'Patient shows significant improvement in thyroid hormone levels. Recommended continuing current medication dosage.' },
+                    { doctor: 'Dr. Michael Chen', date: 'Sept 20, 2024', note: 'Ultrasound results show reduction in nodule size. Benign characteristics maintained.' }
+                  ].map((note, i) => (
+                    <div key={i} className="relative pl-6 border-l-2 border-primary/20 space-y-2 group">
+                      <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-primary group-hover:scale-150 transition-transform"></div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-black text-gray-900 dark:text-white">{note.doctor}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{note.date}</span>
+                      </div>
+                      <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 italic">
+                        "{note.note}"
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Patient shows significant improvement in thyroid hormone levels. Recommended continuing current medication dosage.
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-8 bg-gradient-to-br from-primary to-primaryHover shadow-2xl shadow-primary/20 rounded-3xl text-white">
+                <h3 className="text-xl font-black uppercase tracking-widest mb-6">Medical History Highlights</h3>
+                <div className="space-y-6">
+                  {[
+                    { label: 'Initial Diagnosis', value: 'June 2023 - Normal' },
+                    { label: 'Critical Alert', value: 'March 2024 - Malignant' },
+                    { label: 'Recovery Phase', value: 'June 2024 - Suspicious' },
+                    { label: 'Latest Status', value: 'Sept 2024 - Benign' }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl hover:bg-white/20 transition-colors">
+                      <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                      <div className="flex-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/60">{item.label}</p>
+                        <p className="text-sm font-bold">{item.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

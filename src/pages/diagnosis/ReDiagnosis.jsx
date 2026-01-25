@@ -8,7 +8,7 @@ import {
   Activity,
   Clock,
   AlertCircle,
-  CheckCircle,
+  CircleCheck,
   ChevronRight,
   Upload,
   RefreshCcw,
@@ -112,7 +112,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
           {/* Decorative Background */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
           </div>
         </>
       )}
@@ -182,7 +182,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
                       'bg-gray-100 text-gray-400'
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CircleCheck className="w-6 h-6" />
                       ) : (
                         <StepIcon className="w-6 h-6" />
                       )}
@@ -297,12 +297,12 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
                   </h2>
                   
                   <div className="space-y-6">
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl">
                       <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
                         <div>
-                          <p className="font-medium text-blue-800">Before starting re-diagnosis</p>
-                          <p className="text-sm text-blue-600 mt-1">
+                          <p className="font-medium text-primary">Before starting re-diagnosis</p>
+                          <p className="text-sm text-primary/70 mt-1">
                             Please verify that the patient information is correct and that they have completed 
                             any recommended treatments since the last diagnosis on {patientData.lastDiagnosis.date}.
                           </p>
@@ -511,7 +511,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
                   
                   <div className="space-y-6">
                     {/* Summary Card */}
-                    <div className="p-6 bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-xl border border-primary/20">
+                    <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
                       <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                         <FileText className="w-5 h-5 text-primary" />
                         Data Summary
@@ -525,7 +525,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
                           <p className="text-sm text-gray-500">Active Symptoms</p>
                         </div>
                         <div className="p-3 bg-white rounded-lg">
-                          <p className="text-2xl font-bold text-blue-600">
+                          <p className="text-2xl font-bold text-primary">
                             {Object.keys(diagnosisData.biomarkers).filter(k => diagnosisData.biomarkers[k]).length}
                           </p>
                           <p className="text-sm text-gray-500">Biomarkers</p>
@@ -584,7 +584,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
                     <button
                       onClick={handleSubmit}
                       disabled={isLoading}
-                      className="flex items-center gap-2 px-8 py-3 text-white bg-gradient-to-r from-primary to-blue-600 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-70"
+                      className="flex items-center gap-2 px-8 py-3 text-white bg-gradient-to-r from-primary to-primaryHover rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-70"
                     >
                       {isLoading ? (
                         <>

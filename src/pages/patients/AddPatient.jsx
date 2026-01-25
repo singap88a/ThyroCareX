@@ -15,7 +15,7 @@ import {
   Save,
   Send,
   X,
-  CheckCircle,
+  CircleCheck,
   AlertCircle
 } from 'lucide-react';
 
@@ -161,7 +161,7 @@ const AddPatient = () => {
               {toast.type === 'error' ? (
                 <AlertCircle className="w-5 h-5 text-red-500" />
               ) : (
-                <CheckCircle className="w-5 h-5 text-green-500" />
+                <CircleCheck className="w-5 h-5 text-green-500" />
               )}
             </div>
             <div className="ml-3">

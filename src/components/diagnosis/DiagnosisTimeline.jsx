@@ -6,7 +6,7 @@ import {
   ChevronRight, 
   Activity, 
   AlertCircle, 
-  CheckCircle, 
+  CircleCheck, 
   Clock,
   Eye,
   GitCompare,
@@ -46,7 +46,7 @@ const DiagnosisTimeline = ({
         color: 'bg-green-500',
         textColor: 'text-green-600',
         bgColor: 'bg-green-100 dark:bg-green-900/30',
-        icon: CheckCircle,
+        icon: CircleCheck,
         label: 'Benign'
       },
       SUSPICIOUS: {
@@ -57,10 +57,10 @@ const DiagnosisTimeline = ({
         label: 'Suspicious'
       },
       NORMAL: {
-        color: 'bg-blue-500',
-        textColor: 'text-blue-600',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-        icon: CheckCircle,
+        color: 'bg-primary',
+        textColor: 'text-primary',
+        bgColor: 'bg-primary/10',
+        icon: CircleCheck,
         label: 'Normal'
       }
     };
@@ -97,7 +97,7 @@ const DiagnosisTimeline = ({
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-10 p-4 mb-6 bg-gradient-to-r from-primary to-blue-600 rounded-2xl"
+          className="sticky top-0 z-10 p-4 mb-6 bg-gradient-to-r from-primary to-primaryHover rounded-2xl"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-white">
@@ -117,7 +117,7 @@ const DiagnosisTimeline = ({
       {/* Timeline */}
       <div className="relative">
         {/* Vertical Line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-blue-400 to-gray-300 dark:from-primary dark:via-blue-600 dark:to-slate-700" />
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-gray-300 dark:from-primary dark:via-primary/30 dark:to-slate-700" />
 
         {/* Timeline Items */}
         <div className="space-y-6">
@@ -147,7 +147,7 @@ const DiagnosisTimeline = ({
                       animate={{ scale: 1 }}
                       className="absolute inset-0 bg-white rounded-full flex items-center justify-center"
                     >
-                      <CheckCircle className={`w-4 h-4 ${config.textColor}`} />
+                      <CircleCheck className={`w-4 h-4 ${config.textColor}`} />
                     </motion.div>
                   )}
                 </motion.div>

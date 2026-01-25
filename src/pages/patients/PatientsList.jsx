@@ -16,7 +16,7 @@ import {
   Phone,
   Clock,
   AlertCircle,
-  CheckCircle,
+  CircleCheck,
   XCircle,
   RefreshCcw,
   History,
@@ -148,8 +148,8 @@ const PatientsList = () => {
     switch(status) {
       case 'Critical': return <AlertCircle className="w-4 h-4" />;
       case 'Warning': return <AlertCircle className="w-4 h-4" />;
-      case 'Stable': return <CheckCircle className="w-4 h-4" />;
-      case 'Normal': return <CheckCircle className="w-4 h-4" />;
+      case 'Stable': return <CircleCheck className="w-4 h-4" />;
+      case 'Normal': return <CircleCheck className="w-4 h-4" />;
       default: return null;
     }
   };
@@ -202,13 +202,6 @@ const PatientsList = () => {
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
-            <Link 
-              to="/add-patient"
-              className="flex items-center justify-center px-6 py-2.5 text-white transition-all bg-admin-primary shadow-lg rounded-xl hover:bg-admin-primary/90 shadow-admin-primary/20 hover:shadow-admin-primary/30"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add New Patient
-            </Link>
           </div>
         </div>
 

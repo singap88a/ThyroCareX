@@ -204,7 +204,7 @@ const Hero = () => {
                                 <SwiperSlide>
                                     <div className="relative w-full h-full rounded-[2rem] overflow-hidden group">
                                         <img 
-                                            src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop" 
+                                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtjpNQKLRPnknexJ7zqvxnud2Q8yOnjFq-cQ&s" 
                                             alt="Medical Scan"
                                             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                         />
@@ -222,7 +222,7 @@ const Hero = () => {
                                 <SwiperSlide>
                                     <div className="relative w-full h-full rounded-[2rem] overflow-hidden group">
                                         <img 
-                                            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop" 
+                                            src="https://www.shutterstock.com/image-photo/lifelong-medication-pioneering-thyroid-gland-260nw-2686926357.jpg" 
                                             alt="Lab Results"
                                             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                         />
@@ -240,7 +240,7 @@ const Hero = () => {
                                 <SwiperSlide>
                                     <div className="relative w-full h-full rounded-[2rem] overflow-hidden group">
                                         <img 
-                                            src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=400&h=300&fit=crop" 
+                                            src="https://static.vecteezy.com/system/resources/previews/051/103/289/non_2x/thyroid-gland-and-half-face-free-png.png" 
                                             alt="AI Analysis"
                                             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                         />
@@ -258,7 +258,7 @@ const Hero = () => {
                                 <SwiperSlide>
                                     <div className="relative w-full h-full rounded-[2rem] overflow-hidden group">
                                         <img 
-                                            src="https://images.unsplash.com/photo-1579154204601-01588f351e67?w=400&h=300&fit=crop" 
+                                            src="https://hoytintegrativehealth.com/wp-content/uploads/2025/11/ChatGPT-Image-Nov-17-2025-02_39_20-PM-1024x683.png" 
                                             alt="Medical Report"
                                             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                                         />

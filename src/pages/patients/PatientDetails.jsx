@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   AlertCircle, 
-  CheckCircle, 
+  CircleCheck, 
   XCircle, 
   TrendingUp, 
   TrendingDown,
@@ -577,8 +577,8 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
         <>
           {/* Animated Background Elements */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-blue-100 rounded-full w-96 h-96 blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full w-96 h-96 bg-cyan-100 blur-3xl"></div>
+            <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 bg-primary/10 rounded-full w-96 h-96 blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 rounded-full w-96 h-96 bg-primary/5 blur-3xl"></div>
           </div>
         </>
       )}
@@ -617,7 +617,7 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleShareResults}
-                className="flex items-center px-6 py-3 text-white transition-all bg-blue-600 rounded-xl hover:shadow-lg hover:shadow-purple-500/25"
+                className="flex items-center px-6 py-3 text-white transition-all bg-primaryHover shadow-lg shadow-primaryHover/20 rounded-xl hover:shadow-lg"
               >
                 <Share2 className="w-5 h-5 mr-2" />
                 Share Results
@@ -640,8 +640,8 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
           
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <User className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <User className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">Patient Name</p>
@@ -736,7 +736,7 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
                 {!is3DLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                     <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                      <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
                       <p className="text-gray-600">Loading 3D Thyroid Model...</p>
                     </div>
                   </div>
@@ -745,7 +745,7 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
                 {/* Scan Animation */}
                 <div className="absolute inset-0 pointer-events-none">
                   <div 
-                    className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
+                    className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
                     style={{ 
                       top: `${Math.sin(scanRotation * Math.PI / 180) * 50 + 50}%`,
                       transform: `rotate(${scanRotation}deg)`
@@ -758,7 +758,7 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
                   <h4 className="mb-3 font-bold text-gray-800">Visual Legend</h4>
                   <div className="space-y-2">
                     <div className="flex items-center">
-                      <div className="w-3 h-3 mr-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-3 h-3 mr-2 bg-primary rounded-full"></div>
                       <span className="text-sm text-gray-700">Healthy Tissue</span>
                     </div>
                     <div className="flex items-center">
@@ -783,7 +783,7 @@ const ThyroidDiagnosisResult = ({ dashboardMode = false }) => {
                   className="p-4 border border-gray-200 bg-gray-50 rounded-xl"
                 >
                   <div className="mb-1 text-sm text-gray-500">Total Nodules</div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-primary">
                     <CountUp end={mockDiagnosis.noduleAnalysis.totalNodules} duration={2} />
                   </div>
                 </motion.div>
