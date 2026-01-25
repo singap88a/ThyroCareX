@@ -3,14 +3,9 @@ import api from './api';
 const authService = {
   // Login for both Doctor and Admin
   login: async (email, password) => {
-    const formData = new FormData();
-    formData.append('Email', email);
-    formData.append('Password', password);
-
-    const response = await api.post('/Authentication/sign-in', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await api.post('/Authentication/sign-in', {
+      Email: email,
+      Password: password,
     });
     return response.data;
   },
