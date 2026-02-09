@@ -90,47 +90,16 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* اللوجو - بدون تغيير */}
+          {/* اللوجو - احترافي ومكبر */}
           <Link
             to="/"
             className="z-10 flex items-center py-1 space-x-3 group"
           >
             <img
-              src="/logo.webp"
+              src="/logo.png"
               alt="ThyroCareX Logo"
-              className="object-contain w-12 transition-all duration-300 sm:w-14 md:w-14"
+              className="object-contain  w-48 transition-all duration-300 group-hover:scale-105 group-hover:brightness-110 drop-shadow-md"
             />
-            <div className="flex flex-col items-start leading-tight">
-              <span
-                className="text-xl font-extrabold tracking-tight sm:text-xl"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: "#ffffff",
-                  WebkitTextStroke: "0.8px #4695a5",
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                THYRO
-                <span
-                  style={{
-                    color: "#4695a5",
-                    WebkitTextStroke: "0.8px #4695a5",
-                  }}
-                >
-                  CAREX
-                </span>
-              </span>
-              <span
-                className="mt-1 italic font-semibold uppercase text-xs sm:text-[11px]"
-                style={{
-                  color: "#4695a5",
-                  fontFamily: "'Poppins', sans-serif",
-                  letterSpacing: "1px",
-                }}
-              >
-                AI THYROID DIAGNOSIS
-              </span>
-            </div>
           </Link>
 
           {/* الروابط الرئيسية - تصميم احترافي جديد */}
