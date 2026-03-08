@@ -5,7 +5,7 @@ const API_URL = '/api';
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    'Accept': '*/*',
   },
 });
 
@@ -19,6 +19,19 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
+    
+    // Debug logging for developers
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.headers);
+
+    // Default content type for methods with body
+    if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())) {
+      if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
+      }
+    } else {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {

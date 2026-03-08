@@ -36,6 +36,7 @@ import AdminUsers from './components/admin/users/AdminUsers';
 import DoctorRequests from './components/admin/doctors/DoctorRequests';
 import DoctorDetailsPage from './components/admin/doctors/DoctorDetailsPage';
 import DoctorRequestDetails from './components/admin/doctors/DoctorRequestDetails';
+import CommunityManager from './components/admin/community/CommunityManager';
 // Re-Diagnosis Feature Pages
 import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
 import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
@@ -96,6 +97,7 @@ function AppContent() {
             <Route path="media" element={<MediaManager />} />
             <Route path="messages" element={<ContactMessages />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="community" element={<CommunityManager />} />
           </Route>
         </Routes>
       </div>

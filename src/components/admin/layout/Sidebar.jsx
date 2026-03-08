@@ -84,6 +84,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       items: [
         { path: '/admin/media', icon: Image, label: 'Media Manager', count: 8 },
         { path: '/admin/messages', icon: MessageSquare, label: 'Messages', count: 5 },
+        { path: '/admin/community', icon: MessageSquare, label: 'Community', count: 0 },
       ]
     },
     {

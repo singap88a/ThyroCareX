@@ -36,6 +36,29 @@ const adminService = {
     const response = await api.delete(`/AdminDoctor/DeleteDoctor/${id}`);
     return response.data;
   },
+
+  // Community Management
+  getAllPosts: async () => {
+    const response = await api.get('/Community/Display-All-Posts');
+    return response.data;
+  },
+
+  deletePost: async (id) => {
+    const response = await api.delete(`/Community/post/${id}`);
+    return response.data;
+  },
+
+  getPostComments: async (postId) => {
+    const response = await api.get(`/Community/PostId:${postId}/comments`);
+    return response.data;
+  },
+
+  deleteComment: async (commentId) => {
+    const response = await api.delete('/Community/DeleteComment', {
+      params: { CommentId: commentId }
+    });
+    return response.data;
+  },
 };
 
 export default adminService;
