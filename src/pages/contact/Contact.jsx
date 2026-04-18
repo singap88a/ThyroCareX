@@ -10,13 +10,16 @@ import {
   FaTimesCircle,
   FaArrowRight,
 } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import api from "../../services/api";
 
-const initialForm = { name: "", email: "", subject: "", message: "" };
+const initialForm = { name: "", email: "", subject: "", message: "", attachment: null };
 
 const ContactPage = () => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const validate = () => {
     const e = {};
@@ -38,19 +41,53 @@ const ContactPage = () => {
 
     try {
       setStatus("sending");
-      await new Promise((r) => setTimeout(r, 900));
+      
+      const formData = new FormData();
+      formData.append("Name", form.name);
+      formData.append("Email", form.email);
+      formData.append("Subject", form.subject);
+      formData.append("Message", form.message);
+      if (form.attachment) {
+        formData.append("Attachment", form.attachment);
+      }
+
+      await api.post("/Contact/Submit", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
       setStatus("success");
       setForm(initialForm);
+      setPreview(null);
       setErrors({});
-      setTimeout(() => setStatus(null), 3000);
-    } catch {
+      setTimeout(() => setStatus(null), 5000);
+    } catch (err) {
+      console.error(err);
       setStatus("error");
-      setTimeout(() => setStatus(null), 3000);
+      setTimeout(() => setStatus(null), 5000);
     }
   };
 
   const handleChange = (k) => (e) => {
     setForm((s) => ({ ...s, [k]: e.target.value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm({ ...form, attachment: file });
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        setPreview(url);
+      } else {
+        setPreview(null); 
+      }
+    }
+  };
+
+  const removeAttachment = () => {
+    setForm({ ...form, attachment: null });
+    setPreview(null);
   };
 
   return (
@@ -188,25 +225,62 @@ const ContactPage = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+                                    <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
                     <div className="flex items-center justify-center w-12 h-12 rounded-lg text-primary bg-primary/10">
                       <FaUpload className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-700">
-                        Attach files (optional)
+                        {form.attachment ? form.attachment.name : 'Attach file (optional)'}
                       </div>
                       <div className="text-sm text-gray-500">
                         Max 25MB • JPG, PNG, PDF
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      className="px-4 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20"
-                    >
-                      Browse
-                    </button>
+                    {form.attachment ? (
+                       <button 
+                        type="button"
+                        onClick={removeAttachment}
+                        className="px-4 py-2 text-sm font-medium rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                       >
+                         Remove
+                       </button>
+                    ) : (
+                      <label className="px-4 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors">
+                        Browse
+                        <input 
+                          type="file" 
+                          hidden 
+                          onChange={handleFileChange}
+                          accept="image/*,.pdf"
+                        />
+                      </label>
+                    )}
                   </div>
+
+                  {/* Image Preview Area */}
+                  {preview && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative w-full overflow-hidden border border-gray-100 rounded-2xl group shadow-sm"
+                    >
+                      <img 
+                        src={preview} 
+                        alt="Preview" 
+                        className="w-full h-auto max-h-[300px] object-contain bg-gray-50" 
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black/40 opacity-0 group-hover:opacity-100">
+                         <button 
+                          type="button"
+                          onClick={removeAttachment}
+                          className="px-4 py-2 text-sm font-bold text-white bg-red-500 rounded-lg shadow-lg hover:bg-red-600 transition-transform active:scale-95"
+                         >
+                           Change Image
+                         </button>
+                      </div>
+                    </motion.div>
+                  )}
 
                   <button
                     type="submit"

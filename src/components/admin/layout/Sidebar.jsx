@@ -24,14 +24,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const { isDarkMode } = useAdminTheme();
   const { logout } = useAdminAuth();
   const location = useLocation();
-  const [counts, setCounts] = useState({ doctors: 0, pendingRequests: 0, patients: 0 });
+  const [counts, setCounts] = useState({ doctors: 0, pendingRequests: 0, patients: 0, messages: 0 });
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [pending, allDoctors] = await Promise.all([
+        const [pending, allDoctors, allMessages] = await Promise.all([
             adminService.getPendingDoctors(),
-            adminService.getAllDoctors()
+            adminService.getAllDoctors(),
+            adminService.getContactMessages()
         ]);
         
         let pendingCount = 0;
@@ -44,10 +45,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         else if (Array.isArray(allDoctors)) doctorCount = allDoctors.length;
         else if (allDoctors && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
         
+        let messageCount = 0;
+        if (allMessages && allMessages.succeeded && Array.isArray(allMessages.data)) {
+          messageCount = allMessages.data.filter(m => !m.isReplied).length;
+        }
+
         setCounts({
             pendingRequests: pendingCount,
             doctors: doctorCount,
-            patients: 12 // Mock for now or fetch if API exists
+            patients: 12, // Mock for now or fetch if API exists
+            messages: messageCount
         });
       } catch (error) {
         console.error("Failed to fetch sidebar counts", error);
@@ -82,8 +89,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     {
       title: 'CONTENT',
       items: [
-        { path: '/admin/media', icon: Image, label: 'Media Manager', count: 8 },
-        { path: '/admin/messages', icon: MessageSquare, label: 'Messages', count: 5 },
+        { path: '/admin/media', icon: Image, label: 'Media Manager', count: 0 },
+        { path: '/admin/messages', icon: MessageSquare, label: 'Support Messages', count: counts.messages },
         { path: '/admin/community', icon: MessageSquare, label: 'Community', count: 0 },
       ]
     },

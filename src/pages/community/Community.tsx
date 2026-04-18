@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CreatePost from '../../components/community/CreatePost';
 import PostCard from '../../components/community/PostCard';
-import { FaSearch, FaUsers, FaHashtag, FaChartLine, FaBolt } from 'react-icons/fa';
+import { FaSearch, FaUsers, FaHashtag, FaChartLine, FaBolt, FaLock } from 'react-icons/fa';
 import api from '../../services/api';
 import { parseJwt } from '../../utils/jwt';
 
@@ -35,9 +35,18 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isAuth, setIsAuth] = useState(true);
   const displayName = getCurrentUserName();
 
   const fetchPosts = useCallback(async () => {
+    const userRaw = localStorage.getItem('thyrocarex_user');
+    if (!userRaw) {
+      setIsAuth(false);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -46,9 +55,15 @@ const Community = () => {
         setPosts(res.data.data || []);
         setFilteredPosts(res.data.data || []);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch posts error:', error);
-      setError('Failed to load posts. Please try again.');
+      if (error.response && error.response.status === 403) {
+        setIsSubscribed(false);
+      } else if (error.response && error.response.status === 401) {
+        setIsAuth(false);
+      } else {
+        setError('Failed to load posts. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -87,7 +102,68 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+
+          {/* Unauthenticated Overlay */}
+          {!isAuth && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md rounded-3xl">
+              <div className="bg-white p-10 rounded-3xl shadow-2xl border border-primary/20 max-w-lg w-full text-center transform transition-all">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FaUsers className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-3xl font-black text-slate-800 mb-3">Join the Community</h2>
+                <p className="text-slate-600 mb-8 font-medium">
+                  The medical community is an interactive space where doctors discuss cases and share updates. Please login to join the conversation.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    onClick={() => window.location.href = '/GeminiSingap'}
+                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:-translate-y-1 transition-all"
+                  >
+                    Login / Sign Up
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/'}
+                    className="px-8 py-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all"
+                  >
+                    Go Home
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Locked Overlay */}
+          {!isSubscribed && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md rounded-3xl">
+              <div className="bg-white p-10 rounded-3xl shadow-2xl border border-primary/20 max-w-lg w-full text-center transform transition-all">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                  <FaLock className="w-8 h-8 text-primary" />
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  </div>
+                </div>
+                <h2 className="text-3xl font-black text-slate-800 mb-3">Premium Feature</h2>
+                <p className="text-slate-600 mb-8 font-medium">
+                  The medical community is an exclusive space for subscribed doctors. Upgrade your plan to discuss cases, connect with experts, and share knowledge.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    onClick={() => window.location.href = '/pricing'}
+                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:-translate-y-1 transition-all"
+                  >
+                    View Pricing Plans
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/profile'}
+                    className="px-8 py-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all"
+                  >
+                    Check Subscriptions
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Left Sidebar */}
           <div className="hidden lg:block lg:col-span-3 space-y-6">

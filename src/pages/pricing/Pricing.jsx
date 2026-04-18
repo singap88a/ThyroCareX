@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { 
   Check, 
@@ -21,12 +21,22 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 // --- Components ---
 
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PricingCard = ({ plan, billingPeriod }) => {
   const isPopular = plan.popular;
   const navigate = useNavigate();
   
+  const { isLoggedIn } = useAuth();
+  
   const handlePurchase = () => {
+    if (!isLoggedIn) {
+      toast.error('Please login first to purchase a subscription');
+      navigate('/login', { state: { message: 'Authentication required to access checkout.' } });
+      return;
+    }
     navigate('/checkout', { state: { plan } });
   };
   
@@ -51,9 +61,11 @@ const PricingCard = ({ plan, billingPeriod }) => {
         <h3 className={`text-xl font-bold mb-2 ${isPopular ? 'text-[#4695a5]' : 'text-slate-800'}`}>
           {plan.name}
         </h3>
-        <p className="h-10 text-sm leading-relaxed text-slate-500">
-          {plan.description}
-        </p>
+        {plan.description && (
+          <p className="h-10 text-sm leading-relaxed text-slate-500 line-clamp-2">
+            {plan.description}
+          </p>
+        )}
       </div>
 
       <div className="flex items-baseline gap-1 mb-8">
@@ -61,7 +73,7 @@ const PricingCard = ({ plan, billingPeriod }) => {
         <span className="text-5xl font-extrabold tracking-tight text-slate-900">
           {billingPeriod === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
         </span>
-        <span className="font-medium text-slate-500">/mo</span>
+        <span className="font-medium text-slate-500">/ {plan.durationInDays} Days</span>
       </div>
 
       <button
@@ -98,9 +110,44 @@ const PricingPage = () => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const plans = [
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await api.get('/Plan');
+        if (response.data && response.data.succeeded) {
+          const planNames = { 1: 'Starter', 2: 'Professional', 3: 'Enterprise' };
+          // Map backend plans to frontend structure if necessary
+          const mappedPlans = response.data.data.map(p => ({
+            id: p.id,
+            name: planNames[p.planType] || 'Standard Plan',
+            description: p.description || '',
+            durationInDays: p.durationInDays || 30,
+            monthlyPrice: p.price,
+            yearlyPrice: Math.floor(p.price * 0.8), // Mock yearly discount
+            features: p.features || [],
+            cta: p.price === 0 ? 'Get Started' : 'Subscribe Now',
+            popular: (planNames[p.planType] || '').toLowerCase().includes('pro')
+          }));
+          setPlans(mappedPlans);
+        }
+      } catch (err) {
+        console.error('Failed to fetch plans:', err);
+        // Fallback to mock plans if API fails
+        setPlans(defaultPlans);
+        toast.error('Could not load real plans, showing defaults');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const defaultPlans = [
     {
-      id: 'starter',
+      id: 1,
       name: 'Starter',
       description: 'Essential AI screening for individuals starting their journey.',
       monthlyPrice: '0',
@@ -115,7 +162,7 @@ const PricingPage = () => {
       popular: false,
     },
     {
-      id: 'professional',
+      id: 2,
       name: 'Professional',
       description: 'Advanced care & continuous monitoring for best results.',
       monthlyPrice: '49',
@@ -131,7 +178,7 @@ const PricingPage = () => {
       popular: true,
     },
     {
-      id: 'enterprise',
+      id: 3,
       name: 'Enterprise',
       description: 'Complete solution for clinics and healthcare providers.',
       monthlyPrice: '99',
@@ -221,11 +268,17 @@ const PricingPage = () => {
 
       {/* --- Pricing Cards --- */}
       <section className="relative z-10 px-6 pb-32">
-        <div className="grid items-center grid-cols-1 gap-8 mx-auto max-w-7xl md:grid-cols-3">
-          {plans.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} billingPeriod={billingPeriod} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+             <div className="w-12 h-12 border-4 border-[#4695a5] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="grid items-center grid-cols-1 gap-8 mx-auto max-w-7xl md:grid-cols-3">
+            {plans.map((plan) => (
+              <PricingCard key={plan.id} plan={plan} billingPeriod={billingPeriod} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* --- FAQ Section --- */}

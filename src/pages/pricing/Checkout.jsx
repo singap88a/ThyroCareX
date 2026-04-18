@@ -1,319 +1,234 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
   CreditCard, 
-  ChevronLeft, 
-  Zap, 
-  Cpu, 
-  Globe, 
-  Lock,
-  CheckCircle2,
-  AlertCircle
+  ArrowLeft, 
+  Check, 
+  Lock, 
+  Info,
+  ChevronRight,
+  Zap,
+  Activity,
+  Star
 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [plan, setPlan] = useState(location.state?.plan || {
-    id: 'professional',
-    name: 'Professional',
-    monthlyPrice: '49',
-    features: ['Detailed AI diagnosis reports', '1 Video consultation/month', 'Priority 24/7 support']
-  });
-  
-  const [formData, setFormData] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiry: '',
-    cvc: ''
-  });
-  
-  const [focusedField, setFocusedField] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { user } = useAuth();
+  const { plan } = location.state || {};
+  const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'cardNumber') {
-      const val = value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim();
-      if (val.length <= 19) setFormData({ ...formData, [name]: val });
-    } else if (name === 'expiry') {
-      const val = value.replace(/\//g, '').replace(/(\d{2})/g, '$1/').replace(/\/$/, '');
-      if (val.length <= 5) setFormData({ ...formData, [name]: val });
-    } else if (name === 'cvc') {
-      if (value.length <= 4) setFormData({ ...formData, [name]: value });
-    } else {
-      setFormData({ ...formData, [name]: value });
+  if (!plan) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-sm border">
+          <Info className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">No Plan Selected</h2>
+          <p className="text-gray-500 mb-6">Please select a subscription plan to proceed.</p>
+          <button 
+            onClick={() => navigate('/pricing')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+          >
+            Back to Pricing
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handlePaymobRedirect = async () => {
+    setLoading(true);
+    try {
+      // Step 1: Create transaction record and get Paymob Iframe URL
+      const doctorId = user?.DoctorId || user?.['DoctorId'];
+      
+      if (!doctorId) {
+        toast.error('Doctor ID not found. Please logout and login again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await api.post('/Payment/create', { 
+        planId: plan.id,
+        doctorId: parseInt(doctorId)
+      });
+
+      if (response.data && response.data.succeeded) {
+        const paymentUrl = response.data.data;
+        toast.success('Redirecting to secure payment gateway...');
+        // Step 2: Redirect to Paymob Iframe
+        window.location.href = paymentUrl;
+      } else {
+        toast.error(response.data.message || 'Failed to initiate payment');
+      }
+    } catch (err) {
+      console.error('Payment Error:', err);
+      toast.error('Connection to payment server failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePayment = (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-      setTimeout(() => navigate('/profile'), 3000);
-    }, 3000);
-  };
-
-  const getCardType = (number) => {
-    if (number.startsWith('4')) return 'VISA';
-    if (number.startsWith('5')) return 'MASTERCARD';
-    return 'CREDIT CARD';
-  };
-
   return (
-    <div className="min-h-screen bg-[#0a0f16] text-white pt-24 pb-12 px-4 relative overflow-hidden font-sans">
-      {/* AI Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#4695a5] rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-600 rounded-full blur-[100px] opacity-30" />
-      </div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 group"
-        >
-          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          Back to Plans
-        </button>
-
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          
-          {/* Left Side: Plan Details & AI Visual */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-8"
-          >
-            <div>
-              <h1 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                Unlock Neural Intelligence
-              </h1>
-              <p className="text-slate-400 text-lg">
-                You are upgrading to the <span className="text-[#4695a5] font-bold">{plan.name}</span> plan. 
-                Experience medical diagnosis powered by 4th generation AI.
-              </p>
+    <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-20 px-4 font-sans text-slate-900">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Navigation / Header */}
+        <div className="flex items-center justify-between mb-8">
+            <button 
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors font-semibold group"
+            >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                Back to Pricing
+            </button>
+            <div className="flex items-center gap-2 text-slate-400 text-sm font-bold uppercase tracking-wider">
+                <Lock className="w-3.3 h-3.3" />
+                Secured SSL Connection
             </div>
+        </div>
 
-            {/* Plan Card (Summary) */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl relative overflow-hidden group">
-              {/* AI Scan Line */}
-              <div className="absolute left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#4695a5] to-transparent animate-ai-scan pointer-events-none" />
-              
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Cpu className="w-24 h-24" />
-              </div>
-              
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="text-xl font-bold">{plan.name} Package</h3>
-                  <p className="text-[#4695a5] text-sm">Active for 1 Month</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-3xl font-bold">${plan.monthlyPrice}</span>
-                  <p className="text-slate-500 text-xs">recurring</p>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-6 border-t border-white/10">
-                <p className="text-xs uppercase tracking-widest text-[#4695a5] font-bold">Neural Features Unlocked</p>
-                {plan.features.map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4695a5]" />
-                    <span className="text-slate-300 text-sm font-medium">{feature}</span>
-                  </div>
-                ))}
-                <div className="flex items-center gap-3">
-                    <Zap className="w-5 h-5 text-yellow-500" />
-                    <span className="text-slate-300 text-sm font-medium">99.9% AI Accuracy Depth</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4">
-               {[
-                 { icon: ShieldCheck, label: "Bank Level Security" },
-                 { icon: Lock, label: "SSL Encrypted" },
-                 { icon: Globe, label: "Global Access" }
-               ].map((item, i) => (
-                 <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5">
-                   <item.icon className="w-6 h-6 text-slate-500" />
-                   <span className="text-[10px] text-center font-bold text-slate-400 uppercase tracking-tighter">{item.label}</span>
-                 </div>
-               ))}
-            </div>
-          </motion.div>
-
-          {/* Right Side: Payment Form */}
-          <motion.div 
-             initial={{ opacity: 0, x: 30 }}
-             animate={{ opacity: 1, x: 0 }}
-             className="bg-white/5 backdrop-blur-2xl border border-white/10 p-8 lg:p-12 rounded-[2rem] shadow-2xl relative"
-          >
-            {/* Visual Card */}
-            <div className="mb-12 perspective-1000">
-              <motion.div 
-                animate={{ rotateY: focusedField === 'cvc' ? 180 : 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="relative w-full aspect-[1.58/1] preserve-3d transition-all duration-500"
-              >
-                {/* Card Front */}
-                <div className="absolute inset-0 backface-hidden rounded-2xl bg-gradient-to-br from-[#1e293b] via-[#4695a5] to-[#1e293b] p-6 shadow-2xl flex flex-col justify-between border border-white/20">
-                  <div className="flex justify-between items-start">
-                    <div className="w-12 h-10 bg-yellow-400/80 rounded-lg shadow-inner" /> {/* Chip */}
-                    <span className="font-black italic text-2xl text-white/50">{getCardType(formData.cardNumber)}</span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="text-2xl font-mono tracking-[0.2em] text-white">
-                      {formData.cardNumber || "•••• •••• •••• ••••"}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* LEFT: PLAN SUMMARY */}
+            <div className="lg:col-span-7 space-y-6">
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200"
+                >
+                    <div className="flex items-start justify-between mb-6">
+                        <div>
+                            <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full mb-3 inline-block">
+                                Selected Plan
+                            </span>
+                            <h1 className="text-4xl font-black text-slate-900 mb-2">{plan.name}</h1>
+                            <p className="text-slate-500 font-medium">{plan.description}</p>
+                        </div>
+                        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                            {plan.name === 'Starter' && <Zap className="w-8 h-8 text-white" />}
+                            {plan.name === 'Professional' && <Activity className="w-8 h-8 text-white" />}
+                            {(plan.name === 'Enterprise' || plan.name === 'Standard Plan') && <Star className="w-8 h-8 text-white" />}
+                        </div>
                     </div>
-                    <div className="flex justify-between uppercase">
-                      <div>
-                        <p className="text-[10px] opacity-60">Card Holder</p>
-                        <p className="text-sm font-bold tracking-wider">{formData.cardName || "YOUR NAME"}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] opacity-60">Expires</p>
-                        <p className="text-sm font-bold tracking-wider">{formData.expiry || "MM/YY"}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Subtle Glow Effect */}
-                  <div className="absolute -inset-1 bg-white/5 rounded-2xl blur opacity-20 pointer-events-none" />
-                </div>
 
-                {/* Card Back */}
-                <div className="absolute inset-0 backface-hidden rounded-2xl bg-[#0f172a] p-6 shadow-2xl border border-white/20 flex flex-col justify-between" style={{ transform: 'rotateY(180deg)' }}>
-                   <div className="h-10 bg-black/50 -mx-6 mt-4" />
-                   <div className="space-y-2">
-                     <p className="text-[10px] text-right pr-4 opacity-60">CVV</p>
-                     <div className="h-10 bg-white/10 rounded flex items-center justify-end px-4 font-mono">
-                        {formData.cvc || "•••"}
-                     </div>
-                   </div>
-                   <div className="flex justify-between items-end opacity-20">
-                      <Globe className="w-8 h-8" />
-                      <span className="text-[10px] font-bold">THYROCAREX SECURE AI PAY</span>
-                   </div>
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <span className="block text-slate-400 text-[10px] font-bold uppercase mb-1">Price</span>
+                            <span className="text-2xl font-black text-slate-900">${plan.monthlyPrice}</span>
+                            <span className="text-slate-400 text-sm font-bold ml-1">/ Month</span>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <span className="block text-slate-400 text-[10px] font-bold uppercase mb-1">Billing cycle</span>
+                            <span className="text-lg font-black text-slate-900">Monthly</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-slate-900 font-bold flex items-center gap-2">
+                            Included Advanced Features:
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {plan.features.map((feature, i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                                    </div>
+                                    <span className="text-slate-700 font-semibold text-sm">{feature}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* TRUST SIGNALS */}
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <ShieldCheck className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">HIPAA Compliant</span>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <Lock className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">256-bit AES</span>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <Star className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">Premium Support</span>
+                    </div>
                 </div>
-              </motion.div>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handlePayment} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase ml-2">Card Holder Name</label>
-                <div className="relative group">
-                   <input 
-                    type="text"
-                    name="cardName"
-                    value={formData.cardName}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField('cardName')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    placeholder="Enter full name"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 focus:border-[#4695a5] focus:ring-1 focus:ring-[#4695a5] outline-none transition-all placeholder:text-slate-600"
-                  />
-                </div>
-              </div>
+            {/* RIGHT: CHECKOUT ACTION */}
+            <div className="lg:col-span-5">
+                <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 sticky top-24"
+                >
+                    <h2 className="text-2xl font-black text-slate-900 mb-6">Order Checkout</h2>
+                    
+                    <div className="space-y-4 mb-8">
+                        <div className="flex justify-between items-center text-slate-600 font-medium">
+                            <span>{plan.name} Plan (1 Month)</span>
+                            <span>${plan.monthlyPrice}.00</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-600 font-medium">
+                            <span>Service Setup Fee</span>
+                            <span className="text-green-600">FREE</span>
+                        </div>
+                        <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
+                            <span className="text-slate-900 font-black text-xl">Total Amount</span>
+                            <span className="text-blue-600 font-black text-3xl">${plan.monthlyPrice}.00</span>
+                        </div>
+                    </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase ml-2">Card Number</label>
-                <div className="relative group">
-                   <input 
-                    type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField('cardNumber')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    placeholder="0000 0000 0000 0000"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 focus:border-[#4695a5] focus:ring-1 focus:ring-[#4695a5] outline-none transition-all placeholder:text-slate-600 font-mono"
-                  />
-                  <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-[#4695a5] transition-colors" />
-                </div>
-              </div>
+                    <div className="bg-blue-50 rounded-2xl p-5 mb-8 flex gap-4 border border-blue-100">
+                        <CreditCard className="w-6 h-6 text-blue-600 mt-1" />
+                        <div>
+                            <h4 className="text-blue-900 font-bold mb-1">Paymob Secure Gateway</h4>
+                            <p className="text-blue-700/70 text-xs font-semibold leading-relaxed">
+                                You will be redirected to Paymob's secure server to complete your transaction with Visa, Mastercard, or ValU.
+                            </p>
+                        </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase ml-2">Expiry Date</label>
-                  <input 
-                    type="text"
-                    name="expiry"
-                    value={formData.expiry}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField('expiry')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    placeholder="MM/YY"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 focus:border-[#4695a5] focus:ring-1 focus:ring-[#4695a5] outline-none transition-all placeholder:text-slate-600 font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase ml-2">CVV / CVC</label>
-                  <input 
-                    type="password"
-                    name="cvc"
-                    value={formData.cvc}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField('cvc')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    placeholder="***"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 focus:border-[#4695a5] focus:ring-1 focus:ring-[#4695a5] outline-none transition-all placeholder:text-slate-600 font-mono"
-                  />
-                </div>
-              </div>
+                    <button 
+                        onClick={handlePaymobRedirect}
+                        disabled={loading}
+                        className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 group overflow-hidden relative"
+                    >
+                        {loading ? (
+                            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <span className="relative z-10">Confirm & Pay Now</span>
+                                <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform relative z-10" />
+                            </>
+                        )}
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent pointer-events-none"
+                            animate={{ x: ['100%', '-100%'] }}
+                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        />
+                    </button>
 
-              <button
-                type="submit"
-                disabled={isProcessing || isSuccess}
-                className={`w-full py-4 rounded-xl font-bold text-sm transition-all relative overflow-hidden flex justify-center items-center gap-2 ${
-                  isSuccess 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-[#4695a5] hover:bg-[#3a7e8c] text-white shadow-lg shadow-[#4695a5]/30'
-                }`}
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Neural Verification...
-                  </>
-                ) : isSuccess ? (
-                  <>
-                    <CheckCircle2 className="w-5 h-5" />
-                    Success! Access Granted
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4" />
-                    PAY ${plan.monthlyPrice} FULL ACCESS
-                  </>
-                )}
-                
-                {/* AI Scan Effect over button */}
-                <div className="absolute inset-0 pointer-events-none opacity-20">
-                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                </div>
-              </button>
-              
-              <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center justify-center gap-2">
-                 <AlertCircle className="w-3 h-3" />
-                 Encrypted transaction by ThyroCareX Intelligence System
-              </p>
-            </form>
-          </motion.div>
+                    <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center">
+                        <div className="flex gap-4 mb-4">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4 opacity-50 grayscale hover:grayscale-0 transition-all cursor-crosshair" />
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 opacity-50 grayscale hover:grayscale-0 transition-all cursor-crosshair" />
+                        </div>
+                        <p className="text-slate-400 text-[11px] font-bold text-center uppercase tracking-tighter">
+                            Encrypted by ThyroCareX Neural Security v4.9
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
         </div>
       </div>
     </div>

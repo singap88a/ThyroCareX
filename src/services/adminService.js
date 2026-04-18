@@ -59,6 +59,22 @@ const adminService = {
     });
     return response.data;
   },
+
+  // Contact Messages
+  getContactMessages: async () => {
+    const response = await api.get('/Contact/List');
+    return response.data;
+  },
+
+  toggleContactStatus: async (id) => {
+    const response = await api.put(`/Contact/ToggleStatus/${id}`);
+    return response.data;
+  },
+
+  deleteContactMessage: async (id) => {
+    const response = await api.delete(`/Contact/Delete/${id}`);
+    return response.data;
+  },
 };
 
 export default adminService;

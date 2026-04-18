@@ -17,9 +17,16 @@ import {
   Target,
   Star,
   TrendingUp,
-  Bell
+  Bell,
+  CreditCard,
+  Package,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import doctorService from '../../services/doctorService';
+import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -45,6 +52,11 @@ const Profile = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Subscriptions state
+  const [mySubscriptions, setMySubscriptions] = useState([]);
+  const [activeSubscription, setActiveSubscription] = useState(null);
+  const [selectedTx, setSelectedTx] = useState(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -61,8 +73,60 @@ const Profile = () => {
         setLoading(false);
       }
     };
+
+    const fetchSubscriptions = async () => {
+      try {
+        const historyRes = await api.get('/Payment/history');
+        if (historyRes.data?.succeeded && user?.email) {
+          const planNames = { 1: 'Starter', 2: 'Pro', 3: 'Enterprise' };
+          const statusMap = { 0: 'free', 1: 'trialing', 2: 'paid', 3: 'failed', 4: 'canceled', 5: 'pending' };
+          
+          let myTxs = historyRes.data.data
+            .filter(tx => tx.doctorEmail === user.email)
+            .map(tx => {
+              const startDate = tx.startDate ? new Date(tx.startDate) : null;
+              let endDateStr = 'N/A';
+              let endDateObj = null;
+              if (startDate) {
+                const end = new Date(startDate);
+                end.setDate(end.getDate() + 30);
+                endDateStr = end.toLocaleDateString('en-GB');
+                endDateObj = end;
+              }
+              
+                return {
+                  id: tx.transactionId || `ORD-${tx.id}`,
+                  plan: planNames[tx.planType] || 'Standard',
+                  amount: tx.planPrice || 0,
+                  date: startDate ? startDate.toLocaleDateString('en-GB') : 'Pending',
+                  endDate: endDateStr,
+                  endDateObj: endDateObj,
+                  status: statusMap[tx.status] ?? 'pending',
+                  durationInDays: tx.durationInDays || 30,
+                  features: tx.features || []
+                };
+            });
+            
+          setMySubscriptions(myTxs);
+          
+          // Find the active subscription
+          const active = myTxs.find(tx => tx.status === 'paid' && tx.endDateObj && tx.endDateObj > new Date());
+          if (active) setActiveSubscription(active);
+          
+          if (myTxs.length > 0) {
+            setSelectedTx(active || myTxs[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch subscriptions', err);
+      }
+    };
+
     fetchProfile();
-  }, []);
+    if (user?.email) {
+      fetchSubscriptions();
+    }
+  }, [user]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -217,7 +281,8 @@ const Profile = () => {
   const tabs = [
     { id: 'personal', label: 'Personal Info', icon: User },
     { id: 'security', label: 'Security', icon: Shield },
-    { id: 'statistics', label: 'Analytics', icon: BarChart3 }
+    { id: 'statistics', label: 'Analytics', icon: BarChart3 },
+    { id: 'subscription', label: 'My Subscriptions', icon: CreditCard }
   ];
 
   const getProgressColor = (percentage) => {
@@ -591,7 +656,184 @@ const Profile = () => {
 
 
 
-            {/* Statistics Tab */}
+            {/* My Subscriptions Tab */}
+            {activeTab === 'subscription' && (
+              <div className="space-y-8 animate-fadeIn">
+                <div>
+                  <h3 className="mb-2 text-2xl font-semibold text-slate-900">My Subscriptions</h3>
+                  <p className="text-slate-600">Manage your active plans and billing history</p>
+                </div>
+
+                {/* Professional Display Card */}
+                {selectedTx ? (
+                  <div className={`relative p-8 overflow-hidden border shadow-xl rounded-[2rem] 
+                    ${selectedTx.status === 'paid' 
+                      ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border-teal-400' 
+                      : selectedTx.status === 'failed' || selectedTx.status === 'canceled'
+                      ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700'
+                      : 'bg-gradient-to-br from-amber-500 to-orange-500 border-amber-400'} 
+                  `}>
+                    
+                    {/* Background Accents */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row gap-8 justify-between">
+                      {/* Left Side: Status & Plan Name */}
+                      <div className="flex-1 text-white">
+                        <div className="flex items-center gap-3 mb-4">
+                          {selectedTx.status === 'paid' ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-teal-900 bg-teal-100 rounded-full shadow-sm">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              {activeSubscription?.id === selectedTx.id ? 'Your Current Active Plan' : 'Paid / Ended'}
+                            </span>
+                          ) : selectedTx.status === 'failed' ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-red-900 bg-red-100/90 rounded-full shadow-sm">
+                              <XCircle className="w-3.5 h-3.5" /> Failed Transaction
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-amber-900 bg-amber-100 rounded-full shadow-sm">
+                              <Clock className="w-3.5 h-3.5" /> Pending Payment
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-xl font-medium text-white/80 mb-1">Plan Tier</p>
+                        <h4 className="text-5xl font-black tracking-tight mb-6">{selectedTx.plan}</h4>
+                        
+                        <div className="grid grid-cols-2 gap-6 max-w-sm mb-6">
+                          <div>
+                            <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                              <Calendar className="w-3 h-3" /> Start Date
+                            </p>
+                            <p className="font-bold text-lg">{selectedTx.date}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                              <Clock className="w-3 h-3" /> End Date
+                            </p>
+                            <p className="font-bold text-lg">{selectedTx.endDate}</p>
+                          </div>
+                        </div>
+
+                        {/* Features List */}
+                        <div className="space-y-2 mt-4">
+                          <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">Unlocked Features</p>
+                          <div className="flex flex-wrap gap-2">
+                             {selectedTx.features?.length > 0 ? (
+                               selectedTx.features.map((feature, i) => (
+                                 <div key={i} className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-xs font-bold border border-white/10 backdrop-blur-sm">
+                                   <CheckCircle className="w-3.5 h-3.5 text-white" />
+                                   {feature}
+                                 </div>
+                               ))
+                             ) : (
+                               <p className="text-sm text-white/60">Standard medical features included.</p>
+                             )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Right Side: Invoice & Amount */}
+                      <div className="flex flex-col items-center justify-center md:items-end w-full md:w-auto mt-6 md:mt-0">
+                        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-xl w-full md:w-64">
+                          <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-2 text-center md:text-left">
+                            Transaction Details
+                          </p>
+                          <div className="flex items-baseline gap-1 my-3 justify-center md:justify-start">
+                            <span className="text-4xl font-black text-white">${selectedTx.amount}</span>
+                            <span className="text-sm font-medium text-white/70">USD / {selectedTx.durationInDays} Days</span>
+                          </div>
+                          <div className="flex flex-col gap-2 mt-4 text-sm text-white/80 border-t border-white/20 pt-4">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-white/50">Invoice No:</span>
+                              <span className="font-mono text-xs">{selectedTx.id}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-white/50">Method:</span>
+                              <span className="font-bold text-xs">{selectedTx.method}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {!activeSubscription && selectedTx.id === mySubscriptions[0]?.id && (
+                          <button 
+                            onClick={() => window.location.href = '/pricing'}
+                            className="mt-6 w-full py-4 bg-white text-slate-900 font-black rounded-xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                          >
+                            Upgrade Now
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-8 border shadow-sm border-slate-200 bg-gradient-to-br from-white to-slate-50/50 rounded-3xl text-center">
+                    <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h4 className="text-xl font-bold text-slate-700 mb-2">No Subscriptions Yet</h4>
+                    <p className="text-slate-500 mb-6 max-w-md mx-auto">You are currently not subscribed to any premium plan. Upgrade to unlock all AI diagnostic features.</p>
+                    <button 
+                      onClick={() => window.location.href = '/pricing'}
+                      className="px-8 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg"
+                    >
+                      View Pricing Plans
+                    </button>
+                  </div>
+                )}
+
+                {/* Billing History */}
+                <div className="pt-8 border-t border-slate-200">
+                  <h4 className="mb-6 text-xl font-semibold text-slate-900">Billing History</h4>
+                  
+                  {mySubscriptions.length > 0 ? (
+                    <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                            <th className="p-4 whitespace-nowrap">Plan</th>
+                            <th className="p-4 whitespace-nowrap">Amount</th>
+                            <th className="p-4 whitespace-nowrap">Start Date</th>
+                            <th className="p-4 whitespace-nowrap">End Date</th>
+                            <th className="p-4 whitespace-nowrap">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {mySubscriptions.map((tx, idx) => (
+                            <tr 
+                              key={idx} 
+                              onClick={() => setSelectedTx(tx)}
+                              className={`transition-colors cursor-pointer ${
+                                selectedTx?.id === tx.id 
+                                  ? 'bg-primary/5' 
+                                  : 'hover:bg-slate-50'
+                              }`}
+                            >
+                              <td className="p-4 font-bold text-slate-800">{tx.plan}</td>
+                              <td className="p-4 font-bold text-slate-600">${tx.amount}</td>
+                              <td className="p-4 text-slate-600">{tx.date}</td>
+                              <td className="p-4 text-slate-600">{tx.endDate}</td>
+                              <td className="p-4">
+                                <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider
+                                  ${tx.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 
+                                    tx.status === 'failed' ? 'bg-red-100 text-red-700' : 
+                                    'bg-orange-100 text-orange-700'}`}
+                                >
+                                  {tx.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center p-8 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <p className="text-slate-500 font-medium">No previous transactions found.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeTab === 'statistics' && (
               <div className="space-y-8 animate-fadeIn">
                 <div>

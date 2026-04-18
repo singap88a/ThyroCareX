@@ -2,7 +2,7 @@ import React from 'react';
 import { Download, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 
-const BillingTable = ({ transactions }) => {
+const BillingTable = ({ transactions, onRowClick }) => {
   const { isDarkMode } = useAdminTheme();
 
   const statusStyles = {
@@ -35,7 +35,11 @@ const BillingTable = ({ transactions }) => {
           </thead>
           <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
             {transactions.map((tx) => (
-              <tr key={tx.id} className={`transition-colors ${isDarkMode ? 'hover:bg-gray-800/50 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}>
+              <tr 
+                key={tx.id} 
+                className={`transition-colors cursor-pointer ${isDarkMode ? 'hover:bg-gray-800/50 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}
+                onClick={() => onRowClick && onRowClick(tx)}
+              >
                 <td className="p-4 font-mono text-xs">{tx.id}</td>
                 <td className="p-4 text-sm font-medium">{tx.doctor}</td>
                 <td className="p-4 text-sm">{tx.plan}</td>

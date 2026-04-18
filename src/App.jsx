@@ -43,6 +43,8 @@ import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
 import DiagnosisHistory from './pages/diagnosis/DiagnosisHistory';
 import FloatingChatbot from './components/common/FloatingChatbot';
 import GeminiSingap from './pages/GeminiSingap/GeminiSingap';
+import PaymentSuccess from './pages/payment/PaymentSuccess';
+import PaymentFailure from './pages/payment/PaymentFailure';
 
 function AppContent() {
   const location = useLocation();
@@ -77,6 +79,8 @@ function AppContent() {
           <Route path="/community" element={<Community />} />
           <Route path="/pending-verification" element={<PendingVerification />} />
           <Route path="/gemini" element={<GeminiSingap />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/failure" element={<PaymentFailure />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={
