@@ -1,487 +1,190 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search,
-  Filter,
-  MoreVertical,
-  User,
-  Calendar,
-  Activity,
-  ChevronRight,
-  Plus,
-  Eye,
-  ArrowUpDown,
-  Download,
-  Mail,
-  Phone,
-  Clock,
-  AlertCircle,
-  CircleCheck,
-  XCircle,
-  RefreshCcw,
-  History,
-  LayoutDashboard
+  Search, Filter, User, Calendar, Activity, Plus,
+  LayoutDashboard, Download, Phone, AlertCircle,
+  CircleCheck, Loader2, RefreshCcw, UserPlus
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import patientService from '../../services/patientService';
+import toast from 'react-hot-toast';
 
 const PatientsList = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  
-  // Enhanced Mock Data
-  const patients = [
-    { 
-      id: 1, 
-      name: "Sarah Johnson", 
-      age: 34, 
-      lastVisit: "2024-03-10", 
-      status: "Critical", 
-      condition: "Hyperthyroidism", 
-      img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-      email: "sarah.j@example.com",
-      phone: "+1 (555) 123-4567",
-      nextAppointment: "2024-03-20",
-      visits: 12,
-      priority: "High"
-    },
-    { 
-      id: 2, 
-      name: "Michael Chen", 
-      age: 45, 
-      lastVisit: "2024-03-08", 
-      status: "Stable", 
-      condition: "Hypothyroidism", 
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-      email: "michael.c@example.com",
-      phone: "+1 (555) 987-6543",
-      nextAppointment: "2024-04-05",
-      visits: 8,
-      priority: "Medium"
-    },
-    { 
-      id: 3, 
-      name: "Emma Wilson", 
-      age: 28, 
-      lastVisit: "2024-03-05", 
-      status: "Normal", 
-      condition: "Routine Checkup", 
-      img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-      email: "emma.w@example.com",
-      phone: "+1 (555) 456-7890",
-      nextAppointment: "2024-06-15",
-      visits: 4,
-      priority: "Low"
-    },
-    { 
-      id: 4, 
-      name: "James Rodriguez", 
-      age: 52, 
-      lastVisit: "2024-02-28", 
-      status: "Warning", 
-      condition: "Nodule Detected", 
-      img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-      email: "james.r@example.com",
-      phone: "+1 (555) 321-0987",
-      nextAppointment: "2024-03-25",
-      visits: 15,
-      priority: "High"
-    },
-    { 
-      id: 5, 
-      name: "Lisa Park", 
-      age: 41, 
-      lastVisit: "2024-02-25", 
-      status: "Stable", 
-      condition: "Post-Surgery", 
-      img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
-      email: "lisa.p@example.com",
-      phone: "+1 (555) 765-4321",
-      nextAppointment: "2024-04-10",
-      visits: 6,
-      priority: "Medium"
-    },
-    { 
-      id: 6, 
-      name: "Robert Kim", 
-      age: 38, 
-      lastVisit: "2024-03-01", 
-      status: "Normal", 
-      condition: "Follow-up", 
-      img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-      email: "robert.k@example.com",
-      phone: "+1 (555) 234-5678",
-      nextAppointment: "2024-05-12",
-      visits: 7,
-      priority: "Low"
-    },
-    { 
-      id: 7, 
-      name: "Maria Garcia", 
-      age: 56, 
-      lastVisit: "2024-02-20", 
-      status: "Critical", 
-      condition: "Thyroid Cancer", 
-      img: "https://images.unsplash.com/photo-1551836026-d5c2c5af91f9?w=150&h=150&fit=crop",
-      email: "maria.g@example.com",
-      phone: "+1 (555) 876-5432",
-      nextAppointment: "2024-03-15",
-      visits: 20,
-      priority: "High"
-    },
-    { 
-      id: 8, 
-      name: "David Miller", 
-      age: 49, 
-      lastVisit: "2024-02-18", 
-      status: "Stable", 
-      condition: "Medication Review", 
-      img: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop",
-      email: "david.m@example.com",
-      phone: "+1 (555) 345-6789",
-      nextAppointment: "2024-04-22",
-      visits: 9,
-      priority: "Medium"
-    }
-  ];
 
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case 'Critical': return <AlertCircle className="w-4 h-4" />;
-      case 'Warning': return <AlertCircle className="w-4 h-4" />;
-      case 'Stable': return <CircleCheck className="w-4 h-4" />;
-      case 'Normal': return <CircleCheck className="w-4 h-4" />;
-      default: return null;
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'High': return 'bg-red-500';
-      case 'Medium': return 'bg-yellow-500';
-      case 'Low': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const handleSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const filteredPatients = patients
-    .filter(patient => {
-      const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          patient.condition.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = selectedStatus === 'all' || patient.status === selectedStatus;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      if (sortConfig.direction === 'ascending') {
-        return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+  const fetchPatients = async () => {
+    if (!user?.DoctorId) return;
+    setLoading(true);
+    try {
+      const res = await patientService.getMyPatients(user.DoctorId);
+      if (res.succeeded) {
+        setPatients(res.data || []);
       } else {
-        return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+        toast.error(res.message || 'Failed to load patients');
       }
-    });
+    } catch (err) {
+      toast.error('Failed to load patients');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPatients(); }, [user?.DoctorId]);
+
+  const filtered = patients.filter(p =>
+    (p.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(p.phoneNumber || '').includes(searchTerm)
+  );
+
+  const initials = (name = '') =>
+    name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (
-    <div className="min-h-screen pt-20 pb-12 bg-admin-light-bg dark:bg-admin-dark-bg">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-4 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         {/* Header */}
-        <div className="flex flex-col justify-between mb-8 md:flex-row md:items-center">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-admin-light-text dark:text-admin-dark-text">Patient Management</h1>
-            <p className="mt-1 text-admin-light-muted dark:text-admin-dark-muted">Manage and monitor your patients' health records</p>
+            <h1 className="text-3xl font-bold text-gray-900">My Patients</h1>
+            <p className="mt-1 text-gray-500">
+              {loading ? 'Loading…' : `${patients.length} patient${patients.length !== 1 ? 's' : ''} registered`}
+            </p>
           </div>
-          <div className="flex items-center gap-3 mt-4 md:mt-0">
-            <button className="flex items-center px-4 py-2.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-xl hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover">
-              <Download className="w-4 h-4 mr-2" />
-              Export
+          <div className="flex items-center gap-3">
+            <button onClick={fetchPatients}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 shadow-sm transition">
+              <RefreshCcw className="w-4 h-4" /> Refresh
+            </button>
+            <button onClick={() => navigate('/add-patient')}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-primary text-white rounded-xl hover:bg-primaryHover shadow-lg shadow-primary/30 transition">
+              <UserPlus className="w-4 h-4" /> Add Patient
             </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="p-6 bg-white border border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-admin-light-muted dark:text-admin-dark-muted">Total Patients</p>
-                <p className="mt-2 text-3xl font-bold text-admin-light-text dark:text-admin-dark-text">{patients.length}</p>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Total Patients', value: patients.length, icon: User, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'This Month',     value: patients.filter(p => {
+                const d = new Date(p.registrationAt || 0);
+                const now = new Date();
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+              }).length, icon: Calendar, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { label: 'Active Records', value: patients.length, icon: Activity, color: 'text-green-600', bg: 'bg-green-50' },
+            { label: 'Pending Review', value: 0, icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-50' },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-gray-500">{label}</p>
+                <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center`}>
+                  <Icon className={`w-4 h-4 ${color}`} />
+                </div>
               </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+              <p className="text-3xl font-bold text-gray-900">{loading ? '—' : value}</p>
             </div>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-green-600 dark:text-green-400">↑ 12%</span>
-              <span className="ml-2 text-admin-light-muted dark:text-admin-dark-muted">from last month</span>
-            </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="p-6 bg-white border border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-admin-light-muted dark:text-admin-dark-muted">Critical Cases</p>
-                <p className="mt-2 text-3xl font-bold text-admin-light-text dark:text-admin-dark-text">{patients.filter(p => p.status === 'Critical').length}</p>
-              </div>
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
-                <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-red-600 dark:text-red-400">↑ 3%</span>
-              <span className="ml-2 text-admin-light-muted dark:text-admin-dark-muted">requires attention</span>
-            </div>
-          </div>
-
-          <div className="p-6 bg-white border border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-admin-light-muted dark:text-admin-dark-muted">Avg. Visits</p>
-                <p className="mt-2 text-3xl font-bold text-admin-light-text dark:text-admin-dark-text">
-                  {(patients.reduce((acc, p) => acc + p.visits, 0) / patients.length).toFixed(1)}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <Activity className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-green-600 dark:text-green-400">↓ 5%</span>
-              <span className="ml-2 text-admin-light-muted dark:text-admin-dark-muted">from last month</span>
-            </div>
-          </div>
-
-          <div className="p-6 bg-white border border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-admin-light-muted dark:text-admin-dark-muted">Next 7 Days</p>
-                <p className="mt-2 text-3xl font-bold text-admin-light-text dark:text-admin-dark-text">8</p>
-              </div>
-              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm">
-              <span className="text-purple-600 dark:text-purple-400">3 new</span>
-              <span className="ml-2 text-admin-light-muted dark:text-admin-dark-muted">appointments</span>
-            </div>
+        {/* Search */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name, email or phone…"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition text-sm"
+            />
           </div>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="p-4 mb-6 bg-white border shadow-sm border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute w-5 h-5 transform -translate-y-1/2 text-admin-light-muted dark:text-admin-dark-muted left-4 top-1/2" />
-              <input
-                type="text"
-                placeholder="Search patients by name, email, or condition..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-3 pl-12 pr-4 transition-all border bg-admin-light-bg dark:bg-admin-dark-hover border-admin-light-border dark:border-admin-dark-border rounded-xl focus:ring-2 focus:ring-admin-primary focus:border-transparent"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <select 
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-3 border bg-admin-light-bg dark:bg-admin-dark-hover border-admin-light-border dark:border-admin-dark-border text-admin-light-text dark:text-admin-dark-text rounded-xl focus:ring-2 focus:ring-admin-primary focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="Critical">Critical</option>
-                <option value="Warning">Warning</option>
-                <option value="Stable">Stable</option>
-                <option value="Normal">Normal</option>
-              </select>
-              
-              <button className="flex items-center px-4 py-3 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-xl hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover">
-                <Filter className="w-4 h-4 mr-2" />
-                More Filters
+        {/* Content */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+            <p className="text-gray-500 font-medium">Loading patients…</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <User className="w-16 h-16 text-gray-200 mb-4" />
+            <h3 className="text-lg font-bold text-gray-700 mb-1">
+              {searchTerm ? 'No matching patients' : 'No patients yet'}
+            </h3>
+            <p className="text-gray-400 text-sm mb-6">
+              {searchTerm ? 'Try a different search term' : 'Add your first patient to get started'}
+            </p>
+            {!searchTerm && (
+              <button onClick={() => navigate('/add-patient')}
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primaryHover transition shadow-lg shadow-primary/30">
+                <UserPlus className="w-4 h-4" /> Add First Patient
               </button>
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* Patients Table */}
-        <div className="overflow-hidden bg-white border shadow-sm border-admin-light-border dark:bg-admin-dark-card dark:border-admin-dark-border rounded-2xl">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-admin-light-border dark:border-admin-dark-border">
-                  <th className="px-6 py-4 text-left">
-                    <button 
-                      onClick={() => handleSort('name')}
-                      className="flex items-center text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-light-text dark:hover:text-admin-dark-text"
-                    >
-                      Patient
-                      <ArrowUpDown className="w-3 h-3 ml-1" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <button 
-                      onClick={() => handleSort('status')}
-                      className="flex items-center text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-light-text dark:hover:text-admin-dark-text"
-                    >
-                      Status
-                      <ArrowUpDown className="w-3 h-3 ml-1" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <button 
-                      onClick={() => handleSort('lastVisit')}
-                      className="flex items-center text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-light-text dark:hover:text-admin-dark-text"
-                    >
-                      Last Visit
-                      <ArrowUpDown className="w-3 h-3 ml-1" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <span className="text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted">Condition</span>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <button 
-                      onClick={() => handleSort('priority')}
-                      className="flex items-center text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-light-text dark:hover:text-admin-dark-text"
-                    >
-                      Priority
-                      <ArrowUpDown className="w-3 h-3 ml-1" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <span className="text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted">Contact</span>
-                  </th>
-                  <th className="px-6 py-4 text-left">
-                    <span className="text-xs font-semibold tracking-wider uppercase text-admin-light-muted dark:text-admin-dark-muted">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-admin-light-border dark:divide-admin-dark-border">
-                {filteredPatients.map((patient) => (
-                  <tr 
-                    key={patient.id} 
-                    className="transition-colors hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <img 
-                          src={patient.img} 
-                          alt={patient.name} 
-                          className="object-cover w-10 h-10 mr-3 rounded-full"
-                        />
-                        <div>
-                          <div className="font-medium text-admin-light-text dark:text-admin-dark-text">
-                            {patient.name}
-                          </div>
-                          <div className="text-sm text-admin-light-muted dark:text-admin-dark-muted">
-                            {patient.age} years • {patient.visits} visits
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                          patient.status === 'Critical' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
-                          patient.status === 'Warning' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
-                          patient.status === 'Stable' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                          'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                        }`}>
-                          {getStatusIcon(patient.status)}
-                          <span className="ml-1.5">{patient.status}</span>
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-admin-light-text dark:text-admin-dark-text">{patient.lastVisit}</div>
-                      <div className="text-xs text-admin-light-muted dark:text-admin-dark-muted">
-                        Next: {patient.nextAppointment}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-admin-light-text dark:text-admin-dark-text">{patient.condition}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className={`w-2 h-2 mr-2 rounded-full ${getPriorityColor(patient.priority)}`}></div>
-                        <span className="text-sm font-medium text-admin-light-text dark:text-admin-dark-text">
-                          {patient.priority}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm text-admin-light-muted dark:text-admin-dark-muted">
-                          <Mail className="w-3 h-3 mr-2" />
-                          {patient.email}
-                        </div>
-                        <div className="flex items-center text-sm text-admin-light-muted dark:text-admin-dark-muted">
-                          <Phone className="w-3 h-3 mr-2" />
-                          {patient.phone}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-1">
-                        <Link 
-                          to={`/patients/${patient.id}/dashboard`}
-                          className="flex items-center gap-2 px-3 py-1.5 transition-all rounded-lg bg-admin-primary/10 text-admin-primary hover:bg-admin-primary hover:text-white font-medium text-sm"
-                          title="View Patient Dashboard"
-                        >
-                          <LayoutDashboard className="w-4 h-4" />
-                          <span>Dashboard</span>
-                        </Link>
-
-                        <button 
-                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
-                          title="Send Message"
-                        >
-                          <Mail className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-2 transition-colors rounded-lg text-admin-light-muted dark:text-admin-dark-muted hover:text-admin-primary dark:hover:text-admin-primary hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover"
-                          title="More Options"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['Patient', 'Age', 'Phone', 'Address', 'Actions'].map(h => (
+                      <th key={h} className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Table Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-admin-light-border dark:border-admin-dark-border">
-            <div className="text-sm text-admin-light-muted dark:text-admin-dark-muted">
-              Showing <span className="font-medium text-admin-light-text dark:text-admin-dark-text">{filteredPatients.length}</span> of <span className="font-medium text-admin-light-text dark:text-admin-dark-text">{patients.length}</span> patients
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filtered.map(p => (
+                    <tr key={p.patientID} className="hover:bg-blue-50/30 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primaryHover flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow">
+                            {initials(p.fullName)}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">{p.fullName}</div>
+                            {p.email && <div className="text-xs text-gray-400">{p.email}</div>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {p.age ? `${p.age} yrs` : '—'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-gray-400" />
+                          {p.phoneNumber || '—'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                        {p.address || '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          to={`/patients/${p.patientID}/dashboard`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-semibold hover:bg-primary hover:text-white transition-all duration-200 group-hover:shadow-md"
+                        >
+                          <LayoutDashboard className="w-4 h-4" /> Dashboard
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="flex items-center space-x-2">
-              <button className="px-3 py-1.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-lg hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover disabled:opacity-50">
-                Previous
-              </button>
-              <button className="px-3 py-1.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border bg-admin-primary text-white rounded-lg hover:bg-admin-primary/90">
-                1
-              </button>
-              <button className="px-3 py-1.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-lg hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover">
-                2
-              </button>
-              <button className="px-3 py-1.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-lg hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover">
-                3
-              </button>
-              <button className="px-3 py-1.5 text-sm font-medium transition-colors border border-admin-light-border dark:border-admin-dark-border text-admin-light-muted dark:text-admin-dark-muted rounded-lg hover:bg-admin-light-hover dark:hover:bg-admin-dark-hover">
-                Next
-              </button>
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-400">
+              <span>Showing <strong className="text-gray-700">{filtered.length}</strong> of <strong className="text-gray-700">{patients.length}</strong> patients</span>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -2,607 +2,412 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft,
-  User,
-  Calendar,
-  Activity,
-  Clock,
-  AlertCircle,
-  CircleCheck,
-  ChevronRight,
-  Upload,
-  RefreshCcw,
-  History,
-  FileText,
-  Stethoscope,
-  Brain,
-  Zap,
-  TrendingUp,
-  Heart,
-  Thermometer
+  ArrowLeft, User, Calendar, Activity, Clock,
+  AlertCircle, CircleCheck, ChevronRight, Upload,
+  RefreshCcw, History, FileText, Stethoscope,
+  Brain, Zap, TrendingUp, Heart, Thermometer,
+  Loader2, Scan, FlaskConical, Target, Shield, Save
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import patientService from '../../services/patientService';
+import testService from '../../services/testService';
+import ThyroidDiagnosisView from '../../components/diagnosis/ThyroidDiagnosisView';
 
-const ReDiagnosis = ({ dashboardMode = false, onComplete }) => {
-  const { id } = useParams();
+const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
+  const { id } = useParams(); // patientID
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [diagnosisData, setDiagnosisData] = useState({
-    symptoms: {},
-    biomarkers: {},
-    scans: []
+  const [patient, setPatient] = useState(null);
+  const [loadingPatient, setLoadingPatient] = useState(true);
+  const [diagnosisResult, setDiagnosisResult] = useState(null);
+  
+  // Patient form data (Step 1)
+  const [patientFormData, setPatientFormData] = useState({
+    fullName: '',
+    age: '',
+    gender: 1, // 1 for Male, 2 for Female
+    phoneNumber: '',
+    address: '',
+    email: ''
+  });
+
+  // Clinical form data (Step 2 & 3)
+  const [formData, setFormData] = useState({
+    tsh: '', t3: '', tt4: '', fti: '', t4u: '',
+    on_thyroxine: 0,
+    thyroid_surgery: 0,
+    query_hyperthyroid: 0,
+    nodule_present: false,
+    image: null
   });
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
-  }, []);
+    const fetchPatient = async () => {
+      try {
+        const res = await patientService.getPatientById(id);
+        if (res.succeeded) {
+          setPatient(res.data);
+          setPatientFormData({
+            fullName: res.data.fullName || '',
+            age: res.data.age || '',
+            gender: res.data.gender || 1,
+            phoneNumber: res.data.phoneNumber || '',
+            address: res.data.address || '',
+            email: res.data.email || ''
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch patient', err);
+      } finally {
+        setLoadingPatient(false);
+      }
+    };
+    fetchPatient();
+  }, [id]);
 
-  // Mock patient data (in real app, fetch from API)
-  const patientData = {
-    id: id,
-    name: "Sarah Johnson",
-    age: 34,
-    gender: "Female",
-    phone: "+1 (555) 123-4567",
-    email: "sarah.j@example.com",
-    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-    bloodType: "O+",
-    lastDiagnosis: {
-      date: "2024-03-10",
-      status: "MALIGNANT",
-      condition: "Papillary Thyroid Carcinoma",
-      confidence: 94.7,
-      severity: "Moderate"
-    },
-    totalDiagnoses: 3
+  const handlePatientInputChange = (e) => {
+    const { name, value } = e.target;
+    setPatientFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const symptoms = [
-    { id: 'neck_swelling', label: 'Neck Swelling', icon: '🔴' },
-    { id: 'difficulty_swallowing', label: 'Difficulty Swallowing', icon: '😣' },
-    { id: 'voice_changes', label: 'Voice Changes', icon: '🗣️' },
-    { id: 'fatigue', label: 'Fatigue', icon: '😴' },
-    { id: 'weight_changes', label: 'Weight Changes', icon: '⚖️' },
-    { id: 'heart_palpitations', label: 'Heart Palpitations', icon: '💓' },
-    { id: 'temperature_sensitivity', label: 'Temperature Sensitivity', icon: '🌡️' },
-    { id: 'anxiety', label: 'Anxiety/Nervousness', icon: '😰' }
-  ];
-
-  const handleSymptomChange = (symptomId, severity) => {
-    setDiagnosisData(prev => ({
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
       ...prev,
-      symptoms: { ...prev.symptoms, [symptomId]: severity }
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
-  const handleBiomarkerChange = (marker, value) => {
-    setDiagnosisData(prev => ({
-      ...prev,
-      biomarkers: { ...prev.biomarkers, [marker]: value }
-    }));
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, image: e.target.files[0] }));
+    }
+  };
+
+  const handleSavePatient = async () => {
+    setIsLoading(true);
+    try {
+      const res = await patientService.updatePatient(id, {
+        ...patientFormData,
+        patientID: parseInt(id),
+        age: parseInt(patientFormData.age),
+        gender: parseInt(patientFormData.gender)
+      });
+      if (res.succeeded) {
+        if (onPatientSave) onPatientSave();
+        setCurrentStep(2);
+      } else {
+        alert(res.message || "Failed to update patient info");
+      }
+    } catch (err) {
+      console.error('Update failed', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    
-    if (onComplete) {
-      onComplete();
-    } else {
-      // Navigate to comparison page
-      navigate(`/patients/${id}/compare`);
+    try {
+      // 1. Process Clinical Data
+      const clinicalReq = {
+        patient_id: parseInt(id),
+        tsh: parseFloat(formData.tsh) || 0,
+        t3: parseFloat(formData.t3) || 0,
+        tt4: parseFloat(formData.tt4) || 0,
+        fti: parseFloat(formData.fti) || 0,
+        t4u: parseFloat(formData.t4u) || 0,
+        on_thyroxine: parseInt(formData.on_thyroxine),
+        thyroid_surgery: parseInt(formData.thyroid_surgery),
+        query_hyperthyroid: parseInt(formData.query_hyperthyroid)
+      };
+
+      const clinicalRes = await testService.processClinical(clinicalReq);
+      
+      if (clinicalRes.succeeded) {
+        const testId = clinicalRes.data.testId;
+        let finalData = clinicalRes.data;
+
+        // 2. Process Image (if provided)
+        if (formData.image) {
+          const imageRes = await testService.processImage(testId, formData.image);
+          if (imageRes.succeeded) {
+            finalData = imageRes.data;
+          }
+        }
+
+        // 3. Show Result
+        if (onComplete) {
+          onComplete(testId);
+        } else {
+          setDiagnosisResult(finalData);
+          setCurrentStep(4);
+        }
+      }
+    } catch (err) {
+      console.error('Diagnosis failed', err);
+      alert('An error occurred during diagnosis. Please check console.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (loadingPatient) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24">
+        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+        <p className="text-gray-500 font-medium">Loading patient record...</p>
+      </div>
+    );
+  }
+
+  if (currentStep === 4 && diagnosisResult) {
+    return (
+      <div className="p-8">
+        <div className="mb-8 flex justify-between items-center">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+            <CircleCheck className="text-green-500" /> Re-Diagnosis Successful
+          </h2>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => navigate(`/patients/${id}/compare`)}
+              className="px-6 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2"
+            >
+              <History size={18} /> Compare History
+            </button>
+            <button 
+              onClick={() => setCurrentStep(1)}
+              className="px-6 py-3 bg-gray-100 dark:bg-admin-dark-hover text-gray-600 dark:text-gray-300 font-bold rounded-2xl transition-all"
+            >
+              Run New Diagnosis
+            </button>
+          </div>
+        </div>
+        <ThyroidDiagnosisView initialData={diagnosisResult} patientId={id} />
+      </div>
+    );
+  }
+
   const steps = [
-    { number: 1, title: 'Review Patient', icon: User },
-    { number: 2, title: 'Update Symptoms', icon: Activity },
-    { number: 3, title: 'Biomarkers', icon: Thermometer },
-    { number: 4, title: 'AI Analysis', icon: Brain }
+    { number: 1, title: 'Edit Patient', icon: User },
+    { number: 2, title: 'Clinical Data', icon: Stethoscope },
+    { number: 3, title: 'AI Analysis', icon: Brain }
   ];
 
   return (
     <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50'}`}>
-      {!dashboardMode && (
-        <>
-          {/* Decorative Background */}
-          <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
-          </div>
-        </>
-      )}
-
       <div className={`relative mx-auto sm:px-6 lg:px-8 ${dashboardMode ? 'max-w-full px-0 py-0' : 'max-w-6xl px-4 py-8'}`}>
-        {/* Header */}
-        {!dashboardMode && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-              Back to Patients
-            </button>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-                  <RefreshCcw className="w-8 h-8" />
-                  Re-Diagnosis
-                </h1>
-                <p className="mt-2 text-gray-600">
-                  Initiate a new diagnosis for comparison with previous results
-                </p>
-              </div>
-              
-              <Link
-                to={`/patients/${id}/history`}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                <History className="w-4 h-4" />
-                View History ({patientData.totalDiagnoses})
-              </Link>
-            </div>
-          </motion.div>
-        )}
-
+        
         {/* Progress Steps */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl shadow-sm">
+        <div className="mb-8">
+          <div className="flex items-center justify-between p-4 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-2xl shadow-sm">
             {steps.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = currentStep === step.number;
               const isCompleted = currentStep > step.number;
-              
               return (
                 <React.Fragment key={step.number}>
-                  <div 
-                    className={`flex items-center gap-3 cursor-pointer transition-all ${
-                      isActive ? 'scale-105' : ''
-                    }`}
-                    onClick={() => step.number < currentStep && setCurrentStep(step.number)}
-                  >
+                  <div className={`flex items-center gap-3 transition-all ${isActive ? 'scale-105' : ''}`}>
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                       isActive ? 'bg-primary text-white shadow-lg shadow-primary/30' :
-                      isCompleted ? 'bg-green-500 text-white' :
-                      'bg-gray-100 text-gray-400'
+                      isCompleted ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-admin-dark-hover text-gray-400'
                     }`}>
-                      {isCompleted ? (
-                        <CircleCheck className="w-6 h-6" />
-                      ) : (
-                        <StepIcon className="w-6 h-6" />
-                      )}
+                      {isCompleted ? <CircleCheck className="w-6 h-6" /> : <StepIcon className="w-6 h-6" />}
                     </div>
-                    <div className="hidden sm:block">
-                      <p className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-gray-600'}`}>
-                        Step {step.number}
-                      </p>
-                      <p className={`text-xs ${isActive ? 'text-primary' : 'text-gray-400'}`}>
-                        {step.title}
-                      </p>
+                    <div className="hidden sm:block text-left">
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-primary' : 'text-gray-400'}`}>Step {step.number}</p>
+                      <p className={`text-sm font-bold ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>{step.title}</p>
                     </div>
                   </div>
-                  
-                  {index < steps.length - 1 && (
-                    <div className={`flex-1 h-1 mx-4 rounded-full transition-colors ${
-                      currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
-                    }`} />
-                  )}
+                  {index < steps.length - 1 && <div className={`flex-1 h-1 mx-4 rounded-full ${currentStep > step.number ? 'bg-green-500' : 'bg-gray-100 dark:bg-admin-dark-border'}`} />}
                 </React.Fragment>
               );
             })}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Left Column - Patient Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-1"
-          >
-            {/* Patient Card */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column - Patient Summary */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="p-6 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-3xl shadow-sm">
               <div className="flex items-center gap-4 mb-6">
-                <img
-                  src={patientData.img}
-                  alt={patientData.name}
-                  className="w-20 h-20 rounded-2xl object-cover ring-4 ring-primary/20"
-                />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
+                  {patientFormData.fullName?.charAt(0)}
+                </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">{patientData.name}</h2>
-                  <p className="text-gray-500">{patientData.age} years • {patientData.gender}</p>
-                  <p className="text-sm text-gray-400">ID: {patientData.id}</p>
+                  <h2 className="text-xl font-black text-gray-900 dark:text-white">{patientFormData.fullName || 'Patient Name'}</h2>
+                  <p className="text-sm text-gray-500">Patient ID: #{id}</p>
                 </div>
               </div>
               
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <span className="text-gray-500">Blood Type</span>
-                  <span className="font-semibold text-gray-800">{patientData.bloodType}</span>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl">
+                  <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <Activity size={12} /> Diagnostics Mode
+                  </p>
+                  <p className="text-sm font-bold text-blue-900 dark:text-blue-100">Full Re-Diagnosis Cycle</p>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <span className="text-gray-500">Total Diagnoses</span>
-                  <span className="font-semibold text-gray-800">{patientData.totalDiagnoses}</span>
+
+                <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl text-gray-500">
+                  <Clock size={16} />
+                  <span className="text-xs font-bold">Session started: {new Date().toLocaleTimeString()}</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Last Diagnosis Summary */}
-            <div className="p-6 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl text-white">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertCircle className="w-5 h-5" />
-                <h3 className="font-semibold">Previous Diagnosis</h3>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <p className="text-white/70 text-sm">Condition</p>
-                  <p className="font-bold text-lg">{patientData.lastDiagnosis.condition}</p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white/70 text-sm">Status</p>
-                    <p className="font-semibold">{patientData.lastDiagnosis.status}</p>
-                  </div>
-                  <div>
-                    <p className="text-white/70 text-sm">Confidence</p>
-                    <p className="font-semibold">{patientData.lastDiagnosis.confidence}%</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 pt-3 border-t border-white/20">
-                  <Calendar className="w-4 h-4 text-white/70" />
-                  <span className="text-sm text-white/70">{patientData.lastDiagnosis.date}</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Column - Form Steps */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-2"
-          >
+          {/* Right Column - Step Content */}
+          <div className="lg:col-span-8">
             <AnimatePresence mode="wait">
-              {/* Step 1: Review Patient */}
               {currentStep === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="p-8 bg-white border border-gray-200 rounded-2xl shadow-sm"
+                <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                  className="p-8 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-3xl shadow-sm space-y-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <User className="w-7 h-7 text-primary" />
-                    Confirm Patient Information
-                  </h2>
-                  
-                  <div className="space-y-6">
-                    <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
-                        <div>
-                          <p className="font-medium text-primary">Before starting re-diagnosis</p>
-                          <p className="text-sm text-primary/70 mt-1">
-                            Please verify that the patient information is correct and that they have completed 
-                            any recommended treatments since the last diagnosis on {patientData.lastDiagnosis.date}.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 border border-gray-200 rounded-xl">
-                        <label className="text-sm text-gray-500">Full Name</label>
-                        <p className="font-semibold text-gray-800">{patientData.name}</p>
-                      </div>
-                      <div className="p-4 border border-gray-200 rounded-xl">
-                        <label className="text-sm text-gray-500">Age</label>
-                        <p className="font-semibold text-gray-800">{patientData.age} years</p>
-                      </div>
-                      <div className="p-4 border border-gray-200 rounded-xl">
-                        <label className="text-sm text-gray-500">Gender</label>
-                        <p className="font-semibold text-gray-800">{patientData.gender}</p>
-                      </div>
-                      <div className="p-4 border border-gray-200 rounded-xl">
-                        <label className="text-sm text-gray-500">Blood Type</label>
-                        <p className="font-semibold text-gray-800">{patientData.bloodType}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-                      <input 
-                        type="checkbox" 
-                        id="confirm" 
-                        className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary"
-                      />
-                      <label htmlFor="confirm" className="text-green-800">
-                        I confirm that the patient information is correct and consent has been obtained
-                      </label>
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                      <User className="text-primary" /> Update Patient Profile
+                    </h3>
+                    <span className="px-4 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-full">Editing Record</span>
                   </div>
-
-                  <div className="flex justify-end mt-8">
-                    <button
-                      onClick={() => setCurrentStep(2)}
-                      className="flex items-center gap-2 px-6 py-3 text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-                    >
-                      Continue
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 2: Update Symptoms */}
-              {currentStep === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="p-8 bg-white border border-gray-200 rounded-2xl shadow-sm"
-                >
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <Activity className="w-7 h-7 text-primary" />
-                    Current Symptoms Assessment
-                  </h2>
-                  
-                  <p className="text-gray-600 mb-6">
-                    Rate the severity of each symptom (0 = None, 5 = Severe)
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {symptoms.map((symptom) => (
-                      <div 
-                        key={symptom.id}
-                        className="p-4 border border-gray-200 rounded-xl hover:border-primary/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-2xl">{symptom.icon}</span>
-                          <span className="font-medium text-gray-800">{symptom.label}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          {[0, 1, 2, 3, 4, 5].map((level) => (
-                            <button
-                              key={level}
-                              onClick={() => handleSymptomChange(symptom.id, level)}
-                              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                                diagnosisData.symptoms[symptom.id] === level
-                                  ? level === 0 ? 'bg-green-500 text-white' :
-                                    level <= 2 ? 'bg-yellow-500 text-white' :
-                                    'bg-red-500 text-white'
-                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                              }`}
-                            >
-                              {level}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-between mt-8">
-                    <button
-                      onClick={() => setCurrentStep(1)}
-                      className="flex items-center gap-2 px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                      Back
-                    </button>
-                    <button
-                      onClick={() => setCurrentStep(3)}
-                      className="flex items-center gap-2 px-6 py-3 text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-                    >
-                      Continue
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 3: Biomarkers */}
-              {currentStep === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="p-8 bg-white border border-gray-200 rounded-2xl shadow-sm"
-                >
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <Thermometer className="w-7 h-7 text-primary" />
-                    Current Biomarkers
-                  </h2>
-                  
-                  <p className="text-gray-600 mb-6">
-                    Enter the latest lab results for thyroid function tests
-                  </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[
-                      { id: 'tsh', label: 'TSH', unit: 'mIU/L', normal: '0.4 - 4.0', placeholder: 'e.g., 2.5' },
-                      { id: 't4', label: 'T4 (Thyroxine)', unit: 'μg/dL', normal: '4.5 - 12.0', placeholder: 'e.g., 8.0' },
-                      { id: 't3', label: 'T3 (Triiodothyronine)', unit: 'ng/dL', normal: '80 - 200', placeholder: 'e.g., 120' },
-                      { id: 'calcitonin', label: 'Calcitonin', unit: 'pg/mL', normal: '0 - 10', placeholder: 'e.g., 5' },
-                      { id: 'thyroglobulin', label: 'Thyroglobulin', unit: 'ng/mL', normal: '0 - 40', placeholder: 'e.g., 20' },
-                      { id: 'tpo', label: 'TPO Antibodies', unit: 'IU/mL', normal: '< 35', placeholder: 'e.g., 15' }
-                    ].map((marker) => (
-                      <div key={marker.id} className="p-4 border border-gray-200 rounded-xl">
-                        <label className="block mb-2">
-                          <span className="font-medium text-gray-800">{marker.label}</span>
-                          <span className="text-sm text-gray-500 ml-2">({marker.unit})</span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          placeholder={marker.placeholder}
-                          value={diagnosisData.biomarkers[marker.id] || ''}
-                          onChange={(e) => handleBiomarkerChange(marker.id, e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                        />
-                        <p className="text-xs text-gray-500 mt-2">Normal: {marker.normal}</p>
-                      </div>
-                    ))}
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">Full Name</label>
+                      <input 
+                        type="text" name="fullName" value={patientFormData.fullName} onChange={handlePatientInputChange}
+                        className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">Age</label>
+                      <input 
+                        type="number" name="age" value={patientFormData.age} onChange={handlePatientInputChange}
+                        className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">Gender</label>
+                      <select 
+                        name="gender" value={patientFormData.gender} onChange={handlePatientInputChange}
+                        className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold"
+                      >
+                        <option value={1}>Male</option>
+                        <option value={2}>Female</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">Phone Number</label>
+                      <input 
+                        type="text" name="phoneNumber" value={patientFormData.phoneNumber} onChange={handlePatientInputChange}
+                        className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold"
+                      />
+                    </div>
                   </div>
 
-                  {/* Upload Scans */}
-                  <div className="mt-6 p-6 border-2 border-dashed border-gray-300 rounded-xl text-center">
-                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                    <p className="font-medium text-gray-700">Upload New Scan Images</p>
-                    <p className="text-sm text-gray-500 mt-1">Drag & drop or click to upload ultrasound images</p>
-                    <button className="mt-4 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                      Select Files
-                    </button>
-                  </div>
-
-                  <div className="flex justify-between mt-8">
-                    <button
+                  <div className="flex justify-end gap-4">
+                    <button 
                       onClick={() => setCurrentStep(2)}
-                      className="flex items-center gap-2 px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                      className="px-8 py-4 text-gray-400 font-bold hover:text-primary transition-all"
                     >
-                      <ArrowLeft className="w-5 h-5" />
-                      Back
+                      Skip Updates
                     </button>
-                    <button
-                      onClick={() => setCurrentStep(4)}
-                      className="flex items-center gap-2 px-6 py-3 text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+                    <button 
+                      onClick={handleSavePatient} disabled={isLoading}
+                      className="flex items-center gap-2 px-10 py-4 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:bg-primaryHover transition-all disabled:opacity-50"
                     >
-                      Continue
-                      <ChevronRight className="w-5 h-5" />
+                      {isLoading ? <Loader2 className="animate-spin" /> : <Save size={18} />}
+                      Save & Continue
                     </button>
                   </div>
                 </motion.div>
               )}
 
-              {/* Step 4: AI Analysis */}
-              {currentStep === 4 && (
-                <motion.div
-                  key="step4"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="p-8 bg-white border border-gray-200 rounded-2xl shadow-sm"
+              {currentStep === 2 && (
+                <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                  className="p-8 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-3xl shadow-sm space-y-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <Brain className="w-7 h-7 text-primary" />
-                    AI Analysis
-                  </h2>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                    <FlaskConical className="text-primary" /> Laboratory Metrics
+                  </h3>
                   
-                  <div className="space-y-6">
-                    {/* Summary Card */}
-                    <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-                      <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-primary" />
-                        Data Summary
-                      </h3>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-3 bg-white rounded-lg">
-                          <p className="text-2xl font-bold text-primary">
-                            {Object.keys(diagnosisData.symptoms).filter(k => diagnosisData.symptoms[k] > 0).length}
-                          </p>
-                          <p className="text-sm text-gray-500">Active Symptoms</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg">
-                          <p className="text-2xl font-bold text-primary">
-                            {Object.keys(diagnosisData.biomarkers).filter(k => diagnosisData.biomarkers[k]).length}
-                          </p>
-                          <p className="text-sm text-gray-500">Biomarkers</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg">
-                          <p className="text-2xl font-bold text-green-600">
-                            {diagnosisData.scans.length}
-                          </p>
-                          <p className="text-sm text-gray-500">Scans Uploaded</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg">
-                          <p className="text-2xl font-bold text-purple-600">v3.2.1</p>
-                          <p className="text-sm text-gray-500">AI Model</p>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">TSH Level (mIU/L)</label>
+                      <input type="number" name="tsh" value={formData.tsh} onChange={handleInputChange} className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold" placeholder="0.4 - 4.0" />
                     </div>
-
-                    {/* What will happen */}
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-gray-800">What happens next:</h3>
-                      {[
-                        { icon: Zap, text: 'AI will analyze all provided data in seconds' },
-                        { icon: TrendingUp, text: 'Compare results with previous diagnosis' },
-                        { icon: Stethoscope, text: 'Generate progress report and recommendations' }
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                          <item.icon className="w-5 h-5 text-primary" />
-                          <span className="text-gray-700">{item.text}</span>
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">T3 Level (ng/dL)</label>
+                      <input type="number" name="t3" value={formData.t3} onChange={handleInputChange} className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold" placeholder="80 - 200" />
                     </div>
-
-                    {/* Consent */}
-                    <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                      <input 
-                        type="checkbox" 
-                        id="aiConsent" 
-                        className="w-5 h-5 mt-0.5 text-primary rounded border-gray-300 focus:ring-primary"
-                      />
-                      <label htmlFor="aiConsent" className="text-yellow-800 text-sm">
-                        I understand that AI-assisted diagnosis is meant to support clinical decision-making 
-                        and should not replace professional medical judgment. The results will be reviewed 
-                        by a qualified healthcare provider.
-                      </label>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">TT4 Level (μg/dL)</label>
+                      <input type="number" name="tt4" value={formData.tt4} onChange={handleInputChange} className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold" placeholder="5.1 - 14.1" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-400 uppercase ml-1">FTI Index</label>
+                      <input type="number" name="fti" value={formData.fti} onChange={handleInputChange} className="w-full p-4 bg-gray-50 dark:bg-admin-dark-hover border-none rounded-2xl focus:ring-2 focus:ring-primary outline-none font-bold" placeholder="Relative Index" />
                     </div>
                   </div>
 
-                  <div className="flex justify-between mt-8">
-                    <button
-                      onClick={() => setCurrentStep(3)}
-                      className="flex items-center gap-2 px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                      Back
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-50 dark:border-admin-dark-border">
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl cursor-pointer" onClick={() => setFormData(p => ({...p, on_thyroxine: p.on_thyroxine ? 0 : 1}))}>
+                      <input type="checkbox" checked={formData.on_thyroxine === 1} readOnly className="w-5 h-5 accent-primary" />
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">On Thyroxine</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl cursor-pointer" onClick={() => setFormData(p => ({...p, thyroid_surgery: p.thyroid_surgery ? 0 : 1}))}>
+                      <input type="checkbox" checked={formData.thyroid_surgery === 1} readOnly className="w-5 h-5 accent-primary" />
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Previous Surgery</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl cursor-pointer" onClick={() => setFormData(p => ({...p, query_hyperthyroid: p.query_hyperthyroid ? 0 : 1}))}>
+                      <input type="checkbox" checked={formData.query_hyperthyroid === 1} readOnly className="w-5 h-5 accent-primary" />
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Hyperthyroid?</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <button onClick={() => setCurrentStep(1)} className="px-6 py-3 text-gray-400 font-bold hover:text-primary transition-all">Back to Profile</button>
+                    <button onClick={() => setCurrentStep(3)} className="flex items-center gap-2 px-10 py-4 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:bg-primaryHover transition-all">
+                      Next: Image Upload <ChevronRight size={18} />
                     </button>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={isLoading}
-                      className="flex items-center gap-2 px-8 py-3 text-white bg-gradient-to-r from-primary to-primaryHover rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-70"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Brain className="w-5 h-5" />
-                          Start AI Analysis
-                        </>
-                      )}
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === 3 && (
+                <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                  className="p-8 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-3xl shadow-sm space-y-8"
+                >
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                    <Brain className="text-primary" /> Ultrasound Image Analysis
+                  </h3>
+                  
+                  <div className={`relative p-12 border-2 border-dashed rounded-[40px] text-center transition-all ${formData.image ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-admin-dark-border'}`}>
+                    <input type="file" id="scan-upload" className="hidden" onChange={handleFileChange} accept="image/*" />
+                    <label htmlFor="scan-upload" className="cursor-pointer block space-y-4">
+                      <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary">
+                        {formData.image ? <CircleCheck size={40} /> : <Upload size={40} />}
+                      </div>
+                      <div>
+                        <p className="text-xl font-black text-gray-900 dark:text-white">{formData.image ? formData.image.name : 'Upload Ultrasound Scan'}</p>
+                        <p className="text-sm text-gray-500 max-w-xs mx-auto">Click to browse or drag and drop your ultrasound DICOM/JPG file here</p>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between pt-8">
+                    <button onClick={() => setCurrentStep(2)} className="px-6 py-3 text-gray-400 font-bold hover:text-primary transition-all">Back to Metrics</button>
+                    <button onClick={handleSubmit} disabled={isLoading} className="flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-primary to-primaryHover text-white font-black rounded-[24px] shadow-2xl shadow-primary/40 hover:scale-105 transition-all disabled:opacity-50">
+                      {isLoading ? <Loader2 className="animate-spin w-6 h-6" /> : <Zap size={24} />}
+                      {isLoading ? 'Processing Diagnosis...' : 'EXECUTE AI RE-DIAGNOSIS'}
                     </button>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

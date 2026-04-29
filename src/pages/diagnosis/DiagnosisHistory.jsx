@@ -1,457 +1,254 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft,
-  User,
-  Calendar,
-  Activity,
-  AlertCircle,
-  CircleCheck,
-  Download,
-  Filter,
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { 
+  History, 
+  Calendar, 
+  Activity, 
+  ChevronRight, 
+  FileText, 
   Search,
-  RefreshCcw,
-  Clock,
-  ChevronRight,
-  GitCompare,
-  FileText,
-  BarChart3,
+  Loader2,
+  AlertCircle,
+  Brain,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Target,
+  Clock,
+  Scan,
+  FlaskConical,
+  Shield
 } from 'lucide-react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import DiagnosisTimeline from '../../components/diagnosis/DiagnosisTimeline';
-import ProgressIndicator from '../../components/diagnosis/ProgressIndicator';
+import { motion, AnimatePresence } from 'framer-motion';
+import testService from '../../services/testService';
 
-const DiagnosisHistory = ({ dashboardMode = false }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [selectedDates, setSelectedDates] = useState({ from: '', to: '' });
+const DiagnosisHistory = ({ dashboardMode = false, onSelectTest = null }) => {
+  const { id } = useParams(); // patientId
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedTest, setSelectedTest] = useState(null);
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: true });
-  }, []);
-
-  // Mock patient and diagnosis history data
-  const patientData = {
-    id: id || "THY-2024-001234",
-    name: "Sarah Johnson",
-    age: 34,
-    gender: "Female",
-    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-    totalDiagnoses: 5,
-    firstDiagnosis: "2023-06-15",
-    lastDiagnosis: "2024-09-20"
-  };
-
-  const diagnosisHistory = [
-    {
-      id: "diag-005",
-      date: "2024-09-20",
-      status: "BENIGN",
-      condition: "Post-Treatment Recovery",
-      confidence: 91.2,
-      severity: "Mild",
-      riskLevel: "Low",
-      biomarkers: {
-        tsh: { value: 2.1 },
-        t4: { value: 8.5 },
-        t3: { value: 150 },
-        calcitonin: { value: 8 }
-      },
-      nodules: { total: 1, suspicious: 0 }
-    },
-    {
-      id: "diag-004",
-      date: "2024-06-15",
-      status: "SUSPICIOUS",
-      condition: "Monitoring Phase",
-      confidence: 87.5,
-      severity: "Mild",
-      riskLevel: "Medium",
-      biomarkers: {
-        tsh: { value: 1.8 },
-        t4: { value: 10.2 },
-        t3: { value: 180 },
-        calcitonin: { value: 12 }
-      },
-      nodules: { total: 2, suspicious: 1 }
-    },
-    {
-      id: "diag-003",
-      date: "2024-03-10",
-      status: "MALIGNANT",
-      condition: "Papillary Thyroid Carcinoma",
-      confidence: 94.7,
-      severity: "Moderate",
-      riskLevel: "High",
-      biomarkers: {
-        tsh: { value: 0.15 },
-        t4: { value: 18.9 },
-        t3: { value: 325 },
-        calcitonin: { value: 45 }
-      },
-      nodules: { total: 3, suspicious: 2 }
-    },
-    {
-      id: "diag-002",
-      date: "2023-12-05",
-      status: "SUSPICIOUS",
-      condition: "Nodule Detected - Further Testing Required",
-      confidence: 78.3,
-      severity: "Mild",
-      riskLevel: "Medium",
-      biomarkers: {
-        tsh: { value: 0.35 },
-        t4: { value: 14.2 },
-        t3: { value: 245 },
-        calcitonin: { value: 28 }
-      },
-      nodules: { total: 2, suspicious: 1 }
-    },
-    {
-      id: "diag-001",
-      date: "2023-06-15",
-      status: "NORMAL",
-      condition: "Initial Screening - Routine",
-      confidence: 95.8,
-      severity: "None",
-      riskLevel: "Low",
-      biomarkers: {
-        tsh: { value: 2.5 },
-        t4: { value: 7.8 },
-        t3: { value: 120 },
-        calcitonin: { value: 5 }
-      },
-      nodules: { total: 0, suspicious: 0 }
-    }
-  ];
-
-  // Filter diagnoses
-  const filteredHistory = diagnosisHistory.filter(diag => {
-    const matchesSearch = diag.condition.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         diag.status.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || diag.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  // Calculate overall progress
-  const calculateProgress = () => {
-    const latest = diagnosisHistory[0];
-    const earliest = diagnosisHistory[diagnosisHistory.length - 1];
-    
-    if (latest.status === 'BENIGN' || latest.status === 'NORMAL') return 75;
-    if (latest.status === 'SUSPICIOUS') return 25;
-    if (latest.status === 'MALIGNANT') return -25;
-    return 0;
-  };
-
-  const handleViewDiagnosis = (diagId) => {
-    navigate(`/patients/${id}`);
-  };
-
-  const handleCompare = (selectedIds) => {
-    navigate(`/patients/${id}/compare?dates=${selectedIds.join(',')}`);
-  };
-
-  const getStatusStats = () => {
-    const stats = {
-      total: diagnosisHistory.length,
-      benign: diagnosisHistory.filter(d => d.status === 'BENIGN').length,
-      malignant: diagnosisHistory.filter(d => d.status === 'MALIGNANT').length,
-      suspicious: diagnosisHistory.filter(d => d.status === 'SUSPICIOUS').length,
-      normal: diagnosisHistory.filter(d => d.status === 'NORMAL').length
+    const fetchHistory = async () => {
+      try {
+        const res = await testService.getPatientTestHistory(id);
+        if (res.succeeded) {
+          setHistory(res.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch diagnosis history', err);
+      } finally {
+        setLoading(false);
+      }
     };
-    return stats;
+    fetchHistory();
+  }, [id]);
+
+  const filteredHistory = useMemo(() => {
+    if (!searchTerm) return history;
+    const lowerSearch = searchTerm.toLowerCase();
+    return history.filter(item => {
+      const dateStr = new Date(item.createdAt).toLocaleDateString();
+      const riskLevel = (item.diagnosisResult?.riskLevel || '').toLowerCase();
+      return dateStr.includes(lowerSearch) || riskLevel.includes(lowerSearch);
+    });
+  }, [history, searchTerm]);
+
+  const riskBadge = (level = '') => {
+    const l = level.toLowerCase();
+    if (l.includes('high') || l.includes('malignant')) return 'bg-red-100 text-red-700 border-red-200';
+    if (l.includes('low') || l.includes('benign')) return 'bg-green-100 text-green-700 border-green-200';
+    return 'bg-blue-100 text-blue-700 border-blue-200';
   };
 
-  const stats = getStatusStats();
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24">
+        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+        <p className="text-gray-500 font-medium">Fetching medical history...</p>
+      </div>
+    );
+  }
+
+  const handleTestClick = (item) => {
+    setSelectedTest(item);
+    if (onSelectTest) {
+      // Small delay to let the selection state update or just call it immediately
+      // If we are in dashboard mode, we want to SWITCH to the results view
+      onSelectTest(item.id);
+    }
+  };
 
   return (
-    <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50'}`}>
-      {!dashboardMode && (
-        /* Decorative Background */
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+    <div className="p-8 space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+            <History className="text-primary" /> Diagnosis History
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Sytematic record of all AI-driven assessments</p>
         </div>
-      )}
-
-      <div className={`relative max-w-7xl mx-auto sm:px-6 lg:px-8 ${dashboardMode ? 'px-0 py-0' : 'px-4 py-8'}`}>
-        {/* Header */}
-        {!dashboardMode && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center mb-4 text-gray-600 transition-colors hover:text-gray-900 group"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-              Back
-            </button>
-            
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-                  <Clock className="w-8 h-8" />
-                  Diagnosis History
-                </h1>
-                <p className="mt-2 text-gray-600">
-                  Complete diagnosis timeline for patient records
-                </p>
-              </div>
-              
-              <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                  <Download className="w-4 h-4" />
-                  Export All
-                </button>
-                <Link
-                  to={`/patients/${id}/rediagnose`}
-                  className="flex items-center gap-2 px-4 py-2 text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors"
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                  New Diagnosis
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-1 space-y-6"
-          >
-            {/* Patient Card */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-4 mb-4">
-                <img
-                  src={patientData.img}
-                  alt={patientData.name}
-                  className="w-16 h-16 rounded-2xl object-cover ring-4 ring-primary/20"
-                />
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">{patientData.name}</h2>
-                  <p className="text-gray-500">{patientData.age} years • {patientData.gender}</p>
-                </div>
-              </div>
-              
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-gray-500">Patient ID</span>
-                  <span className="font-medium text-gray-800">{patientData.id}</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-gray-500">First Diagnosis</span>
-                  <span className="font-medium text-gray-800">{patientData.firstDiagnosis}</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-gray-500">Last Diagnosis</span>
-                  <span className="font-medium text-gray-800">{patientData.lastDiagnosis}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Progress Overview */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                Overall Progress
-              </h3>
-              <ProgressIndicator progress={calculateProgress()} size="md" />
-            </div>
-
-            {/* Status Distribution */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <h3 className="font-semibold text-gray-800 mb-4">Diagnosis Distribution</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-sm text-gray-600">Benign/Normal</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">{stats.benign + stats.normal}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-sm text-gray-600">Suspicious</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">{stats.suspicious}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-sm text-gray-600">Malignant</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">{stats.malignant}</span>
-                </div>
-              </div>
-              
-              {/* Visual Bar */}
-              <div className="mt-4 h-3 bg-gray-200 rounded-full overflow-hidden flex">
-                <div 
-                  className="bg-green-500 transition-all"
-                  style={{ width: `${((stats.benign + stats.normal) / stats.total) * 100}%` }}
-                />
-                <div 
-                  className="bg-yellow-500 transition-all"
-                  style={{ width: `${(stats.suspicious / stats.total) * 100}%` }}
-                />
-                <div 
-                  className="bg-red-500 transition-all"
-                  style={{ width: `${(stats.malignant / stats.total) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <h3 className="font-semibold text-gray-800 mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <Link
-                  to={`/patients/${id}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-700"
-                >
-                  <FileText className="w-5 h-5 text-primary" />
-                  <span>View Patient Details</span>
-                  <ChevronRight className="w-4 h-4 ml-auto" />
-                </Link>
-                <Link
-                  to={`/patients/${id}/compare`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-700"
-                >
-                  <GitCompare className="w-5 h-5 text-primary" />
-                  <span>Compare Diagnoses</span>
-                  <ChevronRight className="w-4 h-4 ml-auto" />
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-3"
-          >
-            {/* Filters */}
-            <div className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm mb-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                {/* Search */}
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by condition or status..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                
-                {/* Status Filter */}
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All Status</option>
-                  <option value="BENIGN">Benign</option>
-                  <option value="MALIGNANT">Malignant</option>
-                  <option value="SUSPICIOUS">Suspicious</option>
-                  <option value="NORMAL">Normal</option>
-                </select>
-
-                {/* Date Filter */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={selectedDates.from}
-                    onChange={(e) => setSelectedDates(prev => ({ ...prev, from: e.target.value }))}
-                    className="px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <span className="text-gray-400">to</span>
-                  <input
-                    type="date"
-                    value={selectedDates.to}
-                    onChange={(e) => setSelectedDates(prev => ({ ...prev, to: e.target.value }))}
-                    className="px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Results Count */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-600">
-                Showing <span className="font-semibold text-gray-800">{filteredHistory.length}</span> of{' '}
-                <span className="font-semibold text-gray-800">{diagnosisHistory.length}</span> diagnoses
-              </p>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <GitCompare className="w-4 h-4" />
-                <span>Select 2 diagnoses to compare</span>
-              </div>
-            </div>
-
-            {/* Timeline */}
-            <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <DiagnosisTimeline
-                diagnoses={filteredHistory}
-                onViewDiagnosis={handleViewDiagnosis}
-                onCompare={handleCompare}
-                selectable={true}
-              />
-              
-              {filteredHistory.length === 0 && (
-                <div className="text-center py-12">
-                  <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No diagnoses found matching your criteria</p>
-                  <button
-                    onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}
-                    className="mt-4 text-primary hover:underline"
-                  >
-                    Clear filters
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Progress Summary */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 p-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl text-white"
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-white/20 rounded-xl">
-                  <TrendingUp className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Patient Progress Summary</h3>
-                  <p className="text-white/80 mt-1">
-                    Patient has shown significant improvement from initial MALIGNANT diagnosis in March 2024 
-                    to current BENIGN status. Treatment appears to be effective with nodules reducing from 3 to 1.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input 
+            type="text"
+            placeholder="Filter by date or result..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 bg-white dark:bg-admin-dark-card border border-gray-200 dark:border-admin-dark-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none w-full md:w-64"
+          />
         </div>
       </div>
+
+      {history.length === 0 ? (
+        <div className="bg-white dark:bg-admin-dark-card border border-dashed border-gray-200 dark:border-admin-dark-border rounded-3xl p-16 text-center">
+          <div className="w-16 h-16 bg-gray-50 dark:bg-admin-dark-hover rounded-full flex items-center justify-center mx-auto mb-4">
+            <History className="text-gray-300 w-8 h-8" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">No history found</h3>
+          <p className="text-gray-500 dark:text-gray-400">This patient hasn't had any AI diagnoses yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* History List */}
+          <div className="lg:col-span-5 space-y-4 max-h-[800px] overflow-y-auto pr-2">
+            {filteredHistory.map((item, idx) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: Math.min(idx, 10) * 0.05 }}
+                onClick={() => handleTestClick(item)}
+                className={`p-5 rounded-2xl border transition-all cursor-pointer group ${
+                  selectedTest?.id === item.id 
+                    ? 'bg-primary border-primary shadow-lg shadow-primary/20 scale-[1.02]' 
+                    : 'bg-white dark:bg-admin-dark-card border-gray-100 dark:border-admin-dark-border hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-xl ${selectedTest?.id === item.id ? 'bg-white/20' : 'bg-primary/10'}`}>
+                      <Calendar size={16} className={selectedTest?.id === item.id ? 'text-white' : 'text-primary'} />
+                    </div>
+                    <span className={`text-sm font-bold ${selectedTest?.id === item.id ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                      {new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                    selectedTest?.id === item.id 
+                      ? 'bg-white/20 border-white/30 text-white' 
+                      : riskBadge(item.diagnosisResult?.riskLevel)
+                  }`}>
+                    {item.diagnosisResult?.riskLevel || 'Unknown'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs">
+                  <span className={selectedTest?.id === item.id ? 'text-white/80' : 'text-gray-500'}>
+                    Test ID: #{item.id}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {item.imagePath && <Scan size={14} className={selectedTest?.id === item.id ? 'text-white/80' : 'text-gray-400'} />}
+                    {item.tsh && <FlaskConical size={14} className={selectedTest?.id === item.id ? 'text-white/80' : 'text-gray-400'} />}
+                    <ChevronRight size={14} className={selectedTest?.id === item.id ? 'text-white' : 'text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all'} />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Details View */}
+          <div className="lg:col-span-7">
+            <AnimatePresence mode="wait">
+              {selectedTest ? (
+                <motion.div
+                  key={selectedTest.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-white dark:bg-admin-dark-card border border-gray-100 dark:border-admin-dark-border rounded-3xl overflow-hidden shadow-sm sticky top-8"
+                >
+                  <div className="p-6 border-b border-gray-50 dark:border-admin-dark-border bg-gray-50/50 dark:bg-admin-dark-hover/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
+                        <Activity size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-gray-900 dark:text-white uppercase tracking-wider">Detailed Assessment</h4>
+                        <p className="text-xs text-gray-500">Ref ID: {selectedTest.id} • {new Date(selectedTest.createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-8 space-y-8">
+                    {/* Clinical Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/20">
+                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <Brain size={12} /> Functional Status
+                        </p>
+                        <p className="text-lg font-bold text-blue-900 dark:text-blue-200 capitalize">
+                          {selectedTest.diagnosisResult?.functionalStatus || 'Not assessed'}
+                        </p>
+                      </div>
+                      <div className="p-5 bg-purple-50/50 dark:bg-purple-900/10 rounded-2xl border border-purple-100/50 dark:border-purple-900/20">
+                        <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <Target size={12} /> Risk Level
+                        </p>
+                        <p className="text-lg font-bold text-purple-900 dark:text-purple-200">
+                          {selectedTest.diagnosisResult?.riskLevel || 'Unknown'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Labs Data */}
+                    <div className="space-y-4">
+                      <h5 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                        <FlaskConical size={16} className="text-primary" /> Laboratory Metrics
+                      </h5>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { label: 'TSH', value: selectedTest.tsh, unit: 'mIU/L' },
+                          { label: 'T3', value: selectedTest.t3, unit: 'ng/dL' },
+                          { label: 'TT4', value: selectedTest.tt4, unit: 'μg/dL' },
+                          { label: 'FTI', value: selectedTest.fti, unit: '' },
+                        ].map((lab, i) => (
+                          <div key={i} className="p-4 bg-gray-50 dark:bg-admin-dark-hover rounded-2xl border border-gray-100 dark:border-admin-dark-border">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase">{lab.label}</p>
+                            <p className="text-sm font-black text-gray-900 dark:text-white">{lab.value || 'N/A'}</p>
+                            {lab.value && <p className="text-[10px] text-gray-400">{lab.unit}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Recommendation */}
+                    <div className="p-6 bg-gray-900 rounded-3xl text-white relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <Shield size={80} />
+                      </div>
+                      <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3">AI Recommendation</p>
+                      <p className="text-sm leading-relaxed text-gray-300 italic mb-4">
+                        "{selectedTest.diagnosisResult?.clinicalRecommendation || 'No recommendation available for this assessment.'}"
+                      </p>
+                      <div className="flex items-center gap-2 pt-4 border-t border-white/10">
+                        <Clock size={12} className="text-primary" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Next Step: {selectedTest.diagnosisResult?.nextStep || 'Follow-up as scheduled'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-admin-dark-card border-2 border-dashed border-gray-200 dark:border-admin-dark-border rounded-3xl p-12 text-center">
+                  <Activity className="w-12 h-12 text-gray-200 mb-4" />
+                  <p className="text-gray-400 font-medium">Select a diagnosis from the list to view full details</p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
