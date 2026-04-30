@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FaCopy, FaStop, FaTrash, FaRedo, FaPaperPlane, FaLightbulb, FaSearch, FaCode, FaRobot, FaUser, FaBrain } from "react-icons/fa";
 import axios from "axios";
+import { FaCopy, FaStop, FaTrash, FaRedo, FaPaperPlane, FaLightbulb, FaSearch, FaCode, FaRobot, FaUser, FaBrain, FaImage, FaTimes } from "react-icons/fa";
+import aiService from "../../services/aiService";
+import { toast } from "react-hot-toast";
 
 const GeminiSingap = ({ darkMode = false }) => {
   const typingIntervalsRef = useRef({});
@@ -14,6 +16,20 @@ const GeminiSingap = ({ darkMode = false }) => {
   const [isTypingStopped, setIsTypingStopped] = useState(false);
   const [showCopyPopup, setShowCopyPopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [sessionId] = useState(() => `sess_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`);
+  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem('thyrocarex_user');
+    if (!user) {
+      setIsLoggedIn(false);
+      toast.error("Please login to access the AI Assistant");
+    }
+  }, []);
 
   // API URL
   const API_URL = 'https://admin.dr-krok.com/api/chat/send';
@@ -83,38 +99,27 @@ const GeminiSingap = ({ darkMode = false }) => {
     }
   }, []);
 
-  // Send message to Backend API
-  const sendToGemini = async (message) => {
-    // Create a new AbortController for this request
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-
-    try {
-      const response = await axios({
-        method: 'post',
-        url: API_URL,
-        data: { message: message },
-        signal: signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest' 
-        }
-      });
-
-      // Extract response from backend format
-      const botResponse = response.data.message;
-      return botResponse;
-    } catch (error) {
-      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
-        console.log('Request was aborted');
-        return null; // Return null if aborted
+  // Handle Image Selection
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
       }
-      console.error('Error:', error);
-      return `Sorry, there was a connection error: ${error.message}`;
-    } finally {
-      abortControllerRef.current = null;
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   // Handle send message
@@ -136,26 +141,43 @@ const GeminiSingap = ({ darkMode = false }) => {
       setTimeout(() => {
         setChats((prev) => [...prev, { role: "ai", content: "", loading: true }]);
         
-        // Send to Gemini API and get response
-        sendToGemini(userMessage).then(aiResponse => {
-          if (aiResponse !== null) {
-            simulateTypingEffect(aiResponse);
+      // Send to AI API and get response
+      const history = chats.map(c => ({ role: c.role === "ai" ? "assistant" : "user", content: c.content }));
+      
+      aiService.chat(userMessage, sessionId, history, selectedImage)
+        .then(data => {
+          if (data && data.succeeded) {
+            simulateTypingEffect(data.data.response);
           } else {
-            // If aborted, we might want to remove the loading message or show it was stopped
-            setChats((prev) => {
-              const updated = [...prev];
-              const lastIndex = updated.findLastIndex((msg) => msg.role === "ai");
-              if (lastIndex !== -1) {
-                updated[lastIndex] = { ...updated[lastIndex], loading: false, content: "Interrupted." };
-              }
-              return updated;
-            });
-            setIsGenerating(false);
+            throw new Error(data.message || "Invalid response from AI");
           }
+        })
+        .catch(err => {
+          console.error("Chat Error:", err);
+          let errorMessage = "Sorry, I encountered an error. Please try again.";
+          
+          if (err.response?.status === 403) {
+            errorMessage = "⚠️ Access Denied: You need an active subscription to use the AI medical assistant.";
+            setIsSubscribed(false);
+          } else if (err.response?.status === 401) {
+            errorMessage = "Please login to use the AI assistant.";
+          }
+
+          setChats((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.findLastIndex((msg) => msg.role === "ai");
+            if (lastIndex !== -1) {
+              updated[lastIndex] = { ...updated[lastIndex], loading: false, content: errorMessage, error: true };
+            }
+            return updated;
+          });
+          setIsGenerating(false);
         });
       }, 300);
+
+      removeImage();
     },
-    [inputValue, isGenerating, chats]
+    [inputValue, isGenerating, chats, selectedImage, sessionId]
   );
 
   // Simulate typing
@@ -290,24 +312,36 @@ const GeminiSingap = ({ darkMode = false }) => {
 
           {/* Suggestions */}
           <div className="grid w-full grid-cols-1 gap-6 mt-16 md:grid-cols-3">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion.text)}
-                className={`flex flex-col items-start p-6 text-left transition-all duration-300 hover:scale-[1.05] border rounded-3xl group ${
-                  darkMode 
-                    ? 'bg-surface/50 border-border hover:bg-accent/50' 
-                    : 'bg-white border-gray-100 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10'
-                }`}
-              >
-                <div className={`p-4 rounded-2xl mb-4 transition-all duration-300 ${darkMode ? 'bg-background' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'}`}>
-                  {suggestion.icon}
-                </div>
-                <h4 className="text-sm font-semibold leading-relaxed group-hover:text-primary transition-colors">
-                  {suggestion.text}
-                </h4>
-              </button>
-            ))}
+            {!isLoggedIn ? (
+              <div className="col-span-full p-8 rounded-3xl bg-red-50 border border-red-100 text-red-600">
+                <p className="text-lg font-semibold">You must be logged in to use the AI medical assistant.</p>
+                <a href="/login" className="mt-4 inline-block px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors">Login Now</a>
+              </div>
+            ) : !isSubscribed ? (
+              <div className="col-span-full p-8 rounded-3xl bg-amber-50 border border-amber-100 text-amber-700">
+                <p className="text-lg font-semibold">An active subscription is required to use the AI assistant.</p>
+                <a href="/pricing" className="mt-4 inline-block px-6 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors">View Plans</a>
+              </div>
+            ) : (
+              suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion.text)}
+                  className={`flex flex-col items-start p-6 text-left transition-all duration-300 hover:scale-[1.05] border rounded-3xl group ${
+                    darkMode 
+                      ? 'bg-surface/50 border-border hover:bg-accent/50' 
+                      : 'bg-white border-gray-100 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10'
+                  }`}
+                >
+                  <div className={`p-4 rounded-2xl mb-4 transition-all duration-300 ${darkMode ? 'bg-background' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'}`}>
+                    {suggestion.icon}
+                  </div>
+                  <h4 className="text-sm font-semibold leading-relaxed group-hover:text-primary transition-colors">
+                    {suggestion.text}
+                  </h4>
+                </button>
+              ))
+            )}
           </div>
         </header>
       )}
@@ -346,8 +380,8 @@ const GeminiSingap = ({ darkMode = false }) => {
                   chat.role === "user" 
                     ? "bg-primary text-white rounded-tr-none shadow-primary/20" 
                     : `${darkMode ? 'bg-surface border-border' : 'bg-white border-gray-100'} border text-text rounded-tl-none`
-                }`}>
-                  <p className="whitespace-pre-wrap">{formatMessage(chat.content)}</p>
+                } ${chat.error ? "border-red-500/50 bg-red-50/10 text-red-600" : ""}`}>
+                  <p className="whitespace-pre-wrap text-right" dir="auto">{formatMessage(chat.content)}</p>
                   
                   {chat.role === "ai" && !chat.error && (
                     <button
@@ -374,21 +408,52 @@ const GeminiSingap = ({ darkMode = false }) => {
                 ? 'bg-surface border-border focus-within:border-primary/50' 
                 : 'bg-white border-gray-100 shadow-2xl shadow-gray-200/50 focus-within:border-primary focus-within:shadow-primary/10'
             }`}>
-              <textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder="Type your message here..."
-                className="flex-1 max-h-40 min-h-[48px] py-3 bg-transparent outline-none resize-none text-[15px] scrollbar-hide"
-                rows={1}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageSelect} 
+                accept="image/*" 
+                className="hidden" 
               />
+
+              <div className="flex flex-col flex-1">
+                {imagePreview && (
+                  <div className="relative inline-block mt-2 ml-2 mb-2 w-20 h-20">
+                    <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-primary/20 shadow-lg" />
+                    <button 
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </div>
+                )}
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Ask anything about thyroid health..."
+                  className="w-full max-h-40 min-h-[48px] py-3 bg-transparent outline-none resize-none text-[15px] scrollbar-hide text-right"
+                  rows={1}
+                  dir="auto"
+                />
+              </div>
               
-              <div className="flex gap-1.5 mb-1 mr-1">
+              <div className="flex items-center gap-1.5 mb-1 mr-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex items-center justify-center w-10 h-10 transition-all rounded-full ${imagePreview ? 'text-primary bg-primary/10' : 'text-gray-400 hover:bg-gray-100'}`}
+                  title="Upload image for analysis"
+                >
+                  <FaImage className="text-lg" />
+                </button>
                 {isGenerating ? (
                   <button
                     type="button"
