@@ -37,6 +37,7 @@ import DoctorRequests from './components/admin/doctors/DoctorRequests';
 import DoctorDetailsPage from './components/admin/doctors/DoctorDetailsPage';
 import DoctorRequestDetails from './components/admin/doctors/DoctorRequestDetails';
 import CommunityManager from './components/admin/community/CommunityManager';
+import PatientDetailsPage from './components/admin/patients/PatientDetailsPage';
 // Re-Diagnosis Feature Pages
 import ReDiagnosis from './pages/diagnosis/ReDiagnosis';
 import DiagnosisComparison from './pages/diagnosis/DiagnosisComparison';
@@ -96,6 +97,7 @@ function AppContent() {
             <Route path="doctor-requests" element={<DoctorRequests />} />
             <Route path="doctor-requests/:id" element={<DoctorRequestDetails />} />
             <Route path="patients" element={<CasesManager />} />
+            <Route path="patients/:id" element={<PatientDetailsPage />} />
             <Route path="subscriptions" element={<SubscriptionsManager />} />
             <Route path="credits" element={<CreditsManager />} />
             <Route path="media" element={<MediaManager />} />

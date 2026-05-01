@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, MapPin, Calendar, CreditCard, Activity, Phone, User, FileText, Briefcase, Award, ShieldCheck, Hash, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, Calendar, CreditCard, Activity, Phone, User, FileText, Briefcase, Award, ShieldCheck, Hash, Stethoscope, ChevronRight } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import adminService from '../../../services/adminService';
+import patientService from '../../../services/patientService';
 
 const DoctorDetailsPage = () => {
   const { id } = useParams();
@@ -11,36 +12,19 @@ const DoctorDetailsPage = () => {
   
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Mock patients data (Static as requested)
-  const [patients] = useState([
-    {
-      id: 'P001',
-      name: 'John Smith',
-      date: '2023-10-24',
-      result: 'Normal',
-      confidence: 98,
-      image: 'https://prod-images-static.radiopaedia.org/images/51536838/0b1f7e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg',
-      notes: 'Patient shows no signs of abnormalities. Regular checkup recommended in 6 months.'
-    },
-    {
-      id: 'P002',
-      name: 'Emily Davis',
-      date: '2023-10-23',
-      result: 'Abnormal',
-      confidence: 87,
-      image: 'https://prod-images-static.radiopaedia.org/images/1568265/8b8f8e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg',
-      notes: 'Detected potential nodule in the left lobe. Biopsy recommended.'
-    },
-  ]);
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
-    const fetchDoctor = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await adminService.getDoctorById(id);
-        if (response && response.succeeded && response.data) {
-            const data = response.data;
+        const [doctorRes, patientsRes] = await Promise.all([
+            adminService.getDoctorById(id),
+            patientService.getMyPatients(id)
+        ]);
+
+        if (doctorRes && doctorRes.succeeded && doctorRes.data) {
+            const data = doctorRes.data;
             setDoctor({
                 id: data.doctorID,
                 name: data.fullName,
@@ -51,10 +35,9 @@ const DoctorDetailsPage = () => {
                 hospital: data.hospital,
                 gender: data.gender,
                 nationalId: data.nationalID,
-                // Ensure image paths are correct
-                identificationImage: data.identificationImage, // ID Image from API
-                imagePath: data.imagePath, // Fallback ID Image
-                profileImage: data.profileImage, // Profile Photo
+                identificationImage: data.identificationImage,
+                imagePath: data.imagePath,
+                profileImage: data.profileImage,
                 subscriptionPlans: data.subscriptionPlanNames || [],
                 registrationDate: data.registrationAt,
                 medicalLicenseNumber: data.medicalLicenseNumber,
@@ -62,13 +45,26 @@ const DoctorDetailsPage = () => {
                 dateofBirth: data.dateofBirth
             });
         }
+
+        if (patientsRes && patientsRes.succeeded && patientsRes.data) {
+            const mappedPatients = patientsRes.data.map(p => ({
+                id: p.patientID,
+                name: p.fullName,
+                date: new Date(p.registrationAt).toLocaleDateString(),
+                result: p.latestStatus || 'Uncertain',
+                confidence: p.riskConfidence || 0,
+                image: p.attachmentPath ? (p.attachmentPath.startsWith('http') ? p.attachmentPath : `https://thyrocarex.runasp.net/${p.attachmentPath}`) : 'https://ui-avatars.com/api/?name=' + p.fullName,
+                notes: p.medicalHistory || 'No notes available.'
+            }));
+            setPatients(mappedPatients);
+        }
       } catch (error) {
-        console.error("Failed to fetch doctor details", error);
+        console.error("Failed to fetch doctor details or patients", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchDoctor();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -265,9 +261,17 @@ const DoctorDetailsPage = () => {
                                            </span>
                                        </div>
                                        <p className="text-sm text-gray-500 mb-2">{patient.notes}</p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                                            <span className="flex items-center gap-1"><Calendar size={12}/> {patient.date}</span>
-                                            <span className="flex items-center gap-1"><Activity size={12}/> {patient.confidence}% Confidence</span>
+                                        <div className="flex items-center justify-between mt-4">
+                                            <div className="flex items-center gap-4 text-xs text-gray-400">
+                                                <span className="flex items-center gap-1"><Calendar size={12}/> {patient.date}</span>
+                                                <span className="flex items-center gap-1"><Activity size={12}/> {patient.confidence}% Confidence</span>
+                                            </div>
+                                            <button 
+                                                onClick={() => navigate(`/admin/patients/${patient.id}`)}
+                                                className="text-xs font-bold text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                                            >
+                                                View Patient <ChevronRight size={14} />
+                                            </button>
                                         </div>
                                    </div>
                                </div>

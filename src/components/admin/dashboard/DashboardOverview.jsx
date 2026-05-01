@@ -12,25 +12,49 @@ import { motion } from 'framer-motion';
 import StatsCard from './StatsCard';
 import ChartSection from './ChartSection';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
+import adminService from '../../../services/adminService';
 
 const DashboardOverview = () => {
   const { isDarkMode } = useAdminTheme();
+  const [stats, setStats] = React.useState([
+    { title: 'Total Doctors', value: '0', icon: Users, trend: 'up', trendValue: '0%', color: 'blue' },
+    { title: 'Total Patients', value: '0', icon: Users, trend: 'up', trendValue: '0%', color: 'purple' },
+    { title: 'Total Diagnoses', value: '0', icon: Stethoscope, trend: 'up', trendValue: '0%', color: 'green' },
+    { title: 'Active Subs', value: '0', icon: CreditCard, trend: 'up', trendValue: '0%', color: 'blue' },
+    { title: 'Total Subs', value: '0', icon: CreditCard, trend: 'up', trendValue: '0%', color: 'orange' },
+  ]);
+  const [recentActivity, setRecentActivity] = React.useState([]);
+  const [chartsData, setChartsData] = React.useState({ diagnoses: [], subscriptions: [] });
+  const [loading, setLoading] = React.useState(true);
 
-  const stats = [
-    { title: 'Total Doctors', value: '1,248', icon: Users, trend: 'up', trendValue: '12%', color: 'blue' },
-    { title: 'Total Patients', value: '8,542', icon: Users, trend: 'up', trendValue: '8%', color: 'purple' },
-    { title: 'Total Diagnoses', value: '24.5k', icon: Stethoscope, trend: 'up', trendValue: '24%', color: 'green' },
-    { title: 'Active Subs', value: '892', icon: CreditCard, trend: 'down', trendValue: '2%', color: 'orange' },
-    { title: 'Storage Used', value: '458 GB', icon: HardDrive, trend: 'up', trendValue: '15%', color: 'red' },
-    { title: 'AI Accuracy', value: '94.2%', icon: Brain, trend: 'up', trendValue: '0.5%', color: 'blue' },
-  ];
-
-  const recentActivity = [
-    { user: 'Dr. Sarah Smith', action: 'Diagnosed a patient', time: '2 mins ago', type: 'diagnosis' },
-    { user: 'Dr. John Doe', action: 'Upgraded to Pro Plan', time: '15 mins ago', type: 'subscription' },
-    { user: 'System', action: 'AI Model v2.1 Deployed', time: '1 hour ago', type: 'system' },
-    { user: 'Dr. Emily Chen', action: 'Uploaded 5 X-Rays', time: '2 hours ago', type: 'upload' },
-  ];
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getPlatformStats();
+        if (response && response.succeeded && response.data) {
+          const data = response.data;
+          setStats([
+            { title: 'Total Doctors', value: data.totalDoctors.toLocaleString(), icon: Users, trend: 'up', trendValue: '12%', color: 'blue' },
+            { title: 'Total Patients', value: data.totalPatients.toLocaleString(), icon: Users, trend: 'up', trendValue: '8%', color: 'purple' },
+            { title: 'Total Diagnoses', value: data.totalDiagnoses.toLocaleString(), icon: Stethoscope, trend: 'up', trendValue: '24%', color: 'green' },
+            { title: 'Active Subs', value: data.activeSubscriptions.toLocaleString(), icon: CreditCard, trend: 'up', trendValue: '5%', color: 'blue' },
+            { title: 'Total Subs', value: data.totalSubscriptions.toLocaleString(), icon: CreditCard, trend: 'up', trendValue: '10%', color: 'orange' },
+          ]);
+          setRecentActivity(data.recentActivities || []);
+          setChartsData({
+            diagnoses: data.weeklyDiagnoses || [],
+            subscriptions: data.subscriptionDistribution || []
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -52,14 +76,14 @@ const DashboardOverview = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {stats.map((stat, index) => (
           <StatsCard key={index} {...stat} delay={index * 0.1} />
         ))}
       </div>
 
       {/* Charts Section */}
-      <ChartSection />
+      <ChartSection diagnoses={chartsData.diagnoses} subscriptions={chartsData.subscriptions} />
 
       {/* Recent Activity & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

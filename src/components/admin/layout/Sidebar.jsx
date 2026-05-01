@@ -29,31 +29,35 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [pending, allDoctors, allMessages] = await Promise.all([
+        const [pending, allDoctors, allMessages, stats] = await Promise.all([
             adminService.getPendingDoctors(),
             adminService.getAllDoctors(),
-            adminService.getContactMessages()
+            adminService.getContactMessages(),
+            adminService.getPlatformStats()
         ]);
         
         let pendingCount = 0;
         if (pending && pending.succeeded && Array.isArray(pending.data)) pendingCount = pending.data.length;
         else if (Array.isArray(pending)) pendingCount = pending.length;
-        else if (pending && Array.isArray(pending.data)) pendingCount = pending.data.length;
 
         let doctorCount = 0;
-         if (allDoctors && allDoctors.succeeded && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
+        if (allDoctors && allDoctors.succeeded && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
         else if (Array.isArray(allDoctors)) doctorCount = allDoctors.length;
-        else if (allDoctors && Array.isArray(allDoctors.data)) doctorCount = allDoctors.data.length;
         
         let messageCount = 0;
         if (allMessages && allMessages.succeeded && Array.isArray(allMessages.data)) {
           messageCount = allMessages.data.filter(m => !m.isReplied).length;
         }
 
+        let patientCount = 0;
+        if (stats && stats.succeeded && stats.data) {
+          patientCount = stats.data.totalPatients;
+        }
+
         setCounts({
             pendingRequests: pendingCount,
             doctors: doctorCount,
-            patients: 12, // Mock for now or fetch if API exists
+            patients: patientCount,
             messages: messageCount
         });
       } catch (error) {

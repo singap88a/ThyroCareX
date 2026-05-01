@@ -75,6 +75,28 @@ const adminService = {
     const response = await api.delete(`/Contact/Delete/${id}`);
     return response.data;
   },
+
+  // Dashboard Stats
+  getPlatformStats: async () => {
+    const response = await api.get('/Dashboard/Stats');
+    return response.data;
+  },
+
+  // Patients
+  getAllPatients: async () => {
+    const response = await api.get('/Patient/DisplayAllPatients');
+    return response.data;
+  },
+
+  getPatientById: async (id) => {
+    const response = await api.get(`/Patient/DisplayPatientById/${id}`);
+    return response.data;
+  },
+
+  deletePatient: async (id) => {
+    const response = await api.delete(`/Patient/DeletePatient/${id}`);
+    return response.data;
+  },
 };
 
 export default adminService;

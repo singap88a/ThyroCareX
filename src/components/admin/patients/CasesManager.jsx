@@ -1,23 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import CaseDetails from './CaseDetails';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
+import adminService from '../../../services/adminService';
 
 const CasesManager = () => {
+  const navigate = useNavigate();
   const { isDarkMode } = useAdminTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterResult, setFilterResult] = useState('all');
   const [selectedCase, setSelectedCase] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Data
-  const [cases, setCases] = useState([
-    { id: 'C001', patientName: 'John Smith', doctorName: 'Sarah Smith', date: '2023-10-24', result: 'Normal', confidence: 98, image: 'https://prod-images-static.radiopaedia.org/images/51536838/0b1f7e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg', notes: 'Patient shows no signs of abnormalities. Regular checkup recommended in 6 months.' },
-    { id: 'C002', patientName: 'Emily Davis', doctorName: 'Ahmed Ali', date: '2023-10-23', result: 'Abnormal', confidence: 87, image: 'https://prod-images-static.radiopaedia.org/images/1568265/8b8f8e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg', notes: 'Detected potential nodule in the left lobe. Biopsy recommended.' },
-    { id: 'C003', patientName: 'Michael Brown', doctorName: 'Sarah Smith', date: '2023-10-22', result: 'Normal', confidence: 95, image: 'https://prod-images-static.radiopaedia.org/images/2345678/0b1f7e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg', notes: 'Clear scan. No issues found.' },
-    { id: 'C004', patientName: 'Jessica Wilson', doctorName: 'John Doe', date: '2023-10-21', result: 'Uncertain', confidence: 65, image: 'https://prod-images-static.radiopaedia.org/images/3456789/0b1f7e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg', notes: 'Image quality is low. Requested re-scan.' },
-    { id: 'C005', patientName: 'David Lee', doctorName: 'Emily Chen', date: '2023-10-20', result: 'Abnormal', confidence: 92, image: 'https://prod-images-static.radiopaedia.org/images/4567890/0b1f7e4a8f9d9b4c5d2e1a3f6b5c7d8e_jumbo.jpeg', notes: 'High probability of malignancy. Urgent referral.' },
-  ]);
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getAllPatients();
+        if (response && response.succeeded && response.data) {
+          const mappedCases = response.data.map(p => ({
+            id: p.patientID.toString(),
+            patientName: p.fullName,
+            doctorName: p.doctorName || 'N/A',
+            date: new Date(p.registrationAt).toLocaleDateString(),
+            result: p.latestStatus || 'Uncertain',
+            confidence: p.riskConfidence || 0,
+            email: p.email,
+            phone: p.phoneNumber,
+            address: p.address,
+            age: p.age,
+            gender: p.gender === 0 ? 'Male' : 'Female'
+          }));
+          setCases(mappedCases);
+        }
+      } catch (error) {
+        console.error("Failed to fetch patients", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
 
   const handleSearch = (e) => setSearchQuery(e.target.value);
   const handleFilterChange = (e) => setFilterResult(e.target.value);
@@ -31,14 +57,20 @@ const CasesManager = () => {
   });
 
   const handleViewCase = (caseData) => {
-    setSelectedCase(caseData);
-    setIsDetailsOpen(true);
+    navigate(`/admin/patients/${caseData.id}`);
   };
 
-  const handleDeleteCase = (id) => {
-    if (window.confirm('Are you sure you want to delete this case? This action cannot be undone.')) {
-      setCases(cases.filter(c => c.id !== id));
-      setIsDetailsOpen(false);
+  const handleDeleteCase = async (id) => {
+    if (window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+      try {
+          const response = await adminService.deletePatient(id);
+          if (response && response.succeeded) {
+              setCases(cases.filter(c => c.id !== id));
+              setIsDetailsOpen(false);
+          }
+      } catch (error) {
+          console.error("Failed to delete patient", error);
+      }
     }
   };
 
@@ -87,57 +119,66 @@ const CasesManager = () => {
       {/* Cases Table */}
       <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-admin-dark-card border-admin-dark-border' : 'bg-white border-gray-100'}`}>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className={`${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-              <tr>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Case ID</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Patient Name</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Doctor Name</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Date</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Result</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Confidence</th>
-                <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Actions</th>
-              </tr>
-            </thead>
-            <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
-              {filteredCases.map(caseData => (
-                <tr key={caseData.id} className={`hover:${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} transition-colors`}>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>#{caseData.id}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.patientName}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dr. {caseData.doctorName}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      caseData.result === 'Normal' ? 'bg-emerald-100 text-emerald-800' :
-                      caseData.result === 'Abnormal' ? 'bg-red-100 text-red-800' :
-                      'bg-orange-100 text-orange-800'
-                    }`}>
-                      {caseData.result}
-                    </span>
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.confidence}%</td>
-                  <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleViewCase(caseData)}
-                        className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-primary hover:bg-primary/20' : 'text-primary hover:bg-primary/10'}`}
-                        title="View Details"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCase(caseData.id)}
-                        className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'}`}
-                        title="Delete Case"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Fetching platform cases...
+              </p>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className={`${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                <tr>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Case ID</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Patient Name</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Doctor Name</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Date</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Result</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Confidence</th>
+                  <th className={`px-6 py-4 text-left text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                {filteredCases.map(caseData => (
+                  <tr key={caseData.id} className={`hover:${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} transition-colors`}>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>#{caseData.id}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.patientName}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dr. {caseData.doctorName}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        caseData.result === 'Normal' ? 'bg-emerald-100 text-emerald-800' :
+                        caseData.result === 'Abnormal' ? 'bg-red-100 text-red-800' :
+                        'bg-orange-100 text-orange-800'
+                      }`}>
+                        {caseData.result}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{caseData.confidence}%</td>
+                    <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleViewCase(caseData)}
+                          className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-primary hover:bg-primary/20' : 'text-primary hover:bg-primary/10'}`}
+                          title="View Details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCase(caseData.id)}
+                          className={`p-1 rounded-md transition-colors ${isDarkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'}`}
+                          title="Delete Case"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
