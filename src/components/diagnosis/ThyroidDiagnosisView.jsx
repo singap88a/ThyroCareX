@@ -80,11 +80,11 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
         roi: diag?.roiImageUrl || extra.images?.roi_url
       },
       labs: {
-        tsh: latestTest.tsh,
-        t3: latestTest.t3,
-        tt4: latestTest.tt4,
-        fti: latestTest.fti,
-        t4u: latestTest.t4u
+        tsh: latestTest.tsh || latestTest.TSH,
+        t3: latestTest.t3 || latestTest.T3,
+        tt4: latestTest.tt4 || latestTest.TT4 || latestTest.tT4,
+        fti: latestTest.fti || latestTest.FTI,
+        t4u: latestTest.t4u || latestTest.T4U || latestTest.t4U
       },
       probabilities: extra.probabilities || extra.Probabilities || {},
       fnac: {

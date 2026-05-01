@@ -24,6 +24,16 @@ const testService = {
     const response = await api.get(`/TestsWithAI/GetPatientTestHistory/${patientId}`);
     return response.data; // { succeeded, data: [ { id, diagnosisResult: {...}, createdAt, ... } ] }
   },
+
+  // Validate ultrasound image immediately
+  validateImage: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('ImageFile', imageFile);
+    const response = await api.post('/TestsWithAI/ValidateImage', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data; // { succeeded, data: boolean, message: string }
+  },
 };
 
 export default testService;

@@ -4,20 +4,70 @@ import {
   ArrowLeft, ArrowRight, User, Calendar, Weight, Ruler,
   Phone, MapPin, FileText, Upload, Send, X,
   CircleCheck, AlertCircle, Loader2, Brain,
-  Activity, FlaskConical, Microscope
+  Activity, FlaskConical, Microscope, Info, CheckCircle2, AlertTriangle, Fingerprint,
+  Pill, HeartPulse, ClipboardList
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import patientService from '../../services/patientService';
 import testService from '../../services/testService';
+
+// --- Sub-components (Moved outside to fix focus issue) ---
+
+const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange }) => (
+  <div className="space-y-1.5">
+    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">{label}</label>
+    <div className="relative group">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors">
+        <Icon className="w-4 h-4" />
+      </div>
+      <input
+        type={type}
+        step={step}
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(field, e.target.value)}
+        className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none transition-all duration-200 font-bold text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-sm"
+      />
+    </div>
+  </div>
+);
+
+const Toggle = ({ label, field, icon: Icon, active, onClick }) => (
+  <button
+    type="button"
+    onClick={() => onClick(field, !active)}
+    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all duration-200 font-bold text-xs ${
+      active 
+        ? 'bg-primary border-primary text-white shadow-md shadow-primary/10' 
+        : 'bg-white border-gray-100 text-gray-500 hover:border-primary/30'
+    }`}
+  >
+    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${active ? 'bg-white/20' : 'bg-gray-50'}`}>
+      {Icon && <Icon className="w-3.5 h-3.5" />}
+    </div>
+    <span className="flex-1 text-left">{label}</span>
+    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${active ? 'border-white bg-white' : 'border-gray-200'}`}>
+      {active && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+    </div>
+  </button>
+);
+
+// --- Main Page ---
 
 const AddPatient = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState(null); 
+  const [testId, setTestId] = useState(null);
+  const [patientIdStr, setPatientIdStr] = useState(null);
+  const [clinicalResult, setClinicalResult] = useState(null);
 
   const [patientData, setPatientData] = useState({
-    // Step 1 — Basic Info
     fullName: '',
     age: '',
     gender: '',
@@ -25,11 +75,9 @@ const AddPatient = () => {
     weight: '',
     phone: '',
     address: '',
-    // Step 2 — Medical History
     medicalHistory: '',
     currentMedications: '',
     allergies: '',
-    // Step 3 — AI Diagnosis Data
     tsh: '',
     t3: '',
     tt4: '',
@@ -43,9 +91,10 @@ const AddPatient = () => {
   });
 
   const steps = [
-    { id: 1, title: 'Basic Information', icon: User },
-    { id: 2, title: 'Medical History', icon: FileText },
-    { id: 3, title: 'AI Diagnosis', icon: Brain },
+    { id: 1, title: 'Identity', icon: User },
+    { id: 2, title: 'History', icon: FileText },
+    { id: 3, title: 'Labs', icon: FlaskConical },
+    { id: 4, title: 'Report', icon: Brain },
   ];
 
   const set = (field, value) => setPatientData(p => ({ ...p, [field]: value }));
@@ -56,25 +105,6 @@ const AddPatient = () => {
     return Math.max(0, Math.min(120, Math.floor(n)));
   };
 
-  const calculateBMI = () => {
-    const h = parseFloat(patientData.height);
-    const w = parseFloat(patientData.weight);
-    if (h && w) return (w / ((h / 100) ** 2)).toFixed(1);
-    return '';
-  };
-
-  const bmi = calculateBMI();
-  const bmiStatus = () => {
-    const v = parseFloat(bmi);
-    if (!bmi) return null;
-    if (v < 18.5) return { label: 'Underweight', color: 'text-yellow-500' };
-    if (v < 25) return { label: 'Normal', color: 'text-green-600' };
-    if (v < 30) return { label: 'Overweight', color: 'text-orange-500' };
-    return { label: 'Obese', color: 'text-red-500' };
-  };
-  const bmiInfo = bmiStatus();
-
-  /* ── validation ─────────────────────────────────────── */
   const validateStep = () => {
     if (currentStep === 1) {
       if (!patientData.fullName.trim()) { toast.error('Full name is required'); return false; }
@@ -85,16 +115,38 @@ const AddPatient = () => {
     return true;
   };
 
-  const next = () => { if (validateStep()) setCurrentStep(s => Math.min(3, s + 1)); };
+  const next = () => { if (validateStep()) setCurrentStep(s => Math.min(4, s + 1)); };
   const prev = () => setCurrentStep(s => Math.max(1, s - 1));
 
-  /* ── submit ──────────────────────────────────────────── */
-  const handleSubmit = async () => {
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    set('ultrasoundImage', file);
+    setValidationResult(null);
+    setIsValidating(true);
+
+    try {
+      const res = await testService.validateImage(file);
+      if (res.succeeded && res.data === true) {
+        setValidationResult({ valid: true, message: 'Verified' });
+        toast.success('Image verified');
+      } else {
+        setValidationResult({ valid: false, message: res.message || 'Invalid' });
+        toast.error('Not an ultrasound');
+      }
+    } catch (err) {
+      setValidationResult({ valid: false, message: 'Error' });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleClinicalSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // 1️⃣  Add patient to database
       const fd = new FormData();
       fd.append('FullName', patientData.fullName);
       fd.append('Age', String(getAgeNumber()));
@@ -109,14 +161,14 @@ const AddPatient = () => {
 
       const patientRes = await patientService.addPatient(fd);
       if (!patientRes.succeeded) {
-        toast.error(patientRes.message || 'Failed to create patient');
+        toast.error(patientRes.message || 'Error');
         return;
       }
-      const patientId = patientRes.data;
+      const pId = patientRes.data;
+      setPatientIdStr(pId);
 
-      // 2️⃣  Run clinical AI assessment
       const clinicalPayload = {
-        patient_id: patientId,
+        patient_id: pId,
         Age: getAgeNumber(),
         on_thyroxine: patientData.onThyroxine ? 1 : 0,
         thyroid_surgery: patientData.thyroidSurgery ? 1 : 0,
@@ -130,329 +182,268 @@ const AddPatient = () => {
       };
 
       const clinicalRes = await testService.processClinical(clinicalPayload);
-
-      let imageResult = null;
-      // 3️⃣  Run image AI if an ultrasound was uploaded
-      if (patientData.ultrasoundImage && clinicalRes.succeeded && clinicalRes.data?.testId) {
-        try {
-          const imgRes = await testService.processImage(clinicalRes.data.testId, patientData.ultrasoundImage);
-          if (imgRes.succeeded) {
-            imageResult = imgRes.data;
-          } else {
-            toast.error(imgRes.message || 'Image AI failed to process the ultrasound');
-          }
-        } catch (imgErr) {
-          toast.error(imgErr?.response?.data?.message || 'Image AI failed to process the ultrasound');
-        }
+      if (!clinicalRes.succeeded) {
+        toast.error('AI Error');
+        return;
       }
 
-      toast.success('Patient added & diagnosed successfully!');
-      // Open the same Diagnosis Result page used in the Patient Dashboard
-      navigate(`/patients/${patientId}/dashboard?view=results`);
+      setTestId(clinicalRes.data.test_id);
+      setClinicalResult(clinicalRes.data.clinical);
+      setCurrentStep(4);
+      toast.success('Clinical complete');
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'An unexpected error occurred');
+      toast.error('Failed');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /* ── Toggle chip helper ──────────────────────────────── */
-  const Toggle = ({ label, field }) => (
-    <button
-      type="button"
-      onClick={() => set(field, !patientData[field])}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-medium text-sm transition-all duration-200 ${patientData[field]
-          ? 'bg-primary border-primary text-white shadow-md shadow-primary/30'
-          : 'bg-white border-gray-200 text-gray-600 hover:border-primary/40'
-        }`}
-    >
-      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${patientData[field] ? 'border-white bg-white' : 'border-gray-400'
-        }`}>
-        {patientData[field] && <span className="w-2 h-2 rounded-full bg-primary block" />}
-      </span>
-      {label}
-    </button>
-  );
+  const handleImageSubmit = async () => {
+    if (!validationResult?.valid || !patientData.ultrasoundImage) {
+      toast.error('Valid image required');
+      return;
+    }
 
-  /* ── render ─────────────────────────────────────────── */
+    setIsProcessingImage(true);
+    try {
+      const imgRes = await testService.processImage(testId, patientData.ultrasoundImage);
+      if (imgRes.succeeded) {
+        toast.success('Diagnosis complete');
+        navigate(`/patients/${patientIdStr}/dashboard?view=results`);
+      } else {
+        toast.error(imgRes.message || 'Error');
+      }
+    } catch (imgErr) {
+      toast.error('Error');
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-[#F9FAFB]">
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/patients')}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/patients')} className="p-2 rounded-xl hover:bg-gray-50">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Add New Patient</h1>
-              <p className="text-xs text-gray-500">Complete all steps to run the AI diagnosis</p>
-            </div>
+            <h1 className="text-lg font-bold text-gray-900 tracking-tight">Add Patient</h1>
           </div>
-          <span className="text-sm font-medium text-gray-400">Step {currentStep} / {steps.length}</span>
+          <div className="bg-primary/10 px-3 py-1 rounded-full text-[10px] font-black text-primary uppercase">Step {currentStep}/4</div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Progress */}
-        <div className="flex items-center gap-2 mb-8">
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        {/* Simple Stepper */}
+        <div className="flex items-start gap-2 mb-12 px-4">
           {steps.map((step, idx) => {
             const Icon = step.icon;
             const done = currentStep > step.id;
             const active = currentStep === step.id;
             return (
               <React.Fragment key={step.id}>
-                <div className="flex items-center gap-2">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${done ? 'bg-primary border-primary text-white' :
-                      active ? 'bg-white border-primary text-primary shadow-md shadow-primary/20 scale-110' :
-                        'bg-white border-gray-200 text-gray-400'
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300 ${done ? 'bg-primary border-primary text-white' :
+                      active ? 'bg-white border-primary text-primary shadow-lg shadow-primary/10' : 'bg-white border-gray-100 text-gray-300'
                     }`}>
-                    {done ? <CircleCheck className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
+                    {done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
                   </div>
-                  <span className={`hidden sm:block text-sm font-medium transition-colors ${active ? 'text-primary' : done ? 'text-gray-600' : 'text-gray-400'}`}>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${active ? 'text-primary' : 'text-gray-300'}`}>
                     {step.title}
                   </span>
                 </div>
                 {idx < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 rounded-full transition-colors duration-500 ${currentStep > step.id ? 'bg-primary' : 'bg-gray-200'}`} />
+                  <div className="flex-1 mt-5 h-[1px] bg-gray-100 relative overflow-hidden">
+                    <div className={`absolute inset-0 bg-primary transition-all duration-500 ${currentStep > step.id ? 'translate-x-0' : '-translate-x-full'}`} />
+                  </div>
                 )}
               </React.Fragment>
             );
           })}
         </div>
 
-        {/* ── STEP 1: Basic Information ─────────────────── */}
-        {currentStep === 1 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-fade-in">
-            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <User className="w-5 h-5 text-blue-600" />
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div 
+              key="s1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6"
+            >
+              <div className="grid md:grid-cols-2 gap-6">
+                <InputField label="Full Name" field="fullName" icon={User} placeholder="e.g. John Doe" value={patientData.fullName} onChange={set} />
+                <InputField label="Age" field="age" type="number" icon={Calendar} placeholder="1-120" value={patientData.age} onChange={set} />
               </div>
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">Basic Information</h2>
-                <p className="text-sm text-gray-500">Patient's personal & contact details</p>
-              </div>
-            </div>
-            <div className="p-6 space-y-5">
-              <div className="grid md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
-                  <input type="text" placeholder="e.g. Ahmed Mohamed"
-                    value={patientData.fullName}
-                    onChange={e => set('fullName', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Gender</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><User className="w-4 h-4"/></div>
+                    <select value={patientData.gender} onChange={e => set('gender', e.target.value)} 
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary">
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Age (years) <span className="text-red-500">*</span></label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="120"
-                    placeholder="e.g. 35"
-                    value={patientData.age}
-                    onChange={e => set('age', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
-                  />
-                </div>
+                <InputField label="Height (cm)" field="height" type="number" icon={Ruler} placeholder="175" value={patientData.height} onChange={set} />
+                <InputField label="Weight (kg)" field="weight" type="number" icon={Weight} placeholder="70" value={patientData.weight} onChange={set} />
               </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                 <InputField label="Phone" field="phone" icon={Phone} placeholder="01XXXXXXXXX" value={patientData.phone} onChange={set} />
+                 <InputField label="Address" field="address" icon={MapPin} placeholder="City, Street..." value={patientData.address} onChange={set} />
+              </div>
+            </motion.div>
+          )}
 
-              <div className="grid md:grid-cols-3 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gender <span className="text-red-500">*</span></label>
-                  <select value={patientData.gender} onChange={e => set('gender', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition bg-white">
-                    <option value="">Select...</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Height (cm)</label>
-                  <input type="number" placeholder="170" min="50" max="250"
-                    value={patientData.height} onChange={e => set('height', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Weight (kg)</label>
-                  <input type="number" placeholder="70" min="10" max="300"
-                    value={patientData.weight} onChange={e => set('weight', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
-                  {bmi && bmiInfo && (
-                    <p className={`mt-1 text-xs font-medium ${bmiInfo.color}`}>BMI: {bmi} — {bmiInfo.label}</p>
-                  )}
-                </div>
-              </div>
+          {currentStep === 2 && (
+            <motion.div 
+              key="s2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-4"
+            >
+              <textarea rows={4} placeholder="Medical History..." value={patientData.medicalHistory} onChange={e => set('medicalHistory', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
+              <textarea rows={3} placeholder="Current Medications..." value={patientData.currentMedications} onChange={e => set('currentMedications', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
+              <textarea rows={2} placeholder="Known Allergies..." value={patientData.allergies} onChange={e => set('allergies', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
+            </motion.div>
+          )}
 
-              <div className="grid md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number <span className="text-red-500">*</span></label>
-                  <input type="tel" placeholder="01xxxxxxxxx"
-                    value={patientData.phone} onChange={e => set('phone', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address <span className="text-gray-400 font-normal">(optional)</span></label>
-                  <input type="text" placeholder="City, Street..."
-                    value={patientData.address} onChange={e => set('address', e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 2: Medical History ───────────────────── */}
-        {currentStep === 2 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-fade-in">
-            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">Medical History</h2>
-                <p className="text-sm text-gray-500">Patient's background for clinical context</p>
-              </div>
-            </div>
-            <div className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Medical History</label>
-                <textarea rows={4} placeholder="Previous diseases, surgeries, family history of thyroid conditions..."
-                  value={patientData.medicalHistory} onChange={e => set('medicalHistory', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition resize-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Current Medications</label>
-                <textarea rows={3} placeholder="List medications with dosage..."
-                  value={patientData.currentMedications} onChange={e => set('currentMedications', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition resize-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Known Allergies</label>
-                <textarea rows={2} placeholder="Drug, food, or other allergies..."
-                  value={patientData.allergies} onChange={e => set('allergies', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition resize-none" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 3: AI Diagnosis Data ─────────────────── */}
-        {currentStep === 3 && (
-          <div className="space-y-5 animate-fade-in">
-            {/* Thyroid Lab Values */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
-                  <FlaskConical className="w-5 h-5 text-teal-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Thyroid Lab Results</h2>
-                  <p className="text-sm text-gray-500">Enter available lab values — leave blank if not tested</p>
-                </div>
-              </div>
-              <div className="p-6">
+          {currentStep === 3 && (
+            <motion.div 
+              key="s3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2"><FlaskConical className="w-4 h-4 text-teal-600"/> Lab Data</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {[
-                    { label: 'TSH', unit: 'mIU/L', field: 'tsh', hint: '0.4–4.0' },
-                    { label: 'T3', unit: 'ng/dL', field: 't3', hint: '80–200' },
-                    { label: 'TT4', unit: 'μg/dL', field: 'tt4', hint: '4.5–12' },
-                    { label: 'FTI', unit: '', field: 'fti', hint: '—' },
-                    { label: 'T4U', unit: '', field: 't4u', hint: '—' },
-                  ].map(({ label, unit, field, hint }) => (
-                    <div key={field}>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        {label} {unit && <span className="text-gray-400 normal-case font-normal">({unit})</span>}
-                      </label>
-                      <input type="number" step="0.001" placeholder={hint}
-                        value={patientData[field]} onChange={e => set(field, e.target.value)}
-                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" />
+                    { id: 'tsh', name: 'TSH', hint: '0.4-4.0' },
+                    { id: 't3', name: 'T3', hint: '80-200' },
+                    { id: 'tt4', name: 'TT4', hint: '4.5-12' },
+                    { id: 'fti', name: 'FTI', hint: '8-18' },
+                    { id: 't4u', name: 'T4U', hint: '0.7-1.2' }
+                  ].map(f => (
+                    <div key={f.id} className="space-y-1">
+                      <label className="text-[9px] font-black text-gray-400 uppercase">{f.name}</label>
+                      <input type="number" step="0.001" placeholder={f.hint} value={patientData[f.id]} onChange={e => set(f.id, e.target.value)} 
+                        className="w-full px-2 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-center text-sm focus:bg-white focus:border-primary" />
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-orange-600"/> Clinical Checks</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Toggle label="On Thyroxine" field="onThyroxine" icon={Pill} active={patientData.onThyroxine} onClick={set} />
+                  <Toggle label="Thyroid Surgery" field="thyroidSurgery" icon={Microscope} active={patientData.thyroidSurgery} onClick={set} />
+                  <Toggle label="Suspect Hyper" field="queryHyperthyroid" icon={Activity} active={patientData.queryHyperthyroid} onClick={set} />
+                  <Toggle label="Nodule Present" field="nodulePresent" icon={CircleCheck} active={patientData.nodulePresent} onClick={set} />
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-            {/* Clinical Flags */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Clinical Flags</h2>
-                  <p className="text-sm text-gray-500">Select all that apply to this patient</p>
-                </div>
-              </div>
-              <div className="p-6 flex flex-wrap gap-3">
-                <Toggle label="On Thyroxine" field="onThyroxine" />
-                <Toggle label="Prior Thyroid Surgery" field="thyroidSurgery" />
-                <Toggle label="Query Hyperthyroid" field="queryHyperthyroid" />
-                <Toggle label="Nodule Present" field="nodulePresent" />
-              </div>
-            </div>
-
-            {/* Ultrasound Upload */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                  <Microscope className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Thyroid Ultrasound Image</h2>
-                  <p className="text-sm text-gray-500">Optional — enables AI segmentation & TI-RADS classification</p>
-                </div>
-              </div>
-              <div className="p-6">
-                {patientData.ultrasoundImage ? (
-                  <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <CircleCheck className="w-6 h-6 text-green-600 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-green-800 truncate">{patientData.ultrasoundImage.name}</p>
-                      <p className="text-xs text-green-600">{(patientData.ultrasoundImage.size / 1024).toFixed(1)} KB</p>
+          {currentStep === 4 && clinicalResult && (
+            <motion.div 
+              key="s4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className={`p-8 rounded-[2rem] border shadow-sm bg-white ${clinicalResult.risk_level === 'low' ? 'border-green-100' : 'border-red-100'}`}>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${clinicalResult.risk_level === 'low' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                      <Brain className="w-6 h-6" />
                     </div>
-                    <button onClick={() => set('ultrasoundImage', null)}
-                      className="p-1.5 rounded-lg hover:bg-green-200 transition-colors">
-                      <X className="w-4 h-4 text-green-700" />
-                    </button>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Prediction</p>
+                      <h2 className="text-2xl font-black text-gray-900 capitalize">{clinicalResult.functional_status}</h2>
+                    </div>
                   </div>
-                ) : (
-                  <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-10 border-2 border-dashed border-gray-200 rounded-xl hover:border-primary/40 hover:bg-blue-50/30 transition-all duration-200 group">
-                    <Upload className="w-10 h-10 mx-auto mb-3 text-gray-300 group-hover:text-primary transition-colors" />
-                    <p className="text-sm font-medium text-gray-500 group-hover:text-primary">Click to upload ultrasound image</p>
-                    <p className="text-xs text-gray-400 mt-1">JPG, PNG, DICOM — max 15 MB</p>
-                  </button>
-                )}
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
-                  onChange={e => set('ultrasoundImage', e.target.files[0] || null)} />
-              </div>
-            </div>
-          </div>
-        )}
+                  <div className="text-right">
+                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Confidence</p>
+                     <p className="text-3xl font-black text-gray-900">{(clinicalResult.model_confidence * 100).toFixed(1)}%</p>
+                  </div>
+                </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between mt-8">
-          <button onClick={prev} disabled={currentStep === 1}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm'
-              }`}>
-            <ArrowLeft className="w-4 h-4" /> Previous
+                <div className="grid md:grid-cols-3 gap-4 mb-8">
+                  {clinicalResult.probabilities && Object.entries(clinicalResult.probabilities).map(([key, val]) => (
+                    <div key={key} className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-[9px] font-black text-gray-400 uppercase">{key}</p>
+                        <p className="text-[10px] font-black">{(val * 100).toFixed(1)}%</p>
+                      </div>
+                      <div className="h-1.5 bg-white rounded-full overflow-hidden border border-gray-100">
+                         <div className="h-full bg-primary" style={{ width: `${val * 100}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                   <p className="text-sm font-bold text-gray-700 italic">"{clinicalResult.clinical_recommendation}"</p>
+                </div>
+              </div>
+
+              {(clinicalResult.next_step === 'upload_ultrasound' || clinicalResult.next_step_details?.cancer_pipeline_triggered) ? (
+                <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-lg animate-slide-up">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Microscope className="w-6 h-6" /></div>
+                    <div>
+                      <h3 className="text-lg font-black">Ultrasound Required</h3>
+                      <p className="text-xs opacity-80">High risk detected. Upload scan to continue.</p>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 rounded-2xl p-2 border border-white/20">
+                    {patientData.ultrasoundImage ? (
+                      <div className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : validationResult?.valid ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                        <div className="flex items-center gap-3">
+                          {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : <CheckCircle2 className="w-6 h-6" />}
+                          <span className="text-xs font-bold truncate max-w-[150px]">{patientData.ultrasoundImage.name}</span>
+                        </div>
+                        <button onClick={() => {set('ultrasoundImage', null); setValidationResult(null);}}><X size={16}/></button>
+                      </div>
+                    ) : (
+                      <button onClick={() => fileInputRef.current?.click()} className="w-full py-10 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/5 transition-all">
+                        <Upload size={24} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Select Scan</span>
+                      </button>
+                    )}
+                    <input ref={fileInputRef} type="file" className="hidden" onChange={handleImageChange} />
+                  </div>
+                </div>
+              ) : (
+                <div className={`${clinicalResult.functional_status === 'normal' ? 'bg-green-500' : 'bg-amber-500'} rounded-[2rem] p-10 text-white shadow-lg text-center`}>
+                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-xl font-black mb-2">Diagnosis Complete</h3>
+                  <p className="text-sm opacity-80 max-w-xs mx-auto">Status: {clinicalResult.functional_status}. No ultrasound required.</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex items-center justify-between mt-12 px-4">
+          <button onClick={prev} disabled={currentStep === 1 || currentStep === 4} className={`px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${currentStep === 1 || currentStep === 4 ? 'opacity-0 pointer-events-none' : 'bg-white border border-gray-100 text-gray-400 hover:text-primary'}`}>
+            Back
           </button>
 
           {currentStep < 3 ? (
-            <button onClick={next}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold bg-primary text-white hover:bg-primaryHover shadow-lg shadow-primary/30 transition-all hover:-translate-y-0.5">
-              Next <ArrowRight className="w-4 h-4" />
+            <button onClick={next} className="px-10 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest bg-gray-900 text-white shadow-md transition-all active:scale-95">
+              Next Step
+            </button>
+          ) : currentStep === 3 ? (
+            <button onClick={handleClinicalSubmit} disabled={isSubmitting} className="px-10 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest bg-primary text-white shadow-md shadow-primary/20 transition-all active:scale-95">
+              {isSubmitting ? <Loader2 className="animate-spin w-4 h-4" /> : 'Run AI'}
             </button>
           ) : (
-            <button onClick={handleSubmit} disabled={isSubmitting}
-              className="flex items-center gap-2 px-8 py-3 rounded-xl font-semibold bg-gradient-to-r from-primary to-primaryHover text-white shadow-lg shadow-primary/30 hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
-              {isSubmitting ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> Running AI Diagnosis...</>
-              ) : (
-                <><Brain className="w-5 h-5" /> Run AI Diagnosis</>
-              )}
-            </button>
+            clinicalResult && (clinicalResult.next_step === 'upload_ultrasound' || clinicalResult.next_step_details?.cancer_pipeline_triggered) ? (
+              <button onClick={handleImageSubmit} disabled={!validationResult?.valid || isProcessingImage} className="px-12 py-4 rounded-xl font-black uppercase text-xs tracking-[0.2em] bg-indigo-600 text-white shadow-lg active:scale-95">
+                {isProcessingImage ? <Loader2 className="animate-spin w-5 h-5" /> : 'Process Image'}
+              </button>
+            ) : (
+              <button onClick={() => navigate(`/patients/${patientIdStr}/dashboard?view=results`)} className="px-12 py-4 rounded-xl font-black uppercase text-xs tracking-[0.2em] bg-green-500 text-white shadow-lg active:scale-95">
+                Finish
+              </button>
+            )
           )}
         </div>
       </div>
