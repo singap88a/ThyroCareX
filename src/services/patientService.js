@@ -26,6 +26,12 @@ const patientService = {
     const response = await api.put(`/Patient/EditPatient/${id}`, patientData);
     return response.data; // { succeeded, message }
   },
+
+  // Delete a patient and all their data
+  deletePatient: async (id) => {
+    const response = await api.delete(`/Patient/DeletePatient/${id}`);
+    return response.data; // { succeeded, message }
+  },
 };
 
 export default patientService;
