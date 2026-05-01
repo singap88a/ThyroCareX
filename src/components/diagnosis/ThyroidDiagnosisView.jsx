@@ -5,7 +5,7 @@ import {
   TrendingUp, TrendingDown, Download, Share2, Printer, Clock,
   Brain, ChevronRight, BarChart3, FileText, Stethoscope,
   Target as TargetIcon, Shield, Smartphone, Zap, MapPin,
-  FlaskConical, Microscope, Scan, Info, History
+  FlaskConical, Microscope, Scan, Info, History, Upload, X, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
@@ -13,9 +13,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import toast from 'react-hot-toast';
 import testService from '../../services/testService';
 import patientService from '../../services/patientService';
-import { Loader2 } from 'lucide-react';
 
 const DISEASE_LOCATION_MAP = {
   1: { position: { x: -0.40, y: -0.5, z: 0.3 }, label: "Thyroid Center" },
@@ -33,10 +33,18 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
   const patientId = propPatientId || paramPatientId;
   const navigate = useNavigate();
   const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [loading, setLoading] = useState(!initialData);
   const [is3DLoaded, setIs3DLoaded] = useState(false);
+  const [rawTestData, setRawTestData] = useState(null);
+
+  // --- Image Upload State ---
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const processDiagnosisData = (data, history, patientData = null) => {
     const latestTest = data;
@@ -49,6 +57,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     }
 
     return {
+      testId: latestTest.id,
       patientInfo: {
         id: patientId,
         registrationDate: latestTest.testDate || latestTest.createdAt,
@@ -115,40 +124,40 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     };
   };
 
+  const fetchDiagnosis = async () => {
+    setLoading(true);
+    try {
+      const [historyRes, patientRes] = await Promise.all([
+        testService.getPatientTestHistory(patientId),
+        patientService.getPatientById(patientId),
+      ]);
+
+      if (historyRes.succeeded && historyRes.data && historyRes.data.length > 0) {
+        let testToShow;
+        if (testId) {
+          testToShow = historyRes.data.find(t => t.id === parseInt(testId));
+        }
+
+        if (!testToShow) {
+          testToShow = historyRes.data[0];
+        }
+
+        setRawTestData(testToShow);
+        setDiagnosisResult(processDiagnosisData(testToShow, historyRes.data, patientRes?.data));
+      }
+    } catch (err) {
+      console.error('Failed to load diagnosis', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (initialData) {
       setDiagnosisResult(processDiagnosisData(initialData, []));
       setLoading(false);
       return;
     }
-
-    const fetchDiagnosis = async () => {
-      setLoading(true);
-      try {
-        const [historyRes, patientRes] = await Promise.all([
-          testService.getPatientTestHistory(patientId),
-          patientService.getPatientById(patientId),
-        ]);
-
-        if (historyRes.succeeded && historyRes.data && historyRes.data.length > 0) {
-          let testToShow;
-          if (testId) {
-            testToShow = historyRes.data.find(t => t.id === parseInt(testId));
-          }
-          
-          // Default to latest if specific testId not found or not provided
-          if (!testToShow) {
-            testToShow = historyRes.data[0];
-          }
-          
-          setDiagnosisResult(processDiagnosisData(testToShow, historyRes.data, patientRes?.data));
-        }
-      } catch (err) {
-        console.error('Failed to load diagnosis', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDiagnosis();
   }, [patientId, initialData, testId]);
 
@@ -156,9 +165,56 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     AOS.init({ duration: 1000, once: true });
   }, []);
 
-  const diseaseLocationNumber = diagnosisResult?.diseaseLocation || 1;
+  // --- Image Handling Logic ---
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // 3D Engine Initialization
+    setSelectedImage(file);
+    setValidationResult(null);
+    setIsValidating(true);
+
+    try {
+      const res = await testService.validateImage(file);
+      if (res.succeeded && res.data === true) {
+        setValidationResult({ valid: true, message: 'Verified' });
+        toast.success('Image verified');
+      } else {
+        setValidationResult({ valid: false, message: res.message || 'Invalid' });
+        toast.error('Not an ultrasound');
+      }
+    } catch (err) {
+      setValidationResult({ valid: false, message: 'Error' });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleImageSubmit = async () => {
+    if (!validationResult?.valid || !selectedImage) {
+      toast.error('Valid image required');
+      return;
+    }
+
+    setIsProcessingImage(true);
+    try {
+      const imgRes = await testService.processImage(diagnosisResult.testId, selectedImage);
+      if (imgRes.succeeded) {
+        toast.success('AI Image Diagnosis Complete');
+        setSelectedImage(null);
+        setValidationResult(null);
+        fetchDiagnosis(); // Refresh data to show results
+      } else {
+        toast.error(imgRes.message || 'Error processing image');
+      }
+    } catch (imgErr) {
+      toast.error('Connection error');
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+
+  // 3D Engine Initialization (remains the same)
   useEffect(() => {
     if (!canvasRef.current || !diagnosisResult) return;
 
@@ -208,7 +264,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
       model.traverse(n => { if (n.isMesh) { n.material.transparent = true; n.material.opacity = 0.85; } });
       scene.add(model);
 
-      const loc = DISEASE_LOCATION_MAP[diseaseLocationNumber];
+      const loc = DISEASE_LOCATION_MAP[diagnosisResult.diseaseLocation || 1];
       if (loc) createMarker(loc);
       setIs3DLoaded(true);
     }, undefined, (err) => {
@@ -249,6 +305,8 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     </div>
   );
 
+  const needsUltrasound = (diagnosisResult.diagnosisSummary.nextStep === 'upload_ultrasound') && !diagnosisResult.images.overlay;
+
   return (
     <div className="space-y-8">
 
@@ -256,22 +314,22 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
       <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-6">
-          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary font-black text-3xl">
-            {diagnosisResult.patientInfo.name.charAt(0)}
-          </div>
-          <div>
-            <h1 className="text-3xl font-black text-gray-900">{diagnosisResult.patientInfo.name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-gray-500 font-bold text-sm">
-              <span className="flex items-center gap-1"><Smartphone size={14} /> ID: #{diagnosisResult.patientInfo.id}</span>
-              <span className="flex items-center gap-1"><Calendar size={14} /> {diagnosisResult.patientInfo.age || '—'} Yrs</span>
-              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] uppercase tracking-widest">{diagnosisResult.patientInfo.gender}</span>
+            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary font-black text-3xl">
+              {diagnosisResult.patientInfo.name.charAt(0)}
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900">{diagnosisResult.patientInfo.name}</h1>
+              <div className="flex items-center gap-4 mt-2 text-gray-500 font-bold text-sm">
+                <span className="flex items-center gap-1"><Smartphone size={14} /> ID: #{diagnosisResult.patientInfo.id}</span>
+                <span className="flex items-center gap-1"><Calendar size={14} /> {diagnosisResult.patientInfo.age || '—'} Yrs</span>
+                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] uppercase tracking-widest">{diagnosisResult.patientInfo.gender}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex gap-4">
-          <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 hover:text-primary transition-colors"><Download size={20} /></button>
-          <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 hover:text-primary transition-colors"><Share2 size={20} /></button>
-        </div>
+          <div className="flex gap-4">
+            <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 hover:text-primary transition-colors"><Download size={20} /></button>
+            <button className="p-4 bg-gray-50 rounded-2xl text-gray-400 hover:text-primary transition-colors"><Share2 size={20} /></button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -405,8 +463,57 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* --- URGENT ACTION: Ultrasound Upload (Reverted to Indigo) --- */}
+          {needsUltrasound && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-indigo-600 rounded-[40px] p-10 text-white shadow-2xl relative overflow-hidden group"
+            >
+              <div className="absolute right-0 bottom-0 opacity-10 group-hover:scale-110 transition-transform duration-1000"><Microscope size={200} /></div>
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Scan /></div>
+                    <h3 className="text-2xl font-black">Ultrasound Diagnostic Required</h3>
+                  </div>
+                  <p className="text-indigo-100 font-medium leading-relaxed">
+                    The clinical assessment indicates a potential risk. Please upload the patient's thyroid ultrasound to run the neural cancer-detection pipeline.
+                  </p>
+                  <div className="bg-white/10 rounded-2xl p-2 border border-white/20">
+                    {selectedImage ? (
+                      <div className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : validationResult?.valid ? 'bg-green-500/30' : 'bg-red-500/30'}`}>
+                        <div className="flex items-center gap-3">
+                          {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : <CircleCheck className="w-6 h-6" />}
+                          <span className="text-sm font-bold truncate max-w-[200px]">{selectedImage.name}</span>
+                        </div>
+                        <button onClick={() => { setSelectedImage(null); setValidationResult(null); }}><X size={20} /></button>
+                      </div>
+                    ) : (
+                      <button onClick={() => fileInputRef.current?.click()} className="w-full py-12 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-3 hover:bg-white/5 transition-all group">
+                        <Upload size={32} />
+                        <span className="text-xs font-black uppercase tracking-widest">Select Ultrasound File</span>
+                      </button>
+                    )}
+                    <input ref={fileInputRef} type="file" className="hidden" onChange={handleImageChange} />
+                  </div>
+                  {selectedImage && validationResult?.valid && (
+                    <button
+                      onClick={handleImageSubmit}
+                      disabled={isProcessingImage}
+                      className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isProcessingImage ? <Loader2 className="animate-spin" /> : <Zap size={18} />} Process Image AI
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
         </div>
-      </div>
 
         {/* Right Column: Recommendations & Probabilities */}
         <div className="lg:col-span-4 space-y-8">
