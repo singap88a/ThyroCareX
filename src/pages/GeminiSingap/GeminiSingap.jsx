@@ -3,6 +3,8 @@ import axios from "axios";
 import { FaCopy, FaStop, FaTrash, FaRedo, FaPaperPlane, FaLightbulb, FaSearch, FaCode, FaRobot, FaUser, FaBrain, FaImage, FaTimes } from "react-icons/fa";
 import aiService from "../../services/aiService";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 
 const GeminiSingap = ({ darkMode = false }) => {
   const typingIntervalsRef = useRef({});
@@ -22,6 +24,7 @@ const GeminiSingap = ({ darkMode = false }) => {
   const [isSubscribed, setIsSubscribed] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = localStorage.getItem('thyrax_user');
@@ -291,6 +294,48 @@ const GeminiSingap = ({ darkMode = false }) => {
                 Clear All
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Required Modal */}
+      {!isLoggedIn && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className={`p-8 rounded-3xl shadow-2xl ${darkMode ? 'bg-surface border-border' : 'bg-white border-gray-100'} border max-w-md w-full animate-scale-in flex flex-col items-center`}>
+            <div className="flex items-center justify-center w-20 h-20 mb-6 bg-red-50 rounded-full border-[6px] border-red-50/50">
+              <FaUser className="text-3xl text-red-500" />
+            </div>
+            <h3 className="mb-3 text-2xl font-bold text-center text-text">Login Required</h3>
+            <p className="mb-8 text-center text-text-muted leading-relaxed">
+              You must be logged in to use the AI medical assistant and access personalized health insights.
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full px-4 py-3.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Required Modal */}
+      {isLoggedIn && !isSubscribed && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className={`p-8 rounded-3xl shadow-2xl ${darkMode ? 'bg-surface border-border' : 'bg-white border-gray-100'} border max-w-md w-full animate-scale-in flex flex-col items-center`}>
+            <div className="flex items-center justify-center w-20 h-20 mb-6 bg-amber-50 rounded-full border-[6px] border-amber-50/50">
+              <FaBrain className="text-3xl text-amber-500" />
+            </div>
+            <h3 className="mb-3 text-2xl font-bold text-center text-text">Subscription Required</h3>
+            <p className="mb-8 text-center text-text-muted leading-relaxed">
+              You need an active subscription to access the AI medical assistant and your personalized health insights.
+            </p>
+            <button
+              onClick={() => navigate('/pricing')}
+              className="w-full px-4 py-3.5 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/20"
+            >
+              View Subscription Plans
+            </button>
           </div>
         </div>
       )}
