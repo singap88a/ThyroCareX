@@ -52,7 +52,7 @@ const AboutPreview = () => {
           </h2>
 
           <p className="max-w-xl mb-8 text-lg leading-relaxed text-gray-700">
-            <strong>ThyroCareX</strong> leverages advanced AI to detect thyroid cancer early, 
+            <strong>Thyrax</strong> leverages advanced AI to detect thyroid cancer early, 
             empowering doctors and patients with faster, more reliable diagnostic insights.
           </p>
 

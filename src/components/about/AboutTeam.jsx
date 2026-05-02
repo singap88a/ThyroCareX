@@ -23,7 +23,7 @@ const AboutTeam = () => {
       social: {
         linkedin: "#",
         twitter: "#",
-        email: "sarah@thyrocarex.com"
+        email: "sarah@thyrax.com"
       }
     },
     {
@@ -40,7 +40,7 @@ const AboutTeam = () => {
       social: {
         linkedin: "#",
         twitter: "#",
-        email: "michael@thyrocarex.com"
+        email: "michael@thyrax.com"
       }
     },
     {
@@ -57,7 +57,7 @@ const AboutTeam = () => {
       social: {
         linkedin: "#",
         twitter: "#",
-        email: "emily@thyrocarex.com"
+        email: "emily@thyrax.com"
       }
     },
     {
@@ -74,7 +74,7 @@ const AboutTeam = () => {
       social: {
         linkedin: "#",
         twitter: "#",
-        email: "james@thyrocarex.com"
+        email: "james@thyrax.com"
       }
     },
   ];

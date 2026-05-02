@@ -77,7 +77,7 @@ const PaymentSuccess = () => {
 
                 <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                   <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                    Thank you for trusting <span className="font-black text-slate-800">ThyroCareX</span>. 
+                    Thank you for trusting <span className="font-black text-slate-800">Thyrax</span>. 
                     Your AI-powered thyroid diagnostics are now fully unlocked. 
                     Head to your profile to start using all premium features.
                   </p>
@@ -111,7 +111,7 @@ const PaymentSuccess = () => {
         </motion.div>
 
         <p className="text-center text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-6">
-          Secured by ThyroCareX · 256-bit SSL Encryption
+          Secured by Thyrax · 256-bit SSL Encryption
         </p>
       </div>
     </div>

@@ -29,7 +29,7 @@ const faqs = [
     icon: <FaSearch className="w-5 h-5" />
   },
   {
-    question: 'What makes ThyroCareX different?',
+    question: 'What makes Thyrax different?',
     answer: 'We combine AI precision with human expertise, offering a seamless integration of technology and medical care for comprehensive thyroid health management.',
     icon: <FaHeartbeat className="w-5 h-5" />
   }
@@ -62,7 +62,7 @@ const FAQ = () => {
             </span>
           </h2>
           <p className="max-w-2xl mx-auto text-xl leading-relaxed text-gray-600">
-            Find answers to common questions about ThyroCareX AI diagnosis and services.
+            Find answers to common questions about Thyrax AI diagnosis and services.
           </p>
         </div>
 

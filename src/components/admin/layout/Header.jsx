@@ -144,7 +144,7 @@ const Header = ({ toggleSidebar }) => {
               >
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                   <p className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Admin User</p>
-                  <p className="text-xs text-gray-500">admin@thyrocarex.com</p>
+                  <p className="text-xs text-gray-500">admin@thyrax.com</p>
                 </div>
                 <div className="p-2">
                   <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors

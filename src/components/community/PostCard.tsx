@@ -51,7 +51,7 @@ function timeAgo(dateStr: string): string {
 
 
 function getCurrentUserName(): string {
-  const userRaw = localStorage.getItem('thyrocarex_user');
+  const userRaw = localStorage.getItem('thyrax_user');
   if (!userRaw) return '';
   const u = JSON.parse(userRaw);
   if (u?.token) {
@@ -219,7 +219,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostDeleted }) => {
     const shareText = `Check out this post by Dr. ${post.doctorName}: "${post.content.substring(0, 100)}..."`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'ThyroCareX Community Post', text: shareText, url: shareUrl });
+        await navigator.share({ title: 'Thyrax Community Post', text: shareText, url: shareUrl });
       } catch { /* cancelled */ }
     } else {
       try {

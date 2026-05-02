@@ -155,7 +155,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   exit={{ opacity: 0, x: -20 }}
                   className="text-xl font-bold tracking-wide text-primary"
                 >
-                  ThyroCareX
+                  Thyrax
                 </motion.span>
               )}
             </AnimatePresence>

@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on mount
   useEffect(() => {
     const checkAuth = () => {
-      const savedUser = localStorage.getItem('thyrocarex_user');
+      const savedUser = localStorage.getItem('thyrax_user');
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
         setUser(userData);
         setIsLoggedIn(true);
-        localStorage.setItem('thyrocarex_user', JSON.stringify({ token })); // Store minimal data
+        localStorage.setItem('thyrax_user', JSON.stringify({ token })); // Store minimal data
         return { success: true, role: userData.role };
       } else {
         return { success: false, message: response.message || 'Login failed' };
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem('thyrocarex_user');
+    localStorage.removeItem('thyrax_user');
     window.location.href = '/login'; // Force redirect
   };
   

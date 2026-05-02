@@ -97,7 +97,7 @@ const Navbar = () => {
           >
             <img
               src="/logo.png"
-              alt="ThyroCareX Logo"
+              alt="Thyrax Logo"
               className="object-contain  w-48 transition-all duration-300 group-hover:scale-105 group-hover:brightness-110 drop-shadow-md"
             />
           </Link>

@@ -6,7 +6,7 @@ const Testimonials = () => {
       name: 'Dr. Sarah Johnson',
       specialty: 'Chief Endocrinologist',
       hospital: 'Mayo Clinic, New York',
-      quote: 'ThyroCareX has revolutionized how we approach thyroid diagnosis. The AI    ',
+      quote: 'Thyrax has revolutionized how we approach thyroid diagnosis. The AI    ',
       image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=120&h=120&fit=crop&crop=face',
       rating: 5,
     },
@@ -14,7 +14,7 @@ const Testimonials = () => {
       name: 'Dr. Michael Chen',
       specialty: 'Oncology Director',
       hospital: 'Johns Hopkins Hospital',
-      quote: 'As an oncologist, I rely on ThyroCareX for quick and reliable thyroid cancer  .',
+      quote: 'As an oncologist, I rely on Thyrax for quick and reliable thyroid cancer  .',
       image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=120&h=120&fit=crop&crop=face',
       rating: 5,
     },
@@ -30,7 +30,7 @@ const Testimonials = () => {
       name: 'Dr. James Wilson',
       specialty: 'Medical Research Director',
       hospital: 'Harvard Medical School',
-      quote: 'ThyroCareX represents the future of medical AI with outstanding algorithms.',
+      quote: 'Thyrax represents the future of medical AI with outstanding algorithms.',
       image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=120&h=120&fit=crop&crop=face',
       rating: 5,
     },
@@ -38,7 +38,7 @@ const Testimonials = () => {
       name: 'Dr. Lisa Thompson',
       specialty: 'Pediatric Endocrinologist',
       hospital: 'Boston Children\'s Hospital',
-      quote: 'For pediatric thyroid cases, ThyroCareX provides the precision we need.',
+      quote: 'For pediatric thyroid cases, Thyrax provides the precision we need.',
       image: 'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=120&h=120&fit=crop&crop=face',
       rating: 5,
     },
@@ -139,7 +139,7 @@ const Testimonials = () => {
             </span>
           </h2>
           <p className="max-w-3xl mx-auto text-lg text-gray-600">
-            Discover why healthcare professionals worldwide choose ThyroCareX for accurate thyroid cancer diagnosis
+            Discover why healthcare professionals worldwide choose Thyrax for accurate thyroid cancer diagnosis
           </p>
         </div>
 
@@ -167,7 +167,7 @@ const Testimonials = () => {
         {/* Bottom CTA */}
         <div className="mt-12 text-center">
           <p className="text-sm text-gray-500">
-            Join over <span className="font-bold text-primary">500+</span> medical professionals who trust ThyroCareX
+            Join over <span className="font-bold text-primary">500+</span> medical professionals who trust Thyrax
           </p>
         </div>
       </div>

@@ -114,7 +114,7 @@ const PaymentFailure = () => {
         </motion.div>
 
         <p className="text-center text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-6">
-          Secured by ThyroCareX · 256-bit SSL Encryption
+          Secured by Thyrax · 256-bit SSL Encryption
         </p>
       </div>
     </div>

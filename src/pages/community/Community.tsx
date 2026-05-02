@@ -19,7 +19,7 @@ interface Post {
 }
 
 function getCurrentUserName(): string {
-  const userRaw = localStorage.getItem('thyrocarex_user');
+  const userRaw = localStorage.getItem('thyrax_user');
   if (!userRaw) return 'D';
   const u = JSON.parse(userRaw);
   if (u?.token) {
@@ -40,7 +40,7 @@ const Community = () => {
   const displayName = getCurrentUserName();
 
   const fetchPosts = useCallback(async () => {
-    const userRaw = localStorage.getItem('thyrocarex_user');
+    const userRaw = localStorage.getItem('thyrax_user');
     if (!userRaw) {
       setIsAuth(false);
       setLoading(false);
@@ -308,7 +308,7 @@ const Community = () => {
             <div className="px-4 py-2 flex flex-wrap gap-x-4 gap-y-2">
               <span className="text-xs text-gray-400 hover:underline cursor-pointer">Privacy</span>
               <span className="text-xs text-gray-400 hover:underline cursor-pointer">Terms</span>
-              <span className="text-xs text-gray-400 hover:underline cursor-pointer">&copy; 2025 THYROCAREX</span>
+              <span className="text-xs text-gray-400 hover:underline cursor-pointer">&copy; 2025 THYRAX</span>
             </div>
           </div>
 

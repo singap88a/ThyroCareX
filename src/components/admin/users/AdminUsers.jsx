@@ -18,9 +18,9 @@ const AdminUsers = () => {
 
   // Mock Data
   const [admins, setAdmins] = useState([
-    { id: 1, name: 'Admin User', email: 'admin@thyrocarex.com', role: 'Super Admin', status: 'active', lastLogin: 'Just now' },
-    { id: 2, name: 'Support Team', email: 'support@thyrocarex.com', role: 'Support', status: 'active', lastLogin: '2 hours ago' },
-    { id: 3, name: 'Finance Manager', email: 'finance@thyrocarex.com', role: 'Finance', status: 'inactive', lastLogin: '3 days ago' },
+    { id: 1, name: 'Admin User', email: 'admin@thyrax.com', role: 'Super Admin', status: 'active', lastLogin: 'Just now' },
+    { id: 2, name: 'Support Team', email: 'support@thyrax.com', role: 'Support', status: 'active', lastLogin: '2 hours ago' },
+    { id: 3, name: 'Finance Manager', email: 'finance@thyrax.com', role: 'Finance', status: 'inactive', lastLogin: '3 days ago' },
   ]);
 
   const [auditLog, setAuditLog] = useState([

@@ -24,7 +24,7 @@ const GeminiSingap = ({ darkMode = false }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const user = localStorage.getItem('thyrocarex_user');
+    const user = localStorage.getItem('thyrax_user');
     if (!user) {
       setIsLoggedIn(false);
       toast.error("Please login to access the AI Assistant");
@@ -303,7 +303,7 @@ const GeminiSingap = ({ darkMode = false }) => {
           </div>
           <h1 className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl">
             <span className="text-primary">
-              ThyroCareX AI
+              Thyrax AI
             </span>
           </h1>
           <p className={`text-xl md:text-2xl font-medium max-w-2xl mx-auto ${darkMode ? 'text-text-secondary' : 'text-gray-500'}`}>

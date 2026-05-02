@@ -16,7 +16,7 @@ const AboutHero = () => {
             transition={{ duration: 0.8 }}
             className="inline-flex items-center px-5 py-2 mb-6 text-sm font-medium rounded-full text-primary bg-primary/10"
           >
-            🧬 ABOUT THYROCAREX
+            🧬 ABOUT THYRAX
           </motion.div>
 
           <motion.h1

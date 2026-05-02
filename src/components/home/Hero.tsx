@@ -136,7 +136,7 @@ const Hero = () => {
                         <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)] flex items-center justify-center">
                             <div className="w-1 h-1 bg-white rounded-full"></div>
                         </div>
-                        <span className="hidden group-hover:block text-[8px] font-black text-white uppercase tracking-[0.2em] animate-pulse">ThyroCareX</span>
+                        <span className="hidden group-hover:block text-[8px] font-black text-white uppercase tracking-[0.2em] animate-pulse">Thyrax</span>
                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/40"></div>
                     </div>
 

@@ -224,7 +224,7 @@ const Checkout = () => {
                             <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 opacity-50 grayscale hover:grayscale-0 transition-all cursor-crosshair" />
                         </div>
                         <p className="text-slate-400 text-[11px] font-bold text-center uppercase tracking-tighter">
-                            Encrypted by ThyroCareX Neural Security v4.9
+                            Encrypted by Thyrax Neural Security v4.9
                         </p>
                     </div>
                 </motion.div>

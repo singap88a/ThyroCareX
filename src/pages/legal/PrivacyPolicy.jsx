@@ -65,7 +65,7 @@ const PrivacyPolicy = () => {
                   1. Introduction
                 </h2>
                 <p className="text-slate-400 leading-relaxed text-lg">
-                  Welcome to ThyroCareX. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our AI-powered diagnostic services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
+                  Welcome to Thyrax. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our AI-powered diagnostic services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
                 </p>
               </div>
 
@@ -150,8 +150,8 @@ const PrivacyPolicy = () => {
                 <p className="text-slate-400 mb-6">
                   If you have questions or comments about this policy, please contact us.
                 </p>
-                <a href="mailto:privacy@thyrocarex.ai" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20">
-                  privacy@thyrocarex.ai
+                <a href="mailto:privacy@thyrax.ai" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20">
+                  privacy@thyrax.ai
                 </a>
               </div>
 

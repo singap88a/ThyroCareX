@@ -15,7 +15,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get current user initial & name for avatar preview
-  const userRaw = localStorage.getItem('thyrocarex_user');
+  const userRaw = localStorage.getItem('thyrax_user');
   const currentUser = userRaw ? JSON.parse(userRaw) : null;
   let displayName = 'D';
   if (currentUser?.token) {

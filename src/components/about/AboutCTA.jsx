@@ -9,7 +9,7 @@ const AboutCTA = () => {
           </span>
         </h2>
         <p className="max-w-2xl mx-auto mb-8 text-xl text-blue-100">
-          Join thousands of medical professionals and patients who trust ThyroCareX
+          Join thousands of medical professionals and patients who trust Thyrax
           for accurate, AI-powered thyroid cancer diagnosis.
         </p>
         <div className="flex flex-col justify-center gap-4 sm:flex-row">

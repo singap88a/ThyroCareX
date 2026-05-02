@@ -66,7 +66,7 @@ const AboutTimeline = () => {
       year: "2023",
       phase: "Network Expansion",
       title: "Enterprise Clinical Integration",
-      description: "ThyroCareX became standard in regional hospitals, integrating seamlessly with existing EMR systems to provide real-time diagnostic support.",
+      description: "Thyrax became standard in regional hospitals, integrating seamlessly with existing EMR systems to provide real-time diagnostic support.",
       icon: <FaGlobe className="w-5 h-5" />,
       stat: "ISO 13485 Certified",
       context: "Regional Centers",

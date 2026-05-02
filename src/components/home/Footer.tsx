@@ -18,7 +18,7 @@ const Footer = () => {
             {/* Left Section - Brand & Description */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="ThyroCareX Logo" className="w-40 rounded-xl" />
+                <img src="/logo.png" alt="Thyrax Logo" className="w-40 rounded-xl" />
      
               </div>
 
@@ -123,7 +123,7 @@ const Footer = () => {
         <div className="py-8 border-t border-gray-200">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-center text-gray-600 md:text-left">
-              © {currentYear} ThyroCareX. Made with <FaHeart className="inline w-3 h-3 mx-1 text-red-500" />
+              © {currentYear} Thyrax. Made with <FaHeart className="inline w-3 h-3 mx-1 text-red-500" />
               for better healthcare. All rights reserved.
             </p>
 

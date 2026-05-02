@@ -14,7 +14,7 @@ const api = axios.create({
 // Add a request interceptor to attach the token
 api.interceptors.request.use(
   (config) => {
-    const user = localStorage.getItem('thyrocarex_user');
+    const user = localStorage.getItem('thyrax_user');
     if (user) {
       const { token } = JSON.parse(user);
       if (token) {
@@ -50,7 +50,7 @@ api.interceptors.response.use(
     // Handle 401 Unauthorized errors (optional: redirect to login)
     if (error.response && error.response.status === 401) {
       // You might want to clear local storage and redirect here
-      // localStorage.removeItem('thyrocarex_user');
+      // localStorage.removeItem('thyrax_user');
       // window.location.href = '/login';
     }
     return Promise.reject(error);

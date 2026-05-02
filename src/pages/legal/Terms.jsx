@@ -65,7 +65,7 @@ const Terms = () => {
                   1. Agreement to Terms
                 </h2>
                 <p className="text-slate-400 leading-relaxed text-lg">
-                  These Terms of Use constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and ThyroCareX ("we," "us" or "our"), concerning your access to and use of the ThyroCareX website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").
+                  These Terms of Use constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and Thyrax ("we," "us" or "our"), concerning your access to and use of the Thyrax website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").
                 </p>
               </div>
 
@@ -121,7 +121,7 @@ const Terms = () => {
                     THE SITE DOES NOT PROVIDE MEDICAL ADVICE.
                   </p>
                   <p className="text-yellow-100/80 leading-relaxed">
-                    The contents of the ThyroCareX Site, such as text, graphics, images, and other material contained on the ThyroCareX Site ("Content") are for informational purposes only. The Content is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+                    The contents of the Thyrax Site, such as text, graphics, images, and other material contained on the Thyrax Site ("Content") are for informational purposes only. The Content is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
                   </p>
                 </div>
               </div>
@@ -132,8 +132,8 @@ const Terms = () => {
                 <p className="text-slate-400 mb-6">
                   In order to resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us.
                 </p>
-                <a href="mailto:legal@thyrocarex.ai" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20">
-                  legal@thyrocarex.ai
+                <a href="mailto:legal@thyrax.ai" className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20">
+                  legal@thyrax.ai
                 </a>
               </div>
 
