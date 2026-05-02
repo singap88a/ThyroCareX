@@ -7,7 +7,7 @@ import {
   ChevronRight, ShieldAlert, ShieldCheck, Microscope, 
   Stethoscope, Clock, CheckCircle2, XCircle, SearchX, Brain,
   AlertTriangle, Heart, Activity as ActivityIcon, TrendingUp,
-  FileText
+  FileText, Copy, Check, Smartphone, QrCode
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +32,45 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, patientName, isDeletin
     )}
   </AnimatePresence>
 );
+
+// --- Patient Code Badge (for doctor to share with patient) ---
+const PatientCodeBadge = ({ patientID }) => {
+  const [copied, setCopied] = useState(false);
+  const code = `TC-${String(patientID).padStart(5, '0')}`;
+
+  const handleCopy = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(String(patientID)).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div
+      onClick={e => e.preventDefault()}
+      className="flex items-center gap-2 mt-2.5"
+    >
+      <div className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3.5 py-1.5 rounded-xl shadow-lg shadow-violet-500/20">
+        <Smartphone size={11} className="opacity-80" />
+        <span className="font-black text-[10px] uppercase tracking-[0.15em]">Syrux Code</span>
+        <span className="font-black text-[13px] tracking-tight ml-1 font-mono">{code}</span>
+      </div>
+      <button
+        onClick={handleCopy}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+          copied
+            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+            : 'bg-white border border-gray-200 text-gray-500 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50'
+        }`}
+        title="Copy Patient ID for Syrux app"
+      >
+        {copied ? <><Check size={11} /> Copied!</> : <><Copy size={11} /> Copy</>}
+      </button>
+    </div>
+  );
+};
 
 const PatientsList = () => {
   const { user } = useAuth();
@@ -195,12 +234,13 @@ const PatientsList = () => {
                                 <span className={`flex items-center gap-2 ${config.subText}`}><Phone size={14}/> {p.phoneNumber}</span>
                                 <span className={`flex items-center gap-2 ${config.subText}`}><Calendar size={14}/> {p.age} YEARS</span>
                                 <span className={`flex items-center gap-2 px-3 py-1 bg-white/50 rounded-lg ${config.textColor}`}><Brain size={14}/> {config.description}</span>
-                             </div>
-                          </div>
-                       </div>
+                              </div>
+                              <PatientCodeBadge patientID={p.patientID} />
+                           </div>
+                        </div>
                        <div className="flex items-center gap-10 px-10 border-l border-white/40 hidden xl:flex">
                           <div className="text-center"><p className={`text-[10px] font-black uppercase mb-2 ${config.subText}`}>Function</p><p className={`text-lg font-black ${config.textColor} capitalize`}>{p.latestStatus || 'TBD'}</p></div>
-                          <div className="text-center"><p className={`text-[10px] font-black uppercase mb-2 ${config.subText}`}>Confidence</p><p className={`text-xl font-black ${config.textColor}`}>{p.riskConfidence ? (p.riskConfidence <= 1 ? `${(p.riskConfidence * 100).toFixed(0)}%` : `${p.riskConfidence.toFixed(0)}%`) : '—'}</p></div>
+                          <div className="text-center"><p className={`text-[10px] font-black uppercase mb-2 ${config.subText}`}>Confidence</p><p className={`text-xl font-black ${config.textColor}`}>{p.riskConfidence ? (p.riskConfidence <= 1 ? `${(p.riskConfidence * 100).toFixed(0)}%` : `${p.riskConfidence.toFixed(0)}%`) : 'â€”'}</p></div>
                        </div>
                        <div className="flex items-center gap-4 w-full lg:w-auto">
                           <Link to={`/patients/${p.patientID}/dashboard`} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-10 py-5 bg-white border border-gray-100 rounded-[20px] text-gray-900 font-black uppercase tracking-widest text-[11px] hover:bg-gray-900 hover:text-white transition-all shadow-sm"><LayoutDashboard size={18} /> Dashboard</Link>
@@ -219,3 +259,5 @@ const PatientsList = () => {
 };
 
 export default PatientsList;
+
+
