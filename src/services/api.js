@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5153/api'
-  : 'http://localhost:5153/api';
+  ? 'https://thyrocarex.runasp.net/api'
+  : 'https://thyrocarex.runasp.net/api';
 
 const api = axios.create({
   baseURL: API_URL,
