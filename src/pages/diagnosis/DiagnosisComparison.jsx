@@ -21,6 +21,8 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [comparisonResult, setComparisonResult] = useState(null);
+  const [comparing, setComparing] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -53,9 +55,20 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
     }
   };
 
-  const handleStartComparison = () => {
+  const handleStartComparison = async () => {
     if (selectedItems.length === 2) {
-      setViewMode('detail');
+      setComparing(true);
+      try {
+        const res = await testService.compareTests(selectedItems[0], selectedItems[1]);
+        if (res.succeeded) {
+          setComparisonResult(res.data);
+          setViewMode('detail');
+        }
+      } catch (err) {
+        console.error('Comparison failed', err);
+      } finally {
+        setComparing(false);
+      }
     }
   };
 
@@ -78,49 +91,25 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
   const earlierTest = (test1 && test2) ? (new Date(test1.createdAt) < new Date(test2.createdAt) ? test1 : test2) : test1;
   const laterTest = (test1 && test2) ? (new Date(test1.createdAt) < new Date(test2.createdAt) ? test2 : test1) : test2;
 
-  const mapResult = (test) => {
-    if (!test) return null;
-    const res = test.diagnosisResult;
-    return {
-      id: test.id,
-      date: new Date(test.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      time: new Date(test.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: res?.classificationLabel || res?.riskLevel || 'ASSESSED',
-      confidence: res?.confidence || 0,
-      riskLevel: res?.riskLevel || 'TBD',
-      labs: {
-        tsh: parseFloat(test.tsh || 0),
-        t3: parseFloat(test.t3 || 0),
-        tt4: parseFloat(test.tt4 || 0),
-        fti: parseFloat(test.fti || 0)
-      }
-    };
-  };
-
-  const d1 = mapResult(earlierTest);
-  const d2 = mapResult(laterTest);
+  const d1 = comparisonResult?.before;
+  const d2 = comparisonResult?.after;
+  const summary = comparisonResult?.summary;
 
   const getStatusColor = (status = '') => {
-    const s = status.toUpperCase();
-    if (s.includes('MALIGNANT') || s.includes('HIGH')) return 'bg-red-500';
-    if (s.includes('BENIGN') || s.includes('LOW')) return 'bg-green-500';
+    const s = (status || '').toUpperCase();
+    if (s.includes('MALIGNANT') || s.includes('HIGH') || s.includes('WORSENING')) return 'bg-red-500';
+    if (s.includes('BENIGN') || s.includes('LOW') || s.includes('IMPROVING')) return 'bg-green-500';
+    if (s.includes('STABLE')) return 'bg-blue-500';
     return 'bg-blue-500';
   };
 
-  const calculateTrend = (val1, val2, low, high) => {
-    const delta = val2 - val1;
-    const isNowNormal = val2 >= low && val2 <= high;
-    const wasNormal = val1 >= low && val1 <= high;
-    
-    if (isNowNormal && !wasNormal) return { text: 'Normalized', color: 'text-green-500', icon: <TrendingUp size={14} /> };
-    if (!isNowNormal && wasNormal) return { text: 'Out of Range', color: 'text-red-500', icon: <TrendingDown size={14} /> };
-    if (Math.abs(delta) < 0.01) return { text: 'Stable', color: 'text-gray-400', icon: <Activity size={14} /> };
-    
-    // Closer to range center is better
-    const center = (low + high) / 2;
-    if (Math.abs(val2 - center) < Math.abs(val1 - center)) return { text: 'Improving', color: 'text-green-500', icon: <TrendingUp size={14} /> };
-    return { text: 'Declining', color: 'text-orange-500', icon: <TrendingDown size={14} /> };
+  const getTrendCardStyles = (trend) => {
+    if (trend === 'Improving') return 'bg-green-500/10 border-green-500/30 text-green-900 dark:text-green-100';
+    if (trend === 'Worsening') return 'bg-red-500/10 border-red-500/30 text-red-900 dark:text-red-100';
+    return 'bg-white/5 border-white/10 text-white';
   };
+
+  // Removed local calculateTrend in favor of backend summary
 
   return (
     <div className={`min-h-screen ${dashboardMode ? '' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-admin-dark-bg dark:to-admin-dark-bg'}`}>
@@ -167,14 +156,15 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
               <div className="flex flex-col items-end gap-2">
                 <button 
                   onClick={handleStartComparison} 
-                  disabled={selectedItems.length < 2} 
+                  disabled={selectedItems.length < 2 || comparing} 
                   className={`px-10 py-4 rounded-2xl font-black transition-all flex items-center gap-3 ${
                     selectedItems.length === 2 
                     ? 'bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95' 
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  <Zap size={20} /> ANALYZE COMPARISON ({selectedItems.length}/2)
+                  {comparing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap size={20} />}
+                  {comparing ? 'ANALYZING...' : `ANALYZE COMPARISON (${selectedItems.length}/2)`}
                 </button>
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Select exactly two records to compare</p>
               </div>
@@ -239,7 +229,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Time Interval</p>
                   <p className="font-black dark:text-white">
-                    {Math.ceil(Math.abs(new Date(d2.date) - new Date(d1.date)) / (1000 * 60 * 60 * 24))} Days Apart
+                    {Math.ceil(Math.abs(new Date(d2?.date) - new Date(d1?.date)) / (1000 * 60 * 60 * 24))} Days Apart
                   </p>
                 </div>
               </div>
@@ -282,21 +272,21 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-black text-primary">{data?.date}</p>
-                      <p className="text-xs font-bold text-gray-400">{data?.time}</p>
+                      <p className="text-lg font-black text-primary">{new Date(data?.date).toLocaleDateString('en-GB')}</p>
+                      <p className="text-xs font-bold text-gray-400">{new Date(data?.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                   </div>
                   
-                  <div className={`p-8 rounded-[32px] text-white mb-10 relative overflow-hidden group shadow-lg ${getStatusColor(data?.status)}`}>
+                  <div className={`p-8 rounded-[32px] text-white mb-10 relative overflow-hidden group shadow-lg ${getStatusColor(data?.result || data?.riskLevel)}`}>
                     <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                     <div className="relative z-10">
                       <p className="text-[10px] opacity-80 font-black uppercase tracking-widest mb-2 flex items-center gap-2">
                         <Brain size={14} /> AI CLASSIFICATION STATUS
                       </p>
-                      <h2 className="text-4xl font-black tracking-tighter">{data?.status}</h2>
+                      <h2 className="text-4xl font-black tracking-tighter">{data?.result}</h2>
                       <div className="mt-6 flex justify-between items-center bg-black/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
                         <span className="text-xs font-bold uppercase tracking-widest">Model Confidence</span>
-                        <span className="text-2xl font-black">{data?.confidence}%</span>
+                        <span className="text-2xl font-black">{data?.confidence || 0}%</span>
                       </div>
                     </div>
                   </div>
@@ -310,10 +300,10 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { label: 'TSH', val: data?.labs.tsh, unit: 'mIU/L' },
-                        { label: 'T3', val: data?.labs.t3, unit: 'ng/dL' },
-                        { label: 'TT4', val: data?.labs.tt4, unit: 'μg/dL' },
-                        { label: 'FTI', val: data?.labs.fti, unit: 'Index' },
+                        { label: 'TSH', val: data?.tsh, unit: 'mIU/L' },
+                        { label: 'T3', val: data?.t3, unit: 'ng/dL' },
+                        { label: 'TT4', val: data?.tt4, unit: 'μg/dL' },
+                        { label: 'FTI', val: data?.fti, unit: 'Index' },
                       ].map((lab, i) => (
                         <div key={i} className="p-5 bg-slate-50 dark:bg-admin-dark-hover rounded-3xl border border-slate-100 dark:border-admin-dark-border group hover:bg-white dark:hover:bg-admin-dark-card hover:shadow-md transition-all">
                           <p className="text-[10px] font-black text-gray-400 uppercase mb-1">{lab.label}</p>
@@ -353,9 +343,14 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                   <div className="px-6 py-3 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Overall Shift</p>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold opacity-60">{d1?.status}</span>
+                      <span className="text-sm font-bold opacity-60">{d1?.result}</span>
                       <MoveRight size={16} className="text-primary" />
-                      <span className="text-lg font-black">{d2?.status}</span>
+                      <span className="text-lg font-black">{d2?.result}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                       <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${getStatusColor(summary?.overallTrend)} text-white`}>
+                          {summary?.overallTrend} | {summary?.overallTrendAr}
+                       </span>
                     </div>
                   </div>
                 </div>
@@ -363,13 +358,13 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {/* Lab Trends with Delta calculation */}
                   {[
-                    { label: 'TSH Trend', v1: d1?.labs.tsh, v2: d2?.labs.tsh, low: 0.4, high: 4.0, unit: 'mIU/L' },
-                    { label: 'T3 Trend', v1: d1?.labs.t3, v2: d2?.labs.t3, low: 80, high: 200, unit: 'ng/dL' },
-                    { label: 'TT4 Trend', v1: d1?.labs.tt4, v2: d2?.labs.tt4, low: 5.1, high: 14.1, unit: 'μg/dL' }
+                    { label: 'TSH Trend', v1: d1?.tsh, v2: d2?.tsh, low: 0.4, high: 4.0, unit: 'mIU/L' },
+                    { label: 'T3 Trend', v1: d1?.t3, v2: d2?.t3, low: 80, high: 200, unit: 'ng/dL' },
+                    { label: 'TT4 Trend', v1: d1?.tt4, v2: d2?.tt4, low: 5.1, high: 14.1, unit: 'μg/dL' }
                   ].map((trend, i) => {
-                    const result = calculateTrend(trend.v1, trend.v2, trend.low, trend.high);
-                    const delta = trend.v2 - trend.v1;
-                    const deltaPct = trend.v1 !== 0 ? ((delta / trend.v1) * 100).toFixed(1) : '0';
+                    const delta = (trend.v2 || 0) - (trend.v1 || 0);
+                    const deltaPct = trend.v1 ? ((delta / trend.v1) * 100).toFixed(1) : '0';
+                    const isImproving = trend.v1 > trend.high ? trend.v2 < trend.v1 : (trend.v1 < trend.low ? trend.v2 > trend.v1 : true);
                     
                     return (
                       <div key={i} className="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 hover:bg-white/10 transition-colors group">
@@ -382,12 +377,12 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                         
                         <div className="flex items-end justify-between mb-6">
                           <div>
-                            <p className="text-4xl font-black tracking-tighter">{trend.v2}</p>
+                            <p className="text-4xl font-black tracking-tighter">{trend.v2 || '—'}</p>
                             <p className="text-[10px] font-bold text-gray-500 uppercase">{trend.unit}</p>
                           </div>
-                          <div className={`flex flex-col items-end gap-1 ${result.color}`}>
-                            {result.icon}
-                            <span className="text-[10px] font-black uppercase tracking-widest">{result.text}</span>
+                          <div className={`flex flex-col items-end gap-1 ${isImproving ? 'text-green-500' : 'text-orange-500'}`}>
+                            {isImproving ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                            <span className="text-[10px] font-black uppercase tracking-widest">{isImproving ? 'Stable/Impr.' : 'Variance'}</span>
                           </div>
                         </div>
                         
@@ -396,7 +391,7 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                           <div className="h-full bg-primary/20 w-full relative">
                             <motion.div 
                               initial={{ left: '50%' }}
-                              animate={{ left: `${Math.max(0, Math.min(100, (trend.v2 / trend.high) * 100))}%` }}
+                              animate={{ left: `${Math.max(0, Math.min(100, (trend.v2 / (trend.high * 1.5)) * 100))}%` }}
                               className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" 
                             />
                           </div>
@@ -411,23 +406,49 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                 </div>
 
                 {/* Final Summary Card */}
-                <div className="mt-12 p-10 bg-white/5 backdrop-blur-xl rounded-[40px] border border-white/10 relative overflow-hidden">
+                <div className={`mt-12 p-10 backdrop-blur-xl rounded-[40px] border relative overflow-hidden transition-all duration-500 ${getTrendCardStyles(summary?.overallTrend)}`}>
                    <div className="absolute top-0 right-0 p-8 opacity-10">
                       <Shield size={60} />
                    </div>
                    <div className="flex flex-col lg:flex-row gap-10 items-center">
                       <div className="flex-1 space-y-4 text-center lg:text-left">
                         <h4 className="text-2xl font-black flex items-center justify-center lg:justify-start gap-3">
-                          <CircleCheck className="text-green-400" /> Progression Summary
+                          <CircleCheck className="text-green-400" /> Progression Summary | ملخص تطور الحالة
                         </h4>
-                        <p className="text-gray-400 text-lg leading-relaxed max-w-3xl">
-                          Comprehensive analysis between <span className="text-white font-bold">{d1.date}</span> and <span className="text-white font-bold">{d2.date}</span> indicates a 
-                          <span className="text-primary font-black mx-1 italic">
-                            {d2.status === d1.status ? ' stable clinical trajectory ' : ' dynamic diagnostic shift '}
-                          </span> 
-                          with model confidence averaging <span className="text-white font-bold">{( (parseFloat(d1.confidence) + parseFloat(d2.confidence)) / 2).toFixed(1)}%</span>. 
-                          The primary biomarker variance was observed in <span className="text-white font-bold underline decoration-primary underline-offset-4">TSH levels</span>.
-                        </p>
+                        <div className="space-y-4">
+                          <p className="text-gray-400 text-lg leading-relaxed max-w-3xl">
+                            {summary?.message}
+                          </p>
+                          <p className="text-primary text-xl font-bold leading-relaxed max-w-3xl text-right [direction:rtl]">
+                            {summary?.messageAr}
+                          </p>
+                          
+                          {summary?.analysisDetailsAr && summary.analysisDetailsAr.length > 0 && (
+                            <div className="mt-6 space-y-3">
+                              <p className="text-[10px] font-black uppercase tracking-widest opacity-60 text-right [direction:rtl]">Detailed Analysis | تحليل تفصيلي</p>
+                              <ul className="space-y-2">
+                                {summary.analysisDetailsAr.map((detail, idx) => (
+                                  <li key={idx} className="flex items-center justify-start gap-3 text-sm font-bold text-right [direction:rtl]">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                    <span>{detail}</span>
+                                  </li>
+                                ))}
+                                {summary.analysisDetails && summary.analysisDetails.map((detail, idx) => (
+                                  <li key={`en-${idx}`} className="flex items-center gap-3 text-xs opacity-60 font-medium italic">
+                                    <ChevronRight size={12} className="text-primary" />
+                                    {detail}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-4 mt-4">
+                             <span className={`px-4 py-2 rounded-xl font-black text-sm text-white ${getStatusColor(summary?.overallTrend)}`}>
+                                {summary?.overallTrend} | {summary?.overallTrendAr}
+                             </span>
+                          </div>
+                        </div>
                       </div>
                       <div className="flex flex-col gap-4 w-full lg:w-auto">
                         <button 

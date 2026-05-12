@@ -34,6 +34,11 @@ const testService = {
     });
     return response.data; // { succeeded, data: boolean, message: string }
   },
+  // Compare two diagnostic tests
+  compareTests: async (testId1, testId2) => {
+    const response = await api.get(`/TestsWithAI/CompareTests/${testId1}/${testId2}`);
+    return response.data; // { succeeded, data: { before: {...}, after: {...}, summary: {...} } }
+  },
 };
 
 export default testService;

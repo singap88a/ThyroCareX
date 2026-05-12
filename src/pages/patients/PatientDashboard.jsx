@@ -131,6 +131,11 @@ const PatientDashboard = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const view = (params.get('view') || '').toLowerCase();
+    const testIdParam = params.get('testId');
+    if (testIdParam) {
+      const n = parseInt(testIdParam, 10);
+      if (!Number.isNaN(n)) setSelectedTestId(n);
+    }
     if (view && ['info', 'results', 'history', 'compare', 'rediagnose'].includes(view)) {
       setActiveView(view);
     }
