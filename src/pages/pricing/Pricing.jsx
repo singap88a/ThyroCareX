@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { mapPlansFromApiResponse } from '../../utils/plansFromApi';
 
 const PricingCard = ({ plan, billingPeriod }) => {
   const isPopular = plan.popular;
@@ -118,20 +119,7 @@ const PricingPage = () => {
       try {
         const response = await api.get('/Plan');
         if (response.data && response.data.succeeded) {
-          const planNames = { 1: 'Starter', 2: 'Professional', 3: 'Enterprise' };
-          // Map backend plans to frontend structure if necessary
-          const mappedPlans = response.data.data.map(p => ({
-            id: p.id,
-            name: planNames[p.planType] || 'Standard Plan',
-            description: p.description || '',
-            durationInDays: p.durationInDays || 30,
-            monthlyPrice: p.price,
-            yearlyPrice: Math.floor(p.price * 0.8), // Mock yearly discount
-            features: p.features || [],
-            cta: p.price === 0 ? 'Get Started' : 'Subscribe Now',
-            popular: (planNames[p.planType] || '').toLowerCase().includes('pro')
-          }));
-          setPlans(mappedPlans);
+          setPlans(mapPlansFromApiResponse(response.data.data));
         }
       } catch (err) {
         console.error('Failed to fetch plans:', err);
