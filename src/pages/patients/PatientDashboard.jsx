@@ -12,6 +12,7 @@ import PatientDetails from './PatientDetails';
 import ReDiagnosis from '../diagnosis/ReDiagnosis';
 import DiagnosisComparison from '../diagnosis/DiagnosisComparison';
 import DiagnosisHistory from '../diagnosis/DiagnosisHistory';
+import PatientChat from '../../components/patients/PatientChat';
 import patientService from '../../services/patientService';
 
 /* ── Patient Info View (real data) ────────────────────── */
@@ -162,6 +163,7 @@ const PatientDashboard = () => {
     { id: 'history',    label: 'Diagnosis History',    labelAr: 'تاريخ التشخيص',     icon: History,      color: 'text-green-500',   bg: 'bg-green-500/10'   },
     { id: 'compare',    label: 'Diagnosis Comparison', labelAr: 'مقارنة التشخيص',    icon: Scale,        color: 'text-orange-500',  bg: 'bg-orange-500/10'  },
     { id: 'rediagnose', label: 'New Re-Diagnosis',     labelAr: 'إعادة التشخيص',     icon: RefreshCcw,   color: 'text-red-500',     bg: 'bg-red-500/10'     },
+    { id: 'chat',       label: 'Contact Patient',      labelAr: 'التواصل مع المريض',  icon: Bell,         color: 'text-purple-500',  bg: 'bg-purple-500/10'  },
   ];
 
   const handleTestSelect = (testId) => {
@@ -182,6 +184,7 @@ const PatientDashboard = () => {
       case 'history':    return <DiagnosisHistory dashboardMode={true} onSelectTest={handleTestSelect} />;
       case 'compare':    return <DiagnosisComparison dashboardMode={true} />;
       case 'rediagnose': return <ReDiagnosis dashboardMode={true} onComplete={handleReDiagnosisComplete} onPatientSave={fetchPatient} />;
+      case 'chat':       return <PatientChat patientId={id} />;
       default:           return <PatientInfoView patient={patient} />;
     }
   };
