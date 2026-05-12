@@ -22,6 +22,7 @@ import PendingVerification from './components/auth/PendingVerification';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import Terms from './pages/legal/Terms';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import { AdminThemeProvider } from './contexts/AdminThemeContext';
 import AdminLayout from './components/admin/layout/AdminLayout';
@@ -118,10 +119,12 @@ import { Toaster } from 'react-hot-toast';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-      </Router>
+      <NotificationProvider>
+        <Router>
+          <AppContent />
+          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        </Router>
+      </NotificationProvider>
      </AuthProvider>
   );
 }

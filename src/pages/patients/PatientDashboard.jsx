@@ -14,6 +14,7 @@ import DiagnosisComparison from '../diagnosis/DiagnosisComparison';
 import DiagnosisHistory from '../diagnosis/DiagnosisHistory';
 import PatientChat from '../../components/patients/PatientChat';
 import patientService from '../../services/patientService';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 /* ── Patient Info View (real data) ────────────────────── */
 const PatientInfoView = ({ patient }) => {
@@ -128,6 +129,8 @@ const PatientDashboard = () => {
   const [patient, setPatient] = useState(null);
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [selectedTestId, setSelectedTestId] = useState(null);
+  const { getUnreadCountForPatient, markAllAsRead } = useNotifications();
+  const patientUnreadCount = getUnreadCountForPatient(id);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -236,6 +239,7 @@ const PatientDashboard = () => {
                 onClick={() => {
                   setActiveView(item.id);
                   if (item.id !== 'results') setSelectedTestId(null);
+                  if (item.id === 'chat') markAllAsRead(id);
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group relative ${
                   isActive
@@ -253,6 +257,11 @@ const PatientDashboard = () => {
                     <span className={`text-sm font-semibold tracking-wide transition-colors ${isActive ? 'text-white' : 'text-gray-700 dark:text-gray-200'}`}>{item.label}</span>
                     <span className={`text-xs font-medium transition-colors ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>{item.labelAr}</span>
                   </div>
+                )}
+                {item.id === 'chat' && patientUnreadCount > 0 && (
+                  <span className={`absolute ${isSidebarCollapsed ? 'top-0 right-0' : 'right-4'} flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white`}>
+                    {patientUnreadCount}
+                  </span>
                 )}
                 {isActive && <div className="absolute right-0 w-1 h-8 -translate-y-1/2 rounded-l-full top-1/2 bg-white/30" />}
               </button>
