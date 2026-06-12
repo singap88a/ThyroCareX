@@ -101,7 +101,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
     thyroidSurgery: false,
     queryHyperthyroid: false,
     nodulePresent: false,
-    ultrasoundImage: null,
+    ultrasoundImages: [],
   });
 
   const set = (field, value) => setPatientData((p) => ({ ...p, [field]: value }));
@@ -168,47 +168,95 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
 
   const imageModelCaption = 'Image validation model / موديل التحقق من الصورة';
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const removeImage = (indexToRemove) => {
+    const updated = patientData.ultrasoundImages.filter((_, i) => i !== indexToRemove);
+    set('ultrasoundImages', updated);
+    
+    if (updated.length === 0) {
+      setValidationResult(null);
+      return;
+    }
 
-    set('ultrasoundImage', file);
+    if (validationResult?.results) {
+      const newResults = validationResult.results.filter((_, i) => i !== indexToRemove);
+      const allValid = newResults.every(r => r.is_ultrasound);
+      
+      if (allValid) {
+        setValidationResult({
+          valid: true,
+          message: 'Verified',
+          userMessageAr: 'جميع الصور مقبولة كصور طبية (موجات فوق صوتية).',
+          userMessageEn: 'All images accepted as medical ultrasound images.',
+          results: newResults
+        });
+      } else {
+        setValidationResult({
+          valid: false,
+          message: 'Invalid',
+          userMessageAr: 'تنبيه: يوجد صور غير صالحة. يرجى حذف الصور التي بجانبها علامة ✖.',
+          userMessageEn: 'Warning: Invalid images detected. Please remove the ones marked with ✖.',
+          backendMessage: 'Invalid images detected',
+          results: newResults
+        });
+      }
+    }
+  };
+
+  const handleImageChange = async (e) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (!newFiles.length) return;
+
+    const allFiles = [...(patientData.ultrasoundImages || []), ...newFiles];
+    set('ultrasoundImages', allFiles);
     setValidationResult(null);
     setIsValidating(true);
 
     try {
-      const res = await testService.validateImage(file);
-      if (res.succeeded && res.data === true) {
-        setValidationResult({
-          valid: true,
-          message: 'Verified',
-          userMessageAr: 'الصورة مقبولة كصورة طبية (موجات فوق صوتية) وفق موديل التحقق.',
-          userMessageEn: 'Accepted as a medical ultrasound image according to the validation model.',
-        });
-        toast.success('Image verified / تم التحقق من الصورة');
+      const res = await testService.validateImage(allFiles);
+      if (res.succeeded && Array.isArray(res.data)) {
+        const allValid = res.data.every(r => r.is_ultrasound);
+        
+        if (allValid && res.data.length > 0) {
+          setValidationResult({
+            valid: true,
+            message: 'Verified',
+            userMessageAr: 'جميع الصور مقبولة كصور طبية (موجات فوق صوتية).',
+            userMessageEn: 'All images accepted as medical ultrasound images.',
+            results: res.data
+          });
+          toast.success('Images verified / تم التحقق من الصور');
+        } else {
+          setValidationResult({
+            valid: false,
+            message: 'Invalid',
+            userMessageAr: 'تنبيه: يوجد صور غير صالحة ولا تعتبر صور موجات فوق صوتية طبية. يرجى حذف الصور التي بجانبها علامة ✖.',
+            userMessageEn: 'Warning: Some images are not valid medical ultrasound scans. Please remove the ones marked with ✖.',
+            backendMessage: 'Invalid images detected',
+            results: res.data
+          });
+          toast.error('Invalid image(s) / يوجد صور غير طبية');
+        }
       } else {
-        const backend = res.message || '';
         setValidationResult({
           valid: false,
-          message: backend || 'Invalid',
-          userMessageAr:
-            'الصورة غير مناسبة: موديل التحقق من الصورة يرفضها لأنها ليست صورة موجات فوق صوتية طبية للغدة الدرقية، أو الجودة/النوع لا يطابق المطلوب.',
-          userMessageEn:
-            'The image was rejected by the image validation model: it does not appear to be a valid thyroid ultrasound (or it is not a suitable medical scan).',
-          backendMessage: backend,
+          message: 'Error',
+          userMessageAr: 'الرد من السيرفر غير متوقع.',
+          userMessageEn: 'Unexpected server response.',
         });
-        toast.error('Invalid image — not accepted as medical ultrasound / الصورة غير طبية أو غير مناسبة');
+        toast.error('Validation request failed');
       }
     } catch (err) {
       setValidationResult({
         valid: false,
         message: 'Error',
-        userMessageAr: 'تعذر تشغيل موديل التحقق من الصورة. حاول مرة أخرى.',
-        userMessageEn: 'Could not run the image validation model. Please try again.',
+        userMessageAr: 'تعذر تشغيل موديل التحقق من الصورة. حاول مرة أخرى. ' + (err.response?.status || err.message),
+        userMessageEn: 'Could not run the image validation model. Please try again. ' + (err.response?.status || err.message),
+        backendMessage: typeof err.response?.data === 'object' ? JSON.stringify(err.response?.data) : String(err.response?.data || err.message)
       });
       toast.error('Validation request failed');
     } finally {
       setIsValidating(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -288,14 +336,14 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
   };
 
   const handleImageSubmit = async () => {
-    if (!validationResult?.valid || !patientData.ultrasoundImage) {
+    if (!validationResult?.valid || !patientData.ultrasoundImages?.length) {
       toast.error('Valid ultrasound image required / مطلوب صورة موجات فوق صوتية صالحة');
       return;
     }
 
     setIsProcessingImage(true);
     try {
-      const imgRes = await testService.processImage(testId, patientData.ultrasoundImage);
+      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages);
       if (imgRes.succeeded) {
         toast.success('Diagnosis complete / اكتمل التشخيص');
         finishFlow(testId);
@@ -540,21 +588,27 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
                   )}
 
                   <div className="bg-white/10 rounded-2xl p-2 border border-white/20">
-                    {patientData.ultrasoundImage ? (
-                      <div className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : validationResult?.valid ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        <div className="flex items-center gap-3">
-                          {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : <CheckCircle2 className="w-6 h-6" />}
-                          <span className="text-xs font-bold truncate max-w-[150px]">{patientData.ultrasoundImage.name}</span>
-                        </div>
-                        <button type="button" onClick={() => { set('ultrasoundImage', null); setValidationResult(null); }}><X size={16} /></button>
+                    {patientData.ultrasoundImages?.length > 0 && (
+                      <div className="space-y-2 mb-2">
+                        {patientData.ultrasoundImages.map((img, i) => {
+                          const isImgValid = validationResult?.results ? validationResult.results[i]?.is_ultrasound : true;
+                          return (
+                          <div key={i} className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
+                            <div className="flex items-center gap-3">
+                              {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : (isImgValid) ? <CheckCircle2 className="w-6 h-6 text-green-300" /> : <X className="w-6 h-6 text-red-300" />}
+                              <span className="text-xs font-bold truncate max-w-[150px]">{img.name}</span>
+                            </div>
+                            <button type="button" onClick={() => removeImage(i)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"><X size={16} /></button>
+                          </div>
+                          );
+                        })}
                       </div>
-                    ) : (
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full py-10 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/5 transition-all">
-                        <Upload size={24} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Select Scan</span>
-                      </button>
                     )}
-                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full py-6 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/5 transition-all">
+                      <Upload size={24} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{patientData.ultrasoundImages?.length > 0 ? 'Add more images / إضافة صور أخرى' : 'Select Scans'}</span>
+                    </button>
+                    <input ref={fileInputRef} type="file" multiple className="hidden" accept="image/*" onChange={handleImageChange} />
                   </div>
                 </div>
               ) : (

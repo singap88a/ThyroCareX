@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://thyrocarex.runasp.net',
+        target: 'http://localhost:5153',
         changeOrigin: true,
         secure: false,
       }

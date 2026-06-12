@@ -12,6 +12,7 @@ import PatientDetails from './PatientDetails';
 import ReDiagnosis from '../diagnosis/ReDiagnosis';
 import DiagnosisComparison from '../diagnosis/DiagnosisComparison';
 import DiagnosisHistory from '../diagnosis/DiagnosisHistory';
+import Anatomy3DView from '../diagnosis/Anatomy3DView';
 import PatientChat from '../../components/patients/PatientChat';
 import patientService from '../../services/patientService';
 import { useNotifications } from '../../contexts/NotificationContext';
@@ -140,7 +141,7 @@ const PatientDashboard = () => {
       const n = parseInt(testIdParam, 10);
       if (!Number.isNaN(n)) setSelectedTestId(n);
     }
-    if (view && ['info', 'results', 'history', 'compare', 'rediagnose'].includes(view)) {
+    if (view && ['info', 'results', 'anatomy', 'history', 'compare', 'rediagnose'].includes(view)) {
       setActiveView(view);
     }
   }, [location.search]);
@@ -163,6 +164,7 @@ const PatientDashboard = () => {
   const menuItems = [
     { id: 'info',       label: 'Patient Info',        labelAr: 'معلومات المريض',     icon: User,         color: 'text-primary',     bg: 'bg-primary/10'     },
     { id: 'results',    label: 'Diagnosis Result',     labelAr: 'نتيجة التشخيص',     icon: Activity,     color: 'text-blue-500',    bg: 'bg-blue-500/10'    },
+    { id: 'anatomy',    label: '3D Anatomical Map',    labelAr: 'الخريطة التشريحية 3D', icon: Target,       color: 'text-indigo-500',  bg: 'bg-indigo-500/10'  },
     { id: 'history',    label: 'Diagnosis History',    labelAr: 'تاريخ التشخيص',     icon: History,      color: 'text-green-500',   bg: 'bg-green-500/10'   },
     { id: 'compare',    label: 'Diagnosis Comparison', labelAr: 'مقارنة التشخيص',    icon: Scale,        color: 'text-orange-500',  bg: 'bg-orange-500/10'  },
     { id: 'rediagnose', label: 'New Re-Diagnosis',     labelAr: 'إعادة التشخيص',     icon: RefreshCcw,   color: 'text-red-500',     bg: 'bg-red-500/10'     },
@@ -184,6 +186,7 @@ const PatientDashboard = () => {
     switch (activeView) {
       case 'info':       return <PatientInfoView patient={patient} />;
       case 'results':    return <PatientDetails dashboardMode={true} testId={selectedTestId} />;
+      case 'anatomy':    return <Anatomy3DView patientId={id} testId={selectedTestId} />;
       case 'history':    return <DiagnosisHistory dashboardMode={true} onSelectTest={handleTestSelect} />;
       case 'compare':    return <DiagnosisComparison dashboardMode={true} />;
       case 'rediagnose': return <ReDiagnosis dashboardMode={true} onComplete={handleReDiagnosisComplete} onPatientSave={fetchPatient} />;
@@ -193,7 +196,7 @@ const PatientDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden text-gray-800 bg-gray-50/30 dark:bg-admin-dark-bg dark:text-gray-200">
+    <div className="flex h-[calc(100vh-80px)] overflow-hidden text-gray-800 bg-gray-50/30 dark:bg-admin-dark-bg dark:text-gray-200">
       {/* Fixed Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-30 flex flex-col pt-20 bg-white border-r border-gray-200 shadow-lg dark:bg-admin-dark-card dark:border-admin-dark-border transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}`}>
         {/* Sidebar Header */}
@@ -230,7 +233,7 @@ const PatientDashboard = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 py-3 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {menuItems.map((item) => {
             const isActive = activeView === item.id;
             return (
@@ -241,7 +244,7 @@ const PatientDashboard = () => {
                   if (item.id !== 'results') setSelectedTestId(null);
                   if (item.id === 'chat') markAllAsRead(id);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group relative ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 group relative ${
                   isActive
                     ? 'bg-primary text-white shadow-lg shadow-primary/30'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary dark:hover:text-primary'
@@ -282,8 +285,8 @@ const PatientDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[280px]'}`}>
-        <header className="sticky top-0 z-20 flex items-center justify-between h-20 px-8 border-b border-gray-100 bg-white/80 dark:bg-admin-dark-card/80 backdrop-blur-md dark:border-admin-dark-border/50">
+      <main className={`flex-1 h-[calc(100vh-80px)] overflow-y-auto bg-gray-50/30 dark:bg-admin-dark-bg/50 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[280px]'}`}>
+        <header className="flex items-center justify-between h-20 px-8 border-b border-gray-100 bg-white dark:bg-admin-dark-card dark:border-admin-dark-border/50">
           <div className="flex items-center gap-4">
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">
               {menuItems.find(m => m.id === activeView)?.label}
@@ -300,8 +303,7 @@ const PatientDashboard = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto bg-gray-50/30 dark:bg-admin-dark-bg/50 custom-scrollbar">
-          <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl pt-4 pb-12">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeView}
@@ -313,7 +315,6 @@ const PatientDashboard = () => {
                 {renderContent()}
               </motion.div>
             </AnimatePresence>
-          </div>
         </div>
       </main>
     </div>

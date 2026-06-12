@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://thyrocarex.runasp.net/api';
+const API_URL = 'http://localhost:5153/api';
 
 const api = axios.create({
   baseURL: API_URL,

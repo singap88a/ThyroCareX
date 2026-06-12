@@ -12,10 +12,12 @@ const testService = {
   processImage: async (testId, imageFile) => {
     const formData = new FormData();
     formData.append('TestId', testId);
-    formData.append('UltraSoundImage', imageFile);
-    const response = await api.post('/TestsWithAI/ProcessImage', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    if (Array.isArray(imageFile)) {
+      imageFile.forEach(file => formData.append('UltraSoundImages', file));
+    } else {
+      formData.append('UltraSoundImages', imageFile);
+    }
+    const response = await api.post('/TestsWithAI/ProcessImage', formData);
     return response.data; // { succeeded, data: { status, classification, images, ... } }
   },
 
@@ -26,13 +28,15 @@ const testService = {
   },
 
   // Validate ultrasound image immediately
-  validateImage: async (imageFile) => {
+  validateImage: async (imageFiles) => {
     const formData = new FormData();
-    formData.append('ImageFile', imageFile);
-    const response = await api.post('/TestsWithAI/ValidateImage', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data; // { succeeded, data: boolean, message: string }
+    if (Array.isArray(imageFiles)) {
+      imageFiles.forEach(file => formData.append('ImageFiles', file));
+    } else {
+      formData.append('ImageFiles', imageFiles);
+    }
+    const response = await api.post('/TestsWithAI/ValidateImage', formData);
+    return response.data; // { succeeded, data: [{ filename, is_ultrasound, confidence, reason, status }], message: string }
   },
   // Compare two diagnostic tests
   compareTests: async (testId1, testId2) => {

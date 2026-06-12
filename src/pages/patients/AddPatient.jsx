@@ -14,7 +14,7 @@ import testService from '../../services/testService';
 
 // --- Sub-components (Moved outside to fix focus issue) ---
 
-const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange }) => (
+const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange, autoComplete = "on" }) => (
   <div className="space-y-1.5">
     <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">{label}</label>
     <div className="relative group">
@@ -22,6 +22,9 @@ const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step
         <Icon className="w-4 h-4" />
       </div>
       <input
+        name={field}
+        id={field}
+        autoComplete={autoComplete}
         type={type}
         step={step}
         placeholder={placeholder}
@@ -86,7 +89,7 @@ const AddPatient = () => {
     thyroidSurgery: false,
     queryHyperthyroid: false,
     nodulePresent: false,
-    ultrasoundImage: null,
+    ultrasoundImages: [],
   });
 
   // --- Persistence Logic ---
@@ -111,7 +114,7 @@ const AddPatient = () => {
 
   useEffect(() => {
     const state = {
-      patientData: { ...patientData, ultrasoundImage: null }, // Don't save binary file
+      patientData: { ...patientData, ultrasoundImages: [] }, // Don't save binary files
       currentStep,
       patientIdStr,
       testId,
@@ -153,27 +156,97 @@ const AddPatient = () => {
   const next = () => { if (validateStep()) setCurrentStep(s => Math.min(4, s + 1)); };
   const prev = () => setCurrentStep(s => Math.max(1, s - 1));
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const imageModelCaption = 'Image validation model / موديل التحقق من الصورة';
 
-    set('ultrasoundImage', file);
+  const removeImage = (indexToRemove) => {
+    const updated = patientData.ultrasoundImages.filter((_, i) => i !== indexToRemove);
+    set('ultrasoundImages', updated);
+    
+    if (updated.length === 0) {
+      setValidationResult(null);
+      return;
+    }
+
+    if (validationResult?.results) {
+      const newResults = validationResult.results.filter((_, i) => i !== indexToRemove);
+      const allValid = newResults.every(r => r.is_ultrasound);
+      
+      if (allValid) {
+        setValidationResult({
+          valid: true,
+          message: 'Verified',
+          userMessageAr: 'جميع الصور مقبولة كصور طبية (موجات فوق صوتية).',
+          userMessageEn: 'All images accepted as medical ultrasound images.',
+          results: newResults
+        });
+      } else {
+        setValidationResult({
+          valid: false,
+          message: 'Invalid',
+          userMessageAr: 'تنبيه: يوجد صور غير صالحة. يرجى حذف الصور التي بجانبها علامة ✖.',
+          userMessageEn: 'Warning: Invalid images detected. Please remove the ones marked with ✖.',
+          backendMessage: 'Invalid images detected',
+          results: newResults
+        });
+      }
+    }
+  };
+
+  const handleImageChange = async (e) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (!newFiles.length) return;
+
+    const allFiles = [...(patientData.ultrasoundImages || []), ...newFiles];
+    set('ultrasoundImages', allFiles);
     setValidationResult(null);
     setIsValidating(true);
 
     try {
-      const res = await testService.validateImage(file);
-      if (res.succeeded && res.data === true) {
-        setValidationResult({ valid: true, message: 'Verified' });
-        toast.success('Image verified');
+      const res = await testService.validateImage(allFiles);
+      if (res.succeeded && Array.isArray(res.data)) {
+        const allValid = res.data.every(r => r.is_ultrasound);
+        
+        if (allValid && res.data.length > 0) {
+          setValidationResult({
+            valid: true,
+            message: 'Verified',
+            userMessageAr: 'جميع الصور مقبولة كصور طبية (موجات فوق صوتية).',
+            userMessageEn: 'All images accepted as medical ultrasound images.',
+            results: res.data
+          });
+          toast.success('Images verified / تم التحقق من الصور');
+        } else {
+          setValidationResult({
+            valid: false,
+            message: 'Invalid',
+            userMessageAr: 'تنبيه: يوجد صور غير صالحة ولا تعتبر صور موجات فوق صوتية طبية. يرجى حذف الصور التي بجانبها علامة ✖.',
+            userMessageEn: 'Warning: Some images are not valid medical ultrasound scans. Please remove the ones marked with ✖.',
+            backendMessage: 'Invalid images detected',
+            results: res.data
+          });
+          toast.error('Invalid image(s) / يوجد صور غير طبية');
+        }
       } else {
-        setValidationResult({ valid: false, message: res.message || 'Invalid' });
-        toast.error('Not an ultrasound');
+        setValidationResult({
+          valid: false,
+          message: 'Error',
+          userMessageAr: 'الرد من السيرفر غير متوقع.',
+          userMessageEn: 'Unexpected server response.',
+        });
+        toast.error('Validation request failed');
       }
     } catch (err) {
-      setValidationResult({ valid: false, message: 'Error' });
+      setValidationResult({
+        valid: false,
+        message: 'Error',
+        userMessageAr: 'تعذر تشغيل موديل التحقق من الصورة. حاول مرة أخرى. ' + (err.response?.status || err.message),
+        userMessageEn: 'Could not run the image validation model. Please try again. ' + (err.response?.status || err.message),
+        backendMessage: typeof err.response?.data === 'object' ? JSON.stringify(err.response?.data) : String(err.response?.data || err.message)
+      });
+      toast.error('Validation request failed');
     } finally {
       setIsValidating(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -234,16 +307,16 @@ const AddPatient = () => {
   };
 
   const handleImageSubmit = async () => {
-    if (!validationResult?.valid || !patientData.ultrasoundImage) {
-      toast.error('Valid image required');
+    if (!validationResult?.valid || !patientData.ultrasoundImages?.length) {
+      toast.error('Valid ultrasound image required / مطلوب صورة موجات فوق صوتية صالحة');
       return;
     }
 
     setIsProcessingImage(true);
     try {
-      const imgRes = await testService.processImage(testId, patientData.ultrasoundImage);
+      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages);
       if (imgRes.succeeded) {
-        toast.success('Diagnosis complete');
+        toast.success('Diagnosis complete / اكتمل التشخيص');
         localStorage.removeItem('thyrocare_active_diagnosis'); // Clear upon completion
         navigate(`/patients/${patientIdStr}/dashboard?view=results`);
       } else {
@@ -312,20 +385,21 @@ const AddPatient = () => {
 
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
-            <motion.div
+            <motion.form
               key="s1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onSubmit={e => { e.preventDefault(); next(); }}
               className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6"
             >
               <div className="grid md:grid-cols-2 gap-6">
-                <InputField label="Full Name" field="fullName" icon={User} placeholder="e.g. John Doe" value={patientData.fullName} onChange={set} />
-                <InputField label="Age" field="age" type="number" icon={Calendar} placeholder="1-120" value={patientData.age} onChange={set} />
+                <InputField label="Full Name" field="fullName" autoComplete="name" icon={User} placeholder="e.g. John Doe" value={patientData.fullName} onChange={set} />
+                <InputField label="Age" field="age" autoComplete="off" type="number" icon={Calendar} placeholder="1-120" value={patientData.age} onChange={set} />
               </div>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Gender</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><User className="w-4 h-4" /></div>
-                    <select value={patientData.gender} onChange={e => set('gender', e.target.value)}
+                    <select name="gender" value={patientData.gender} onChange={e => set('gender', e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary">
                       <option value="">Select</option>
                       <option value="male">Male</option>
@@ -337,10 +411,12 @@ const AddPatient = () => {
                 <InputField label="Weight (kg)" field="weight" type="number" icon={Weight} placeholder="70" value={patientData.weight} onChange={set} />
               </div>
               <div className="grid md:grid-cols-2 gap-6">
-                <InputField label="Phone" field="phone" icon={Phone} placeholder="01XXXXXXXXX" value={patientData.phone} onChange={set} />
-                <InputField label="Address" field="address" icon={MapPin} placeholder="City, Street..." value={patientData.address} onChange={set} />
+                <InputField label="Phone" field="phone" autoComplete="tel" icon={Phone} placeholder="01XXXXXXXXX" value={patientData.phone} onChange={set} />
+                <InputField label="Address" field="address" autoComplete="address-line1" icon={MapPin} placeholder="City, Street..." value={patientData.address} onChange={set} />
               </div>
-            </motion.div>
+              {/* Hidden submit button to allow Enter key submission */}
+              <button type="submit" className="hidden">Submit</button>
+            </motion.form>
           )}
 
           {currentStep === 2 && (
@@ -439,22 +515,45 @@ const AddPatient = () => {
                       <p className="text-xs opacity-80">High risk detected. Upload scan to continue.</p>
                     </div>
                   </div>
+
+                  {validationResult && (
+                    <div
+                      className={`mb-4 rounded-2xl p-4 border text-sm ${validationResult.valid
+                        ? 'bg-emerald-500/20 border-emerald-300/40 text-emerald-50'
+                        : 'bg-red-600/25 border-red-300/40 text-white'
+                        }`}
+                    >
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-90 mb-2">{imageModelCaption}</p>
+                      <p className="font-bold leading-relaxed">{validationResult.userMessageAr}</p>
+                      <p className="mt-2 text-xs opacity-90 leading-relaxed">{validationResult.userMessageEn}</p>
+                      {!validationResult.valid && validationResult.backendMessage && (
+                        <p className="mt-2 text-[11px] font-mono opacity-80 border-t border-white/20 pt-2">{validationResult.backendMessage}</p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="bg-white/10 rounded-2xl p-2 border border-white/20">
-                    {patientData.ultrasoundImage ? (
-                      <div className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : validationResult?.valid ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        <div className="flex items-center gap-3">
-                          {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : <CheckCircle2 className="w-6 h-6" />}
-                          <span className="text-xs font-bold truncate max-w-[150px]">{patientData.ultrasoundImage.name}</span>
-                        </div>
-                        <button onClick={() => { set('ultrasoundImage', null); setValidationResult(null); }}><X size={16} /></button>
+                    {patientData.ultrasoundImages?.length > 0 && (
+                      <div className="space-y-2 mb-2">
+                        {patientData.ultrasoundImages.map((img, i) => {
+                          const isImgValid = validationResult?.results ? validationResult.results[i]?.is_ultrasound : true;
+                          return (
+                          <div key={i} className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
+                            <div className="flex items-center gap-3">
+                              {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : (isImgValid) ? <CheckCircle2 className="w-6 h-6 text-green-300" /> : <X className="w-6 h-6 text-red-300" />}
+                              <span className="text-xs font-bold truncate max-w-[150px]">{img.name}</span>
+                            </div>
+                            <button type="button" onClick={() => removeImage(i)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"><X size={16} /></button>
+                          </div>
+                          );
+                        })}
                       </div>
-                    ) : (
-                      <button onClick={() => fileInputRef.current?.click()} className="w-full py-10 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/5 transition-all">
-                        <Upload size={24} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Select Scan</span>
-                      </button>
                     )}
-                    <input ref={fileInputRef} type="file" className="hidden" onChange={handleImageChange} />
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full py-6 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/5 transition-all">
+                      <Upload size={24} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{patientData.ultrasoundImages?.length > 0 ? 'Add more images / إضافة صور أخرى' : 'Select Scans'}</span>
+                    </button>
+                    <input ref={fileInputRef} type="file" multiple className="hidden" accept="image/*" onChange={handleImageChange} />
                   </div>
                 </div>
               ) : (
