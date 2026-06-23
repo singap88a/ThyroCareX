@@ -4,6 +4,7 @@ import { ArrowLeft, Mail, MapPin, Calendar, CreditCard, Activity, Phone, User, F
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import adminService from '../../../services/adminService';
 import patientService from '../../../services/patientService';
+import { BASE_URL } from '../../../config.js';
 
 const DoctorDetailsPage = () => {
   const { id } = useParams();
@@ -53,7 +54,7 @@ const DoctorDetailsPage = () => {
                 date: new Date(p.registrationAt).toLocaleDateString(),
                 result: p.latestStatus || 'Uncertain',
                 confidence: p.riskConfidence || 0,
-                image: p.attachmentPath ? (p.attachmentPath.startsWith('http') ? p.attachmentPath : `https://thyrocarex.runasp.net/${p.attachmentPath}`) : 'https://ui-avatars.com/api/?name=' + p.fullName,
+                image: p.attachmentPath ? (p.attachmentPath.startsWith('http') ? p.attachmentPath : `${BASE_URL}/${p.attachmentPath}`) : 'https://ui-avatars.com/api/?name=' + p.fullName,
                 notes: p.medicalHistory || 'No notes available.'
             }));
             setPatients(mappedPatients);
@@ -139,7 +140,7 @@ const DoctorDetailsPage = () => {
                <div className="relative w-32 h-32 rounded-3xl p-1 bg-white dark:bg-gray-800 shadow-lg mb-4">
                   <img 
                     src={doctor.profileImage && doctor.profileImage !== 'default-doctor.png' 
-                        ? (doctor.profileImage.startsWith('http') ? doctor.profileImage : `https://thyrocarex.runasp.net/${doctor.profileImage}`) 
+                        ? (doctor.profileImage.startsWith('http') ? doctor.profileImage : `${BASE_URL}/${doctor.profileImage}`) 
                         : `https://ui-avatars.com/api/?name=${doctor.name}&background=random`} 
                     alt={doctor.name} 
                     className="w-full h-full rounded-2xl object-cover"
@@ -214,10 +215,10 @@ const DoctorDetailsPage = () => {
                {doctor.identificationImage || doctor.imagePath ? (
                    <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
                        <img 
-                           src={`https://thyrocarex.runasp.net/${doctor.identificationImage || doctor.imagePath}`} 
+                           src={`${BASE_URL}/${doctor.identificationImage || doctor.imagePath}`} 
                            alt="ID Document" 
                            className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
-                           onClick={() => window.open(`https://thyrocarex.runasp.net/${doctor.identificationImage || doctor.imagePath}`, '_blank')}
+                           onClick={() => window.open(`${BASE_URL}/${doctor.identificationImage || doctor.imagePath}`, '_blank')}
                        />
                    </div>
                ) : (

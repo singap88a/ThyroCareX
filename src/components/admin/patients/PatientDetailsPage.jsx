@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import adminService from '../../../services/adminService';
 import ThyroidDiagnosisView from '../../diagnosis/ThyroidDiagnosisView';
+import { BASE_URL } from '../../../config.js';
 
 const PatientDetailsPage = () => {
   const { id } = useParams();
@@ -343,7 +344,7 @@ const TestCard = ({ test, isDarkMode, index, onClick }) => (
       <div className="w-full md:w-32 h-32 rounded-2xl overflow-hidden bg-gray-200 relative group">
         {test.imagePath ? (
           <img 
-            src={test.imagePath.startsWith('http') ? test.imagePath : `https://thyrocarex.runasp.net/${test.imagePath}`} 
+            src={test.imagePath.startsWith('http') ? test.imagePath : `${BASE_URL}/${test.imagePath}`} 
             alt="Scan" 
             className="w-full h-full object-cover transition-transform group-hover:scale-110"
           />

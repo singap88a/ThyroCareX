@@ -4,6 +4,7 @@ import { Mail, Search, Clock, CheckCircle, XCircle, Eye, ExternalLink, Trash2, S
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
+import { BASE_URL } from '../../../config.js';
 
 const ContactMessagesManager = () => {
   const { isDarkMode } = useAdminTheme();
@@ -11,7 +12,7 @@ const ContactMessagesManager = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const baseURL = "https://thyrocarex.runasp.net/"; // Adjust as needed for your backend image base
+  const baseURL = BASE_URL; // Adjust as needed for your backend image base
 
   const fetchMessages = async () => {
     setLoading(true);

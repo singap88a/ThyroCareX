@@ -9,8 +9,7 @@ import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import adminService from '../../../services/adminService';
 import DeleteConfirmationModal from '../../community/DeleteConfirmationModal';
 import { toast } from 'react-hot-toast';
-
-const BASE_URL = 'https://thyrocarex.runasp.net';
+import { BASE_URL } from '../../../config.js';
 
 const PostAdminCard = ({ post, onDelete }) => {
   const { isDarkMode } = useAdminTheme();

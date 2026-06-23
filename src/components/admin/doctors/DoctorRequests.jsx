@@ -6,6 +6,7 @@ import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 
 import adminService from '../../../services/adminService';
 import toast from 'react-hot-toast';
+import { BASE_URL } from '../../../config.js';
 
 const DoctorRequests = () => {
   const { isDarkMode } = useAdminTheme();
@@ -351,7 +352,7 @@ const DoctorRequests = () => {
                          <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Identity Document</h3>
                          <div className="border rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800 flex justify-center p-4">
                              <img 
-                                src={`https://thyrocarex.runasp.net/${selectedRequest.imagePath}`} 
+                                src={`${BASE_URL}/${selectedRequest.imagePath}`} 
                                 alt="Identity" 
                                 className="max-w-full h-auto max-h-64 object-contain rounded"
                                 onError={(e) => {e.target.style.display='none'}}

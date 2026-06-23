@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Activity, MoreVertical, Shield, Ban, CheckCircle, Trash2, Stethoscope } from 'lucide-react';
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
+import { BASE_URL } from '../../../config.js';
 
 const DoctorCard = ({ doctor, onEdit, onToggleStatus, onDelete }) => {
   const { isDarkMode } = useAdminTheme();
@@ -85,7 +86,7 @@ const DoctorCard = ({ doctor, onEdit, onToggleStatus, onDelete }) => {
             <img 
               src={
                 doctor.profileImage && doctor.profileImage !== 'default-doctor.png' 
-                  ? (doctor.profileImage.startsWith('http') ? doctor.profileImage : `https://thyrocarex.runasp.net/${doctor.profileImage}`)
+                  ? (doctor.profileImage.startsWith('http') ? doctor.profileImage : `${BASE_URL}/${doctor.profileImage}`)
                   : `https://ui-avatars.com/api/?name=${doctor.name}&background=random`
               } 
               alt={doctor.name} 

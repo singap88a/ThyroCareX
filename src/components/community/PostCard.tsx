@@ -6,8 +6,7 @@ import {
 import api from '../../services/api';
 import { parseJwt } from '../../utils/jwt';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-
-const BASE_URL = 'https://thyrocarex.runasp.net';
+import { BASE_URL } from '../../config.js';
 
 interface Comment {
   commentId: number;

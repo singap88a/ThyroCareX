@@ -29,6 +29,7 @@ import doctorService from '../../services/doctorService';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { BASE_URL } from '../../config.js';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('personal');
@@ -328,7 +329,7 @@ const Profile = () => {
                     <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
                         {profileData.profileImage || profileData.previewImage ? (
                             <img 
-                                src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
+                                src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`)} 
                                 alt="Profile" 
                                 className="w-full h-full object-cover"
                                 onError={(e) => {e.target.style.display='none';}} 
@@ -353,7 +354,7 @@ const Profile = () => {
                   <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
                       {profileData.profileImage || profileData.previewImage ? (
                           <img 
-                              src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `https://thyrocarex.runasp.net/${profileData.profileImage}`)} 
+                              src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`)} 
                               alt="Profile" 
                               className="w-full h-full object-cover"
                               onError={(e) => {e.target.style.display='none';}}

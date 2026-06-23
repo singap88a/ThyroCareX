@@ -8,6 +8,7 @@ import {
 import { useAdminTheme } from '../../../contexts/AdminThemeContext';
 import adminService from '../../../services/adminService';
 import toast from 'react-hot-toast';
+import { BASE_URL } from '../../../config.js';
 
 const ContactMessages = () => {
   const { isDarkMode } = useAdminTheme();
@@ -17,7 +18,7 @@ const ContactMessages = () => {
   const [filterType, setFilterType] = useState('all'); // all, pending, replied
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [messageToDelete, setMessageToDelete] = useState(null);
-  const baseURL = "https://thyrocarex.runasp.net/"; 
+  const baseURL = BASE_URL; 
 
   const fetchMessages = async () => {
     setLoading(true);
