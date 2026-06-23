@@ -14,7 +14,7 @@ import testService from '../../services/testService';
 
 // --- Sub-components (Moved outside to fix focus issue) ---
 
-const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange, autoComplete = "on" }) => (
+const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange, autoComplete = "on", inputClassName = "py-2.5" }) => (
   <div className="space-y-1.5">
     <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">{label}</label>
     <div className="relative group">
@@ -30,7 +30,7 @@ const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step
         placeholder={placeholder}
         value={value || ''}
         onChange={e => onChange(field, e.target.value)}
-        className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none transition-all duration-200 font-bold text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-sm"
+        className={`w-full pl-10 pr-4 ${inputClassName} bg-gray-50/50 border border-gray-100 rounded-xl outline-none transition-all duration-200 font-bold text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-sm`}
       />
     </div>
   </div>
@@ -424,9 +424,33 @@ const AddPatient = () => {
               key="s2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-4"
             >
-              <textarea rows={4} placeholder="Medical History..." value={patientData.medicalHistory} onChange={e => set('medicalHistory', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
-              <textarea rows={3} placeholder="Current Medications..." value={patientData.currentMedications} onChange={e => set('currentMedications', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
-              <textarea rows={2} placeholder="Known Allergies..." value={patientData.allergies} onChange={e => set('allergies', e.target.value)} className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary resize-none" />
+              <InputField
+                label="Medical History"
+                field="medicalHistory"
+                icon={ClipboardList}
+                placeholder="Medical History..."
+                value={patientData.medicalHistory}
+                onChange={set}
+                inputClassName="py-4"
+              />
+              <InputField
+                label="Current Medications"
+                field="currentMedications"
+                icon={Pill}
+                placeholder="Current Medications..."
+                value={patientData.currentMedications}
+                onChange={set}
+                inputClassName="py-4"
+              />
+              <InputField
+                label="Known Allergies"
+                field="allergies"
+                icon={AlertTriangle}
+                placeholder="Known Allergies..."
+                value={patientData.allergies}
+                onChange={set}
+                inputClassName="py-4"
+              />
             </motion.div>
           )}
 

@@ -234,6 +234,7 @@ const Profile = () => {
         if (response.succeeded) {
             toast.success("Profile Updated Successfully");
             setIsEditing(false);
+            window.dispatchEvent(new Event('profileUpdated'));
         } else {
             toast.error(response.message || "Could not update profile");
         }
@@ -327,16 +328,12 @@ const Profile = () => {
                   <>
                   <label htmlFor="profile-image-upload" className="cursor-pointer">
                     <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
-                        {profileData.profileImage || profileData.previewImage ? (
-                            <img 
-                                src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`)} 
-                                alt="Profile" 
-                                className="w-full h-full object-cover"
-                                onError={(e) => {e.target.style.display='none';}} 
-                            />
-                        ) : (
-                            <User className="w-12 h-12 text-white" />
-                        )}
+                        <img 
+                            src={profileData.previewImage || (profileData.profileImage ? (profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || user?.firstName || 'Doctor')}&background=0D8ABC&color=fff&size=150`)} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || user?.firstName || 'Doctor')}&background=0D8ABC&color=fff&size=150`;}} 
+                        />
                     </div>
                     <div className="absolute flex items-center justify-center w-10 h-10 transition-all duration-200 bg-white shadow-md rounded-xl -bottom-2 -right-2 hover:bg-slate-50 group-hover:scale-110 hover:shadow-lg">
                         <Camera className="w-5 h-5 text-gray-600" />
@@ -352,16 +349,12 @@ const Profile = () => {
                   </>
               ) : (
                   <div className="flex items-center justify-center shadow-lg w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-[#00A2C2] overflow-hidden relative">
-                      {profileData.profileImage || profileData.previewImage ? (
-                          <img 
-                              src={profileData.previewImage || (profileData.profileImage && profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`)} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {e.target.style.display='none';}}
-                          />
-                      ) : (
-                          <User className="w-12 h-12 text-white" />
-                      )}
+                      <img 
+                          src={profileData.previewImage || (profileData.profileImage ? (profileData.profileImage.startsWith('http') ? profileData.profileImage : `${BASE_URL}/${profileData.profileImage}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || user?.firstName || 'Doctor')}&background=0D8ABC&color=fff&size=150`)} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || user?.firstName || 'Doctor')}&background=0D8ABC&color=fff&size=150`;}}
+                      />
                   </div>
               )}
             </div>

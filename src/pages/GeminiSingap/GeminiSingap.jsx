@@ -10,6 +10,10 @@ const GeminiSingap = ({ darkMode = false }) => {
   const typingIntervalsRef = useRef({});
   const chatContainerRef = useRef(null);
   const abortControllerRef = useRef(null);
+  // Typewriter queue: incoming chunks are buffered here, drained char-by-char
+  const charQueueRef = useRef([]);
+  const typewriterIntervalRef = useRef(null);
+  const isStreamDoneRef = useRef(false);
 
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -40,16 +44,16 @@ const GeminiSingap = ({ darkMode = false }) => {
   // Suggestions
   const suggestions = [
     {
-      text: "What are the best tips to improve my public speaking skills?",
+      text: "What are the early symptoms of thyroid disorders I should watch for in my patients?",
       icon: <FaLightbulb className="text-xl" />,
     },
     {
-      text: "Can you help me find the latest news on web development?",
+      text: "How do I interpret TSH, T3, and T4 levels in a thyroid function panel?",
       icon: <FaSearch className="text-xl" />,
     },
     {
-      text: "Write JavaScript code to sum all elements in an array.",
-      icon: <FaCode className="text-xl" />,
+      text: "What is the difference between hypothyroidism and hyperthyroidism in terms of treatment?",
+      icon: <FaBrain className="text-xl" />,
     },
   ];
 
@@ -61,6 +65,14 @@ const GeminiSingap = ({ darkMode = false }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+    }
+
+    // Stop typewriter and clear queue
+    charQueueRef.current = [];
+    isStreamDoneRef.current = true;
+    if (typewriterIntervalRef.current) {
+      clearInterval(typewriterIntervalRef.current);
+      typewriterIntervalRef.current = null;
     }
 
     // Clear any typing intervals
@@ -140,30 +152,69 @@ const GeminiSingap = ({ darkMode = false }) => {
       setShowHeader(false);
       setIsGenerating(true);
 
-      // Add AI placeholder
-      setTimeout(() => {
-        setChats((prev) => [...prev, { role: "ai", content: "", loading: true }]);
-        
-      // Send to AI API and get response
-      const history = chats.map(c => ({ role: c.role === "ai" ? "assistant" : "user", content: c.content }));
-      
-      aiService.chat(userMessage, sessionId, history, selectedImage)
-        .then(data => {
-          if (data && data.succeeded) {
-            simulateTypingEffect(data.data.response);
-          } else {
-            throw new Error(data.message || "Invalid response from AI");
+      // Reset typewriter state
+      charQueueRef.current = [];
+      isStreamDoneRef.current = false;
+      if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+
+      // Add AI placeholder immediately with loading state
+      setChats((prev) => [...prev, { role: "ai", content: "", loading: true }]);
+
+      // Start typewriter interval — drains charQueue char-by-char at 20ms
+      typewriterIntervalRef.current = setInterval(() => {
+        if (charQueueRef.current.length > 0) {
+          const char = charQueueRef.current.shift();
+          setChats((prevChats) => {
+            const updated = [...prevChats];
+            const lastIndex = updated.findLastIndex((msg) => msg.role === "ai");
+            if (lastIndex !== -1) {
+              updated[lastIndex] = {
+                ...updated[lastIndex],
+                loading: false,
+                content: updated[lastIndex].content + char
+              };
+            }
+            return updated;
+          });
+        } else if (isStreamDoneRef.current) {
+          // Queue empty and stream finished — stop the interval
+          clearInterval(typewriterIntervalRef.current);
+          typewriterIntervalRef.current = null;
+          setIsGenerating(false);
+        }
+      }, 20);
+
+      // Create an AbortController for stopping the stream
+      abortControllerRef.current = new AbortController();
+
+      // Start streaming response — chunks go into the queue, typewriter drains them
+      aiService.chatStream(
+        userMessage,
+        sessionId,
+        abortControllerRef.current.signal,
+        (chunk) => {
+          // onChunk — push each character of the chunk into the queue
+          for (const char of chunk) {
+            charQueueRef.current.push(char);
           }
-        })
-        .catch(err => {
+        },
+        (err) => {
+          // onError
+          if (err.name === 'AbortError') {
+            console.log('Stream aborted by user');
+            setIsGenerating(false);
+            return;
+          }
           console.error("Chat Error:", err);
           let errorMessage = "Sorry, I encountered an error. Please try again.";
           
-          if (err.response?.status === 403) {
+          if (err.message === "403") {
             errorMessage = "⚠️ Access Denied: You need an active subscription to use the AI medical assistant.";
             setIsSubscribed(false);
-          } else if (err.response?.status === 401) {
+          } else if (err.message === "401") {
             errorMessage = "Please login to use the AI assistant.";
+          } else if (err.message && err.message !== "Network response was not ok") {
+            errorMessage = err.message;
           }
 
           setChats((prev) => {
@@ -174,56 +225,26 @@ const GeminiSingap = ({ darkMode = false }) => {
             }
             return updated;
           });
+          // On error: clear queue and stop typewriter
+          charQueueRef.current = [];
+          isStreamDoneRef.current = true;
+          clearInterval(typewriterIntervalRef.current);
+          typewriterIntervalRef.current = null;
           setIsGenerating(false);
-        });
-      }, 300);
+        },
+        () => {
+          // onComplete — mark stream done; typewriter will stop itself when queue empties
+          isStreamDoneRef.current = true;
+        }
+      );
 
       removeImage();
     },
     [inputValue, isGenerating, chats, selectedImage, sessionId]
   );
 
-  // Simulate typing
-  const simulateTypingEffect = useCallback(
-    (text) => {
-      let index = 0;
-      const intervalId = Symbol();
+  // Typing simulation is no longer needed since we use SSE streaming directly.
 
-      setChats((prevChats) => {
-        const updated = [...prevChats];
-        const lastIndex = updated.findLastIndex((msg) => msg.role === "ai");
-        if (lastIndex !== -1) updated[lastIndex] = { ...updated[lastIndex], loading: false };
-        return updated;
-      });
-
-      typingIntervalsRef.current[intervalId] = setInterval(() => {
-        if (isTypingStopped) {
-          clearInterval(typingIntervalsRef.current[intervalId]);
-          delete typingIntervalsRef.current[intervalId];
-          setIsGenerating(false);
-          return;
-        }
-
-        setChats((prevChats) => {
-          if (index >= text.length) {
-            clearInterval(typingIntervalsRef.current[intervalId]);
-            delete typingIntervalsRef.current[intervalId];
-            setIsGenerating(false);
-            return prevChats;
-          }
-
-          const updated = [...prevChats];
-          const lastIndex = updated.findLastIndex((msg) => msg.role === "ai");
-          if (lastIndex !== -1) {
-            updated[lastIndex] = { ...updated[lastIndex], content: text.substring(0, index + 1) };
-            index++;
-          }
-          return updated;
-        });
-      }, 15); // Faster typing
-    },
-    [isTypingStopped]
-  );
 
   // Handle suggestion click
   const handleSuggestionClick = useCallback((text) => {

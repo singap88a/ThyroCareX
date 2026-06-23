@@ -20,12 +20,15 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationContext";
+import doctorService from "../../services/doctorService";
+import { BASE_URL } from "../../config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const location = useLocation();
   const { isLoggedIn, user, logout } = useAuth();
   const { unreadCount, notifications, markAllAsRead } = useNotifications();
@@ -59,6 +62,33 @@ const Navbar = () => {
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [profileDropdown, notifDropdown]);
+
+  const fetchProfileImage = async () => {
+    if (isLoggedIn) {
+      try {
+        const response = await doctorService.getProfile();
+        if (response?.succeeded && response.data?.profileImage) {
+          const imgUrl = response.data.profileImage;
+          setProfileImage(imgUrl.startsWith('http') ? imgUrl : `${BASE_URL}/${imgUrl}`);
+        } else {
+          setProfileImage(null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile image for navbar", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileImage();
+    
+    const handleProfileUpdate = () => {
+      fetchProfileImage();
+    };
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, [isLoggedIn]);
 
   const navLinks = [
     { path: "/", label: "Home", icon: FaHome },
@@ -139,8 +169,12 @@ const Navbar = () => {
                     onClick={() => setProfileDropdown(!profileDropdown)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50/80"
                   >
-                    <div className="flex items-center justify-center rounded-full shadow-md w-9 h-9 bg-primary ring-2 ring-primary/20">
-                      <FaUser className="w-4 h-4 text-white" />
+                    <div className="flex items-center justify-center rounded-full shadow-md w-9 h-9 bg-primary ring-2 ring-primary/20 overflow-hidden">
+                      {profileImage ? (
+                        <img src={profileImage} alt="Profile" className="w-full h-full object-cover" onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || user?.username || 'Doctor')}&background=0D8ABC&color=fff&size=100`;}} />
+                      ) : (
+                        <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || user?.username || 'Doctor')}&background=0D8ABC&color=fff&size=100`} alt="Profile" className="w-full h-full object-cover" />
+                      )}
                     </div>
                     <span className="hidden xl:block font-medium text-sm text-gray-700 max-w-[60px] truncate">
                       {getShortUserName()}
