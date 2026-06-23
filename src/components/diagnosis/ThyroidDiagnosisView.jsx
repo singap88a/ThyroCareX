@@ -5,7 +5,7 @@ import {
   TrendingUp, TrendingDown, Download, Share2, Printer, Clock,
   Brain, ChevronRight, BarChart3, FileText, Stethoscope,
   Target as TargetIcon, Shield, Smartphone, Zap, MapPin,
-  FlaskConical, Microscope, Scan, Info, History, Upload, X, Loader2
+  FlaskConical, Microscope, Scan, Info, History, Upload, X, Loader2, Image as ImageIcon
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,28 +14,15 @@ import 'aos/dist/aos.css';
 import toast from 'react-hot-toast';
 import testService from '../../services/testService';
 import patientService from '../../services/patientService';
-
-const DISEASE_LOCATION_MAP = {
-  1: { position: { x: -0.40, y: -0.5, z: 0.3 }, label: "Thyroid Center" },
-  2: { position: { x: 0.5, y: 0.2, z: 0.25 }, label: "Right Lobe - Superior" },
-  3: { position: { x: 0.6, y: 0, z: 0.3 }, label: "Right Lobe - Middle" },
-  4: { position: { x: 0.5, y: -0.2, z: 0.25 }, label: "Right Lobe - Inferior" },
-  5: { position: { x: -0.5, y: 0.2, z: 0.25 }, label: "Left Lobe - Superior" },
-  6: { position: { x: -0.6, y: 0, z: 0.3 }, label: "Left Lobe - Middle" },
-  7: { position: { x: -0.5, y: -0.2, z: 0.25 }, label: "Left Lobe - Inferior" },
-  8: { position: { x: 0, y: 0.15, z: 0.2 }, label: "Isthmus" },
-};
+import { BASE_URL } from '../../config';
 
 const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, dashboardMode = false, testId = null }) => {
   const { id: paramPatientId } = useParams();
   const patientId = propPatientId || paramPatientId;
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [loading, setLoading] = useState(!initialData);
-  const [is3DLoaded, setIs3DLoaded] = useState(false);
   const [rawTestData, setRawTestData] = useState(null);
 
   // --- Image Upload State ---
@@ -43,17 +30,50 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
   const [isValidating, setIsValidating] = useState(false);
   const [validationResults, setValidationResults] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [webGLError, setWebGLError] = useState(false);
+  const [expandedImageDetails, setExpandedImageDetails] = useState({});
+
+  const toggleImageDetails = (idx) => {
+    setExpandedImageDetails(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
 
   const processDiagnosisData = (data, history, patientData = null) => {
     const latestTest = data;
     const diag = latestTest.diagnosisResult;
-    let extra = {};
+    let extra = null;
+    let imagePredictions = [];
+    let clinicalExtra = null;
+
     if (diag?.rawResponse) {
       try {
         extra = JSON.parse(diag.rawResponse);
+        
+        // If it's an array, it's definitely ImagePredictions
+        if (Array.isArray(extra)) {
+          imagePredictions = extra;
+        } 
+        // If it's an object with 'model_confidence' or 'functionalStatus', it's Clinical
+        else if (extra && (extra.model_confidence !== undefined || extra.modelConfidence !== undefined || extra.FunctionalStatus)) {
+          clinicalExtra = extra;
+        }
+        // Otherwise, if it has 'filename' or 'classification', it's a single Image Prediction
+        else if (extra && typeof extra === 'object') {
+          imagePredictions = [extra];
+        }
       } catch (e) { }
     }
+
+    const originalImageUrls = (latestTest.imagePath || latestTest.ImagePath)?.split(',').filter(i => i) || [];
+
+    // Ensure imagePredictions map correctly to their original URLs if possible
+    imagePredictions = imagePredictions.map((pred, idx) => {
+        return {
+            ...pred,
+            original_url: originalImageUrls[idx] || null
+        };
+    });
 
     return {
       testId: latestTest.id,
@@ -69,24 +89,18 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
               ? 'Female'
               : (latestTest.patient?.gender === 1 ? 'Male' : 'Female'))
       },
-      diagnosisSummary: {
-        status: (diag?.classificationLabel || diag?.riskLevel || extra.functional_status || extra.classification?.label || 'PENDING').toUpperCase(),
-        confidence: extra.model_confidence ? (extra.model_confidence * 100).toFixed(1) : (extra.classification?.confidence_pct || diag?.confidence || 0),
-        thyroidCondition: diag?.functionalStatus || extra.functional_status || (extra.classification?.label ? `Ultrasound: ${extra.classification.label}` : 'Thyroid Assessment'),
-        severity: diag?.riskLevel || extra.risk_level || extra.classification?.risk_level || 'TBD',
-        riskLevel: diag?.riskLevel || extra.risk_level || extra.classification?.risk_level || 'TBD',
-        clinicalRecommendation: diag?.clinicalRecommendation || extra.clinical_recommendation || extra.classification?.clinical_recommendation || 'Standard clinical follow-up recommended.',
-        aiRecommendation: extra.ai_recommendation || diag?.fnacRecommendation || null,
-        urgency: (diag?.riskLevel || extra.risk_level || extra.classification?.risk_level || '').toLowerCase().includes('high') ? 'HIGH' : 'NORMAL',
-        nextStep: diag?.nextStep || extra.next_step || 'Consult with endocrinologist',
-        needsManualReview: extra.needs_manual_review || (extra.classification?.confidence_pct < 60) || false,
-        tirads: diag?.tiradsStage || extra.classification?.acr_tirads_level || 'TBD'
-      },
-      images: {
-        original: (latestTest.imagePath || latestTest.ImagePath)?.split(',').filter(i => i) || [],
-        overlay: (diag?.overlayImageUrl || extra.images?.overlay_url)?.split(/,(?=[Ii]mages|http|\/|data:image)/).filter(i => i) || [],
-        mask: (diag?.maskImageUrl || extra.images?.mask_url)?.split(/,(?=[Ii]mages|http|\/|data:image)/).filter(i => i) || [],
-        roi: (diag?.roiImageUrl || extra.images?.roi_url)?.split(/,(?=[Ii]mages|http|\/|data:image)/).filter(i => i) || []
+      imagePredictions, // New array for multi-image logic
+      clinicalAssessment: {
+        functionalStatus: diag?.functionalStatus || 'N/A',
+        riskLevel: diag?.riskLevel || 'N/A',
+        clinicalRecommendation: diag?.clinicalRecommendation || 'N/A',
+        nextStep: diag?.nextStep || 'N/A',
+        label: diag?.classificationLabel || 'Pending Imaging',
+        confidence: clinicalExtra?.model_confidence || clinicalExtra?.modelConfidence || diag?.confidence || 0,
+        probabilities: clinicalExtra?.probabilities || null,
+        aiRecommendation: clinicalExtra?.ai_recommendation || clinicalExtra?.aiRecommendation || null,
+        needsManualReview: clinicalExtra?.needs_manual_review !== undefined ? clinicalExtra?.needs_manual_review : null,
+        nextStepDetails: clinicalExtra?.next_step_details || clinicalExtra?.nextStepDetails || null
       },
       labs: {
         tsh: latestTest.tsh || latestTest.TSH,
@@ -95,28 +109,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
         fti: latestTest.fti || latestTest.FTI,
         t4u: latestTest.t4u || latestTest.T4U || latestTest.t4U
       },
-      probabilities: extra.probabilities || extra.Probabilities || {},
-      fnac: {
-        category: diag?.bethesdaCategory,
-        label: diag?.bethesdaLabel,
-        risk: diag?.malignancyRisk
-      },
-      aiMetrics: extra.metrics || {
-        accuracy: 96.3,
-        sensitivity: 94.8,
-        specificity: 97.1,
-        processingTime: extra.processing_time || "2.4s"
-      },
-      diseaseLocation: extra.disease_location || extra.location_index || 1,
-      noduleAnalysis: extra.nodules || [
-        {
-          id: 1,
-          size: extra.nodule_size || "1.8cm",
-          location: "Detected Nodule",
-          tirads: diag?.tiradsStage || extra.classification?.acr_tirads_level || "TBD",
-          risk: extra.classification?.confidence_pct || diag?.confidence || 0
-        }
-      ],
       timeline: history ? history.map(t => ({
         date: new Date(t.testDate || t.createdAt).toLocaleDateString(),
         status: t.diagnosisResult?.classificationLabel || t.diagnosisResult?.functionalStatus || 'ASSESSED'
@@ -165,7 +157,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     AOS.init({ duration: 1000, once: true });
   }, []);
 
-  // --- Image Handling Logic ---
   const onDrop = async (acceptedFiles) => {
     if (!acceptedFiles || acceptedFiles.length === 0) return;
 
@@ -179,7 +170,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
         const results = res.data.map((r, i) => ({ fileName: acceptedFiles[i].name, valid: r.is_ultrasound }));
         const allValid = results.every(r => r.valid);
         setValidationResults(prev => {
-          // Remove any previous results with the same names to avoid duplicates
           const filtered = prev.filter(p => !results.find(nr => nr.fileName === p.fileName));
           return [...filtered, ...results];
         });
@@ -191,8 +181,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
         }
       } else {
         toast.error('Validation process failed: Invalid response');
-        // Optional fallback: assume valid if backend validation fails unexpectedly
-        // setValidationResults(prev => [...prev, ...acceptedFiles.map(f => ({fileName: f.name, valid: true}))]);
       }
     } catch (err) {
       toast.error('Validation process failed');
@@ -210,7 +198,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { 'image/*': [] },
-    noClick: selectedImages && selectedImages.length > 0, // Disable root click if images are already selected so users can click remove icons
+    noClick: selectedImages && selectedImages.length > 0,
   });
 
   const handleImageSubmit = async () => {
@@ -233,7 +221,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
         toast.success('AI Image Diagnosis Complete');
         setSelectedImages([]);
         setValidationResults([]);
-        fetchDiagnosis(); // Refresh data to show results
+        fetchDiagnosis();
       } else {
         toast.error(`Error processing images: ${imgRes.message}`);
       }
@@ -243,8 +231,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
       setIsProcessingImage(false);
     }
   };
-
-  // 3D Model logic removed to separate view
 
   if (loading) return (
     <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[40px] shadow-sm">
@@ -259,8 +245,6 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
       <h2 className="text-xl font-bold text-gray-800">No Diagnosis Found</h2>
     </div>
   );
-
-  const needsUltrasound = diagnosisResult.diagnosisSummary.nextStep === 'upload_ultrasound';
 
   return (
     <div className="space-y-6">
@@ -286,7 +270,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
             <FlaskConical size={14} className="text-teal-500" /> Laboratory Biomarkers
           </h3>
-          <div className="flex flex-wrap gap-4 md:gap-8 justify-between xl:justify-end">
+          <div className="flex flex-wrap gap-3 md:gap-4 justify-between xl:justify-end">
             {[
               { l: 'TSH', v: diagnosisResult.labs.tsh, u: 'mIU/L' },
               { l: 'T3', v: diagnosisResult.labs.t3, u: 'ng/dL' },
@@ -294,197 +278,267 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
               { l: 'FTI', v: diagnosisResult.labs.fti, u: '' },
               { l: 'T4U', v: diagnosisResult.labs.t4u, u: '' }
             ].map((lab, i) => (
-              <div key={i} className="text-left">
+              <div key={i} className="text-center bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 min-w-[80px]">
                 <p className="text-[10px] font-black text-gray-400 uppercase mb-1">{lab.l}</p>
-                <p className="text-xl font-black text-gray-900">
-                  {lab.v || '—'} <span className="text-[9px] text-gray-400 ml-1">{lab.u}</span>
+                <p className="text-lg md:text-xl font-black text-gray-900">
+                  {lab.v || '—'}
                 </p>
+                <p className="text-[9px] text-gray-400">{lab.u || '\u00A0'}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* 2. Professional AI Diagnosis Result */}
-      <div className="bg-white rounded-3xl p-8 md:p-10 shadow-sm border-l-[12px] border-primary border-t border-b border-r border-gray-200 relative">
-        <div className="absolute right-0 top-0 opacity-[0.03] pointer-events-none">
-          <Brain size={250} className="-mr-10 -mt-10" />
-        </div>
-
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-8 border-b border-gray-100">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 flex items-center gap-2">
-                <Brain size={14} className="text-primary"/> Clinical AI Assessment
-              </p>
-              <div className="flex items-center gap-4">
-                <h2 className="text-4xl font-black text-gray-900 capitalize tracking-tight">{diagnosisResult.diagnosisSummary.status.toLowerCase()}</h2>
-                {diagnosisResult.diagnosisSummary.needsManualReview && (
-                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-red-200">
-                    <AlertCircle size={12} /> Review Req
-                  </span>
-                )}
-              </div>
+      {/* 1.5 Overall Clinical Assessment */}
+      {diagnosisResult.clinicalAssessment && (
+        <div className="bg-white rounded-3xl p-8 shadow-sm border-l-[8px] border-teal-500 border-t border-b border-r border-gray-200">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
+              <Stethoscope size={24} />
             </div>
-
-            <div className="flex gap-8 mt-6 md:mt-0 text-right">
-              <div>
-                <p className="text-3xl font-black text-primary">{diagnosisResult.diagnosisSummary.confidence}%</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">AI Confidence</p>
-              </div>
-              <div className="w-px bg-gray-200"></div>
-              <div>
-                <p className="text-3xl font-black text-gray-900 capitalize">{diagnosisResult.diagnosisSummary.riskLevel.toLowerCase()}</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Risk Level</p>
-              </div>
+            <div>
+              <h2 className="text-xl font-black text-gray-900 flex items-center gap-3 flex-wrap">
+                  Overall Clinical Assessment
+                  {diagnosisResult.clinicalAssessment.needsManualReview && (
+                      <span className="bg-amber-100 text-amber-700 text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md border border-amber-200 flex items-center gap-1">
+                          <AlertCircle size={12}/> Manual Review Needed
+                      </span>
+                  )}
+              </h2>
+              <p className="text-sm font-bold text-gray-500 mt-1">{diagnosisResult.clinicalAssessment.functionalStatus}</p>
+            </div>
+            <div className="md:ml-auto mt-4 md:mt-0 text-left md:text-right flex flex-wrap items-center gap-4">
+                {diagnosisResult.clinicalAssessment.probabilities && (
+                    <div className="flex gap-2 mr-4">
+                        {Object.entries(diagnosisResult.clinicalAssessment.probabilities).map(([key, val]) => (
+                            <div key={key} className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm text-center">
+                                <p className="text-[9px] uppercase font-black text-slate-400 tracking-widest">{key}</p>
+                                <p className="text-xs font-black text-slate-700">{(val * 100).toFixed(1)}%</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {diagnosisResult.clinicalAssessment.confidence ? (
+                    <div className="bg-teal-50/50 border border-teal-100 px-4 py-2 rounded-xl shadow-sm text-center">
+                        <p className="text-xl font-black text-teal-600">
+                            {diagnosisResult.clinicalAssessment.confidence <= 1 
+                                ? (diagnosisResult.clinicalAssessment.confidence * 100).toFixed(1) 
+                                : Number(diagnosisResult.clinicalAssessment.confidence).toFixed(1)}%
+                        </p>
+                        <p className="text-[9px] font-bold text-teal-600/70 uppercase tracking-widest">AI Confidence</p>
+                    </div>
+                ) : null}
+                <div className="bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl shadow-sm text-center">
+                    <p className="text-xl font-black text-slate-800 capitalize">{diagnosisResult.clinicalAssessment.riskLevel.toLowerCase()}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</p>
+                </div>
             </div>
           </div>
-
-          <div className="space-y-6">
-            <div className="bg-blue-50/50 p-6 md:p-8 rounded-2xl border border-blue-100">
-              <p className="text-[11px] font-black text-blue-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Stethoscope size={16}/> Primary Recommendation
-              </p>
-              <p className="text-lg md:text-xl font-bold text-gray-800 leading-relaxed">
-                "{diagnosisResult.diagnosisSummary.clinicalRecommendation}"
-              </p>
-            </div>
-
-            {diagnosisResult.diagnosisSummary.aiRecommendation && (
-              <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100">
-                <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <FileText size={16}/> Detailed AI Insight
+          
+          <div className="space-y-4">
+            <div className="bg-slate-50 p-6 rounded-2xl border border-gray-100">
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <FileText size={16} /> Clinical Recommendation
                 </p>
-                <div className="text-[14px] font-medium leading-relaxed text-gray-600 prose max-w-none">
-                  {diagnosisResult.diagnosisSummary.aiRecommendation.split('\n').map((line, i) => (
-                    <p key={i} className={line.startsWith('**') ? 'font-black mt-3 text-gray-900' : ''}>{line.replace(/\*\*/g, '')}</p>
-                  ))}
+                <p className="text-gray-800 font-bold leading-relaxed">{diagnosisResult.clinicalAssessment.clinicalRecommendation}</p>
+            </div>
+            
+            {diagnosisResult.clinicalAssessment.aiRecommendation && (
+                <div className="bg-slate-50 p-6 rounded-2xl border border-gray-100">
+                    <p className="text-[11px] font-black text-blue-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Brain size={16} /> AI Detailed Insight
+                    </p>
+                    <div className="text-[13px] text-gray-600 font-medium leading-relaxed prose max-w-none">
+                        {diagnosisResult.clinicalAssessment.aiRecommendation.split('\n').map((line, idx) => (
+                            <p key={idx} className={line.trim() ? "mb-2" : "hidden"}>{line}</p>
+                        ))}
+                    </div>
                 </div>
-              </div>
             )}
 
-            <div className="inline-flex flex-wrap items-center gap-3 text-gray-700 font-bold text-sm bg-gray-50 px-6 py-4 rounded-xl border border-gray-200">
-              <Clock size={18} className="text-gray-400" /> 
-              <span><span className="text-gray-400 uppercase text-[10px] tracking-widest mr-2">Suggested Action:</span> {diagnosisResult.diagnosisSummary.nextStep}</span>
-            </div>
+            {diagnosisResult.clinicalAssessment.nextStepDetails ? (
+                <div className="bg-slate-50 p-6 rounded-2xl border border-gray-100">
+                    <p className="text-[11px] font-black text-teal-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <TargetIcon size={16} /> Next Step Action Plan
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Action</p>
+                            <p className="text-sm font-bold text-gray-800">{diagnosisResult.clinicalAssessment.nextStepDetails.action || diagnosisResult.clinicalAssessment.nextStep}</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Rationale</p>
+                            <p className="text-sm font-bold text-gray-800">{diagnosisResult.clinicalAssessment.nextStepDetails.rationale || '—'}</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-center gap-2">
+                            <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Urgency</p>
+                                <p className="text-sm font-bold text-gray-800 capitalize">{diagnosisResult.clinicalAssessment.nextStepDetails.urgency || 'Normal'}</p>
+                            </div>
+                            {diagnosisResult.clinicalAssessment.nextStepDetails.cancer_pipeline_triggered && (
+                                <span className="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100 inline-block w-fit">
+                                    Cancer Pipeline Triggered
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="inline-flex flex-wrap items-center gap-3 text-gray-700 font-bold text-sm bg-slate-50 px-5 py-3 rounded-xl border border-gray-100">
+                    <TargetIcon size={16} className="text-gray-400" /> 
+                    <span><span className="text-gray-400 uppercase text-[10px] tracking-widest mr-2">Next Step:</span> {diagnosisResult.clinicalAssessment.nextStep}</span>
+                </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 3. Detailed Analysis (Nodule Analysis & Probabilities) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Probabilities */}
-          {diagnosisResult.probabilities && Object.keys(diagnosisResult.probabilities).length > 0 && (
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-md font-black text-gray-900 mb-6 flex items-center gap-3">
-                 <Activity className="text-primary" size={18} /> Probability Distribution
-              </h3>
-              <div className="space-y-4">
-                {Object.entries(diagnosisResult.probabilities).map(([key, val], i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-[10px] font-black uppercase text-gray-500 mb-2">
-                      <span>{key}</span>
-                      <span className={val > 0.5 ? 'text-primary' : 'text-gray-400'}>{Math.round(val * 100)}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${val * 100}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className={`h-full rounded-full ${val > 0.5 ? 'bg-primary' : 'bg-gray-300'}`}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* 2. Loop over Image Predictions */}
+      {diagnosisResult.imagePredictions && diagnosisResult.imagePredictions.length > 0 ? (
+        <div className="space-y-8">
+            {diagnosisResult.imagePredictions.map((pred, idx) => {
+                const label = pred?.classification?.label || pred?.Classification?.Label || pred?.classificationLabel || 'Unknown';
+                const confidence = pred?.classification?.confidence_pct || pred?.Classification?.confidence_pct || pred?.confidence || 0;
+                const riskLevel = pred?.classification?.risk_level || pred?.Classification?.risk_level || pred?.riskLevel || 'TBD';
+                const clinicalRec = pred?.classification?.clinical_recommendation || pred?.Classification?.clinical_recommendation || pred?.clinicalRecommendation || 'Follow up required.';
+                const aiRec = pred?.ai_recommendation || null;
+                const nextStep = pred?.classification?.next_step || pred?.Classification?.next_step || pred?.nextStep || 'Consult endocrinologist';
+                const needsReview = pred?.classification?.needs_manual_review || pred?.Classification?.needs_manual_review || confidence < 60;
+                const filename = pred?.filename || pred?.Filename || `Image ${idx + 1}`;
+                
+                // Extract images object (could be uppercase or lowercase depending on source)
+                const aiImages = pred?.images || pred?.Images;
 
-          {/* Nodule Analysis */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 h-full">
-            <h3 className="text-md font-black text-gray-900 mb-6 flex items-center gap-3">
-              <BarChart3 className="text-primary" size={18} /> Nodule Analysis
-            </h3>
-            <div className="space-y-4">
-              {diagnosisResult.noduleAnalysis.map((nodule, i) => (
-                <div key={i} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-primary font-black shadow-sm border border-gray-100">
-                      {nodule.id}
-                    </div>
-                    <div>
-                      <p className="font-black text-gray-900 text-sm">{nodule.size}</p>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{nodule.location}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black text-red-600">{nodule.tirads}</p>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">TI-RADS</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-      </div>
+                // Construct original image URL properly
+                const origImgUrl = pred.original_url 
+                    ? (pred.original_url.startsWith('http') || pred.original_url.startsWith('data:') 
+                        ? pred.original_url 
+                        : `${BASE_URL}${pred.original_url.startsWith('/') ? '' : '/'}${pred.original_url}`)
+                    : null;
 
-      {/* 5. Ultrasound Scans (Full Width) */}
-      {diagnosisResult.images && diagnosisResult.images.original?.length > 0 && (
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-100 pb-6">
-            <h2 className="text-xl font-black text-gray-900 flex items-center gap-3">
-              <Scan className="text-blue-500" size={24} /> AI Vision Diagnostics
-            </h2>
-            <div className="flex gap-4">
-              <div className="px-4 py-2 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-2">
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Risk Level:</span>
-                <span className="text-xs font-black text-blue-600">{diagnosisResult.diagnosisSummary.riskLevel}</span>
-              </div>
-            </div>
-          </div>
+                return (
+                    <div key={idx} className="bg-white rounded-3xl p-8 md:p-10 shadow-sm border-l-[12px] border-primary border-t border-b border-r border-gray-200 relative">
+                        <div className="absolute right-0 top-0 opacity-[0.03] pointer-events-none">
+                            <Brain size={250} className="-mr-10 -mt-10" />
+                        </div>
 
-          <div className="space-y-12">
-            {diagnosisResult.images.original.map((origImage, idx) => (
-              <div key={idx} className="pt-6 first:pt-0">
-                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">Ultrasound View {idx + 1}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {(!diagnosisResult.images.overlay || !diagnosisResult.images.overlay[idx]) && (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Original Scan</span>
-                      </div>
-                      <img src={origImage.startsWith('http') || origImage.startsWith('data:') ? origImage : `http://localhost:5153${origImage.startsWith('/') ? '' : '/'}${origImage}`} alt="Original Ultrasound" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                        <div className="relative z-10">
+                            {/* Simple Header */}
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-6 border-b border-gray-100">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        {needsReview && (
+                                            <span className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100">
+                                                Review Req
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h2 className="text-2xl font-black text-gray-900 capitalize">{label}</h2>
+                                </div>
+                                <div className="mt-4 md:mt-0 flex gap-3 text-left md:text-right">
+                                    <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 text-center shadow-sm">
+                                        <p className="text-xl font-black text-primary">{Number(confidence).toFixed(1)}%</p>
+                                        <p className="text-[9px] font-bold text-primary/70 uppercase tracking-widest">Confidence</p>
+                                    </div>
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-center shadow-sm">
+                                        <p className="text-xl font-black text-slate-800 capitalize">{riskLevel.toLowerCase()}</p>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Images Grid */}
+                            <div className="mt-6">
+                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2"><Scan size={18} className="text-primary"/> AI Vision Scans</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {/* Removed Original Scan per user request */}
+                                    {aiImages?.overlay_url && (
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Detection</span>
+                                            </div>
+                                            <img src={aiImages.overlay_url} alt="Overlay" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                        </div>
+                                    )}
+                                    {aiImages?.mask_url && (
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Segmentation</span>
+                                            </div>
+                                            <img src={aiImages.mask_url} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                        </div>
+                                    )}
+                                    {aiImages?.roi_url && (
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">ROI Area</span>
+                                            </div>
+                                            <img src={aiImages.roi_url} alt="ROI" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Show Details Button */}
+                            <div className="mt-8 text-center border-t border-gray-100 pt-6">
+                                <button
+                                    onClick={() => toggleImageDetails(idx)}
+                                    className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white transition-all bg-primary hover:bg-primary/90 shadow-sm hover:shadow-md px-6 py-3 rounded-full"
+                                >
+                                    <Info size={14} /> {expandedImageDetails[idx] ? "Hide Details" : "Show Details"}
+                                </button>
+                            </div>
+
+                            {/* Details Expanded Section */}
+                            <AnimatePresence>
+                                {expandedImageDetails[idx] && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden mt-6"
+                                    >
+                                        <div className="space-y-6 bg-slate-50 p-6 md:p-8 rounded-2xl border border-gray-100">
+                                            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                                                <p className="text-[11px] font-black text-blue-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                    <Stethoscope size={16}/> Primary Recommendation
+                                                </p>
+                                                <p className="text-sm md:text-base font-bold text-gray-800 leading-relaxed">
+                                                    "{clinicalRec}"
+                                                </p>
+                                            </div>
+
+                                            {aiRec && (
+                                                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                                                    <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                        <FileText size={16}/> Detailed AI Insight
+                                                    </p>
+                                                    <div className="text-[13px] font-medium leading-relaxed text-gray-600 prose max-w-none">
+                                                        {aiRec.split('\n').map((line, lineIdx) => (
+                                                            <p key={lineIdx} className={line.startsWith('**') ? 'font-black mt-2 text-gray-900' : ''}>{line.replace(/\*\*/g, '')}</p>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="inline-flex flex-wrap items-center gap-3 text-gray-700 font-bold text-sm bg-white px-5 py-4 rounded-xl border border-gray-100 shadow-sm w-full">
+                                                <Clock size={16} className="text-gray-400" /> 
+                                                <span><span className="text-gray-400 uppercase text-[10px] tracking-widest mr-2">Suggested Action:</span> {nextStep}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
-                  )}
-                  {diagnosisResult.images.overlay && diagnosisResult.images.overlay[idx] && (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Detection</span>
-                        <div className="px-2 py-0.5 bg-primary/10 text-primary rounded-md text-[10px] font-black">{diagnosisResult.diagnosisSummary.confidence}% Conf</div>
-                      </div>
-                      <img src={diagnosisResult.images.overlay[idx]} alt="Overlay" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
-                    </div>
-                  )}
-                  {diagnosisResult.images.mask && diagnosisResult.images.mask[idx] && (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Segmentation</span>
-                      </div>
-                      <img src={diagnosisResult.images.mask[idx]} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
-                    </div>
-                  )}
-                  {diagnosisResult.images.roi && diagnosisResult.images.roi[idx] && (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">ROI Area</span>
-                      </div>
-                      <img src={diagnosisResult.images.roi[idx]} alt="ROI" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+            })}
         </div>
+      ) : (
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 text-center">
+             <p className="text-gray-500 font-bold">No image analysis results found for this session.</p>
+          </div>
       )}
 
       {/* Timeline (Full Width) */}

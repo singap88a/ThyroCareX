@@ -290,17 +290,17 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
       if (onPatientSave) onPatientSave();
 
       const clinicalPayload = {
-        patient_id: parseInt(id, 10),
+        patient_id: String(id),
         Age: getAgeNumber(),
         on_thyroxine: patientData.onThyroxine ? 1 : 0,
         thyroid_surgery: patientData.thyroidSurgery ? 1 : 0,
         query_hyperthyroid: patientData.queryHyperthyroid ? 1 : 0,
-        TSH: patientData.tsh ? parseFloat(patientData.tsh) : null,
-        T3: patientData.t3 ? parseFloat(patientData.t3) : null,
-        TT4: patientData.tt4 ? parseFloat(patientData.tt4) : null,
-        FTI: patientData.fti ? parseFloat(patientData.fti) : null,
-        T4U: patientData.t4u ? parseFloat(patientData.t4u) : null,
-        nodule_present: patientData.nodulePresent,
+        TSH: patientData.tsh ? parseFloat(patientData.tsh) : 0,
+        T3: patientData.t3 ? parseFloat(patientData.t3) : 0,
+        TT4: patientData.tt4 ? parseFloat(patientData.tt4) : 0,
+        FTI: patientData.fti ? parseFloat(patientData.fti) : 0,
+        T4U: patientData.t4u ? parseFloat(patientData.t4u) : 0,
+        nodule_present: patientData.nodulePresent || false,
       };
 
       const clinicalRes = await testService.processClinical(clinicalPayload);

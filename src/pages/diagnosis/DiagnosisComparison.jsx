@@ -277,16 +277,23 @@ const DiagnosisComparison = ({ dashboardMode = false }) => {
                     </div>
                   </div>
                   
-                  <div className={`p-8 rounded-[32px] text-white mb-10 relative overflow-hidden group shadow-lg ${getStatusColor(data?.result || data?.riskLevel)}`}>
-                    <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
-                    <div className="relative z-10">
-                      <p className="text-[10px] opacity-80 font-black uppercase tracking-widest mb-2 flex items-center gap-2">
-                        <Brain size={14} /> AI CLASSIFICATION STATUS
-                      </p>
-                      <h2 className="text-4xl font-black tracking-tighter">{data?.result}</h2>
-                      <div className="mt-6 flex justify-between items-center bg-black/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                        <span className="text-xs font-bold uppercase tracking-widest">Model Confidence</span>
-                        <span className="text-2xl font-black">{data?.confidence || 0}%</span>
+                  <div className="bg-slate-50 dark:bg-admin-dark-hover p-6 md:p-8 rounded-[32px] mb-10 border border-slate-100 dark:border-admin-dark-border relative overflow-hidden">
+                    {/* Subtle color accent line */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${getStatusColor(data?.result || data?.riskLevel)}`} />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6 pl-2">
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                          <Brain size={14} className="text-primary" /> AI Classification
+                        </p>
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white capitalize break-words leading-tight">
+                          {Array.from(new Set((data?.result || '').split(',').map(s => s.trim()))).filter(Boolean).join(' / ') || 'Unknown'}
+                        </h2>
+                      </div>
+                      <div className="bg-white dark:bg-admin-dark-card px-5 py-3 rounded-2xl shadow-sm border border-slate-200 dark:border-admin-dark-border text-center min-w-[120px]">
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Confidence</p>
+                        <p className="text-2xl font-black text-primary">
+                          {data?.confidence <= 1 ? (data?.confidence * 100).toFixed(1) : Number(data?.confidence || 0).toFixed(1)}%
+                        </p>
                       </div>
                     </div>
                   </div>
