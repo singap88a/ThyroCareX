@@ -123,7 +123,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="z-10 flex items-center py-1 space-x-3 group">
             <img
-              src="/logo.png"
+              src="/logo_edit.png"
               alt="Thyrax Logo"
               className="object-contain w-48 transition-all duration-300 group-hover:scale-105 group-hover:brightness-110 drop-shadow-md"
             />

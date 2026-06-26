@@ -50,7 +50,7 @@ export const NotificationProvider = ({ children }) => {
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(`New message from ${message.patient?.fullName || 'Patient'}`, {
               body: message.content,
-              icon: '/logo.png'
+              icon: '/logo_edit.png'
             });
           }
         }

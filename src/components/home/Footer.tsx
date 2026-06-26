@@ -18,7 +18,7 @@ const Footer = () => {
             {/* Left Section - Brand & Description */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Thyrax Logo" className="w-40 rounded-xl" />
+                <img src="/logo_edit.png" alt="Thyrax Logo" className="w-40 rounded-xl" />
      
               </div>
 

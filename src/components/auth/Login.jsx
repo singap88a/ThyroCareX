@@ -46,20 +46,8 @@ const Login = () => {
           {/* Logo / Header */}
           <div className="mb-12">
             <div className="relative inline-block w-full">
-              <div className="flex items-center mb-2">
-{/* أيقونة الدرع الطبي */}
-<div className="flex items-center justify-center w-10 h-10 mr-3 shadow-sm bg-gradient-to-br from-blue-50 to-primary/10 rounded-xl">
-  <svg 
-    className="w-7 h-7 text-primary" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-  </svg>
-</div>
+              <div className="flex flex-col items-start mb-8">
+                <img src="/logo_edit.png" alt="ThyroCareX Logo" className="h-16 w-auto mb-6 drop-shadow-md" />
                 <h1 className="text-[1.7rem] font-bold tracking-tight text-gray-900">
                   <span className="relative font-extrabold text-primary">
                     Welcome Back
@@ -67,7 +55,6 @@ const Login = () => {
                   </span>
                   <span className="ml-2 font-extrabold text-gray-700">
                     to Thyro Carex
-
                   </span>
                 </h1>
               </div>
