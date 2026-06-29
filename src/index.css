@@ -18,6 +18,16 @@
   html, body {
     @apply font-['Plus_Jakarta_Sans',sans-serif] text-primary antialiased;
   }
+  
+  /* Hide number input arrows for elements with hide-arrows class */
+  input[type="number"].hide-arrows::-webkit-inner-spin-button,
+  input[type="number"].hide-arrows::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"].hide-arrows {
+    -moz-appearance: textfield;
+  }
 }
 
 /* Custom Scrollbar */

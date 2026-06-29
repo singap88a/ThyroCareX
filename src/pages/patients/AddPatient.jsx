@@ -14,11 +14,11 @@ import testService from '../../services/testService';
 
 // --- Sub-components (Moved outside to fix focus issue) ---
 
-const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange, autoComplete = "on", inputClassName = "py-2.5" }) => (
+const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step, value, onChange, autoComplete = "on", inputClassName = "py-2.5", inputMode, pattern }) => (
   <div className="space-y-1.5">
-    <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">{label}</label>
+    <label className="text-[10px] font-black text-slate-800 uppercase tracking-wider ml-1">{label}</label>
     <div className="relative group">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
         <Icon className="w-4 h-4" />
       </div>
       <input
@@ -27,10 +27,12 @@ const InputField = ({ label, field, icon: Icon, type = "text", placeholder, step
         autoComplete={autoComplete}
         type={type}
         step={step}
+        inputMode={inputMode}
+        pattern={pattern}
         placeholder={placeholder}
         value={value || ''}
         onChange={e => onChange(field, e.target.value)}
-        className={`w-full pl-10 pr-4 ${inputClassName} bg-gray-50/50 border border-gray-100 rounded-xl outline-none transition-all duration-200 font-bold text-gray-700 placeholder:text-gray-300 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-sm`}
+        className={`w-full pl-10 pr-4 ${inputClassName} bg-white border-2 border-slate-300 shadow-sm rounded-xl outline-none transition-all duration-200 font-bold text-slate-900 placeholder:text-slate-500 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 text-sm`}
       />
     </div>
   </div>
@@ -40,16 +42,16 @@ const Toggle = ({ label, field, icon: Icon, active, onClick }) => (
   <button
     type="button"
     onClick={() => onClick(field, !active)}
-    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all duration-200 font-bold text-xs ${active
-        ? 'bg-primary border-primary text-white shadow-md shadow-primary/10'
-        : 'bg-white border-gray-100 text-gray-500 hover:border-primary/30'
+    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 transition-all duration-200 font-bold text-xs ${active
+      ? 'bg-primary border-primary text-white shadow-md shadow-primary/30'
+      : 'bg-white border-slate-300 text-slate-700 shadow-sm hover:border-primary/50 hover:shadow-md'
       }`}
   >
-    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${active ? 'bg-white/20' : 'bg-gray-50'}`}>
+    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${active ? 'bg-white/20' : 'bg-slate-50'}`}>
       {Icon && <Icon className="w-3.5 h-3.5" />}
     </div>
     <span className="flex-1 text-left">{label}</span>
-    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${active ? 'border-white bg-white' : 'border-gray-200'}`}>
+    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${active ? 'border-white bg-white' : 'border-slate-300'}`}>
       {active && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
     </div>
   </button>
@@ -145,10 +147,24 @@ const AddPatient = () => {
 
   const validateStep = () => {
     if (currentStep === 1) {
-      if (!patientData.fullName?.trim()) { toast.error('Full name is required'); return false; }
-      if (!getAgeNumber()) { toast.error('Age is required'); return false; }
-      if (!patientData.gender) { toast.error('Gender is required'); return false; }
-      if (!patientData.phone?.trim()) { toast.error('Phone number is required'); return false; }
+      if (!patientData.fullName?.trim()) { toast.error('Full name is required / الاسم بالكامل مطلوب'); return false; }
+      if (!getAgeNumber()) { toast.error('Age is required / العمر مطلوب'); return false; }
+      if (!patientData.gender) { toast.error('Gender is required / النوع مطلوب'); return false; }
+      if (!patientData.height) { toast.error('Height is required / الطول مطلوب'); return false; }
+      if (!patientData.weight) { toast.error('Weight is required / الوزن مطلوب'); return false; }
+      if (!patientData.phone?.trim()) { toast.error('Phone number is required / رقم الهاتف مطلوب'); return false; }
+      if (!patientData.address?.trim()) { toast.error('Address is required / العنوان مطلوب'); return false; }
+    }
+    if (currentStep === 2) {
+      if (!patientData.medicalHistory?.trim()) { toast.error('Medical History is required / التاريخ المرضي مطلوب'); return false; }
+      if (!patientData.currentMedications?.trim()) { toast.error('Current Medications are required / الأدوية الحالية مطلوبة'); return false; }
+      if (!patientData.allergies?.trim()) { toast.error('Allergies are required / الحساسية مطلوبة'); return false; }
+    }
+    if (currentStep === 3) {
+      const requiredLabs = ['tsh', 't3', 'tt4', 'fti', 't4u'];
+      for (let lab of requiredLabs) {
+         if (!patientData[lab]) { toast.error(`${lab.toUpperCase()} is required / مطلوب`); return false; }
+      }
     }
     return true;
   };
@@ -161,7 +177,7 @@ const AddPatient = () => {
   const removeImage = (indexToRemove) => {
     const updated = patientData.ultrasoundImages.filter((_, i) => i !== indexToRemove);
     set('ultrasoundImages', updated);
-    
+
     if (updated.length === 0) {
       setValidationResult(null);
       return;
@@ -170,7 +186,7 @@ const AddPatient = () => {
     if (validationResult?.results) {
       const newResults = validationResult.results.filter((_, i) => i !== indexToRemove);
       const allValid = newResults.every(r => r.is_ultrasound);
-      
+
       if (allValid) {
         setValidationResult({
           valid: true,
@@ -205,7 +221,7 @@ const AddPatient = () => {
       const res = await testService.validateImage(allFiles);
       if (res.succeeded && Array.isArray(res.data)) {
         const allValid = res.data.every(r => r.is_ultrasound);
-        
+
         if (allValid && res.data.length > 0) {
           setValidationResult({
             valid: true,
@@ -355,27 +371,46 @@ const AddPatient = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Simple Stepper */}
-        <div className="flex items-start gap-2 mb-12 px-4">
+        {/* Professional Stepper */}
+        <div className="flex items-start justify-between mb-16 px-2 md:px-8">
           {steps.map((step, idx) => {
             const Icon = step.icon;
             const done = currentStep > step.id;
             const active = currentStep === step.id;
             return (
               <React.Fragment key={step.id}>
-                <div className="flex flex-col items-center gap-2">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300 ${done ? 'bg-primary border-primary text-white' :
-                    active ? 'bg-white border-primary text-primary shadow-lg shadow-primary/10' : 'bg-white border-gray-100 text-gray-300'
-                    }`}>
-                    {done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
+                {/* Step Node */}
+                <div className="flex flex-col items-center gap-4 relative z-10 w-20 shrink-0">
+                  <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ease-out ${
+                    done ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30' :
+                    active ? 'bg-white border-primary text-primary shadow-xl shadow-primary/20 ring-4 ring-primary/20 scale-110' : 
+                    'bg-white border-slate-200 text-slate-400'
+                  }`}>
+                    {done ? <CheckCircle2 className="w-6 h-6 md:w-7 md:h-7" /> : <Icon className="w-5 h-5 md:w-6 md:h-6" />}
                   </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${active ? 'text-primary' : 'text-gray-300'}`}>
+                  <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${
+                    active ? 'text-primary' : done ? 'text-slate-700' : 'text-slate-400'
+                  }`}>
                     {step.title}
                   </span>
                 </div>
+
+                {/* Connector with Directional Arrow */}
                 {idx < steps.length - 1 && (
-                  <div className="flex-1 mt-5 h-[1px] bg-gray-100 relative overflow-hidden">
-                    <div className={`absolute inset-0 bg-primary transition-all duration-500 ${currentStep > step.id ? 'translate-x-0' : '-translate-x-full'}`} />
+                  <div className="flex-1 mt-2.5 md:mt-3 flex items-center px-1 md:px-4">
+                    <div className="w-full relative flex items-center justify-center">
+                      {/* Track Background */}
+                      <div className="absolute inset-x-0 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        {/* Track Fill */}
+                        <div className={`absolute inset-y-0 left-0 bg-primary transition-all duration-700 ease-out rounded-full ${currentStep > step.id ? 'w-full' : 'w-0'}`} />
+                      </div>
+                      {/* Center Arrow Indicator */}
+                      <div className={`relative z-10 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-500 bg-white border-2 ${
+                        currentStep > step.id ? 'border-primary text-primary shadow-md shadow-primary/20 scale-110' : 'border-slate-200 text-slate-300'
+                      }`}>
+                        <ArrowRight className="w-4 h-4 md:w-4 md:h-4" strokeWidth={3} />
+                      </div>
+                    </div>
                   </div>
                 )}
               </React.Fragment>
@@ -388,27 +423,27 @@ const AddPatient = () => {
             <motion.form
               key="s1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onSubmit={e => { e.preventDefault(); next(); }}
-              className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6"
+              className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-xl shadow-slate-300/40 space-y-6"
             >
               <div className="grid md:grid-cols-2 gap-6">
                 <InputField label="Full Name" field="fullName" autoComplete="name" icon={User} placeholder="e.g. John Doe" value={patientData.fullName} onChange={set} />
-                <InputField label="Age" field="age" autoComplete="off" type="number" icon={Calendar} placeholder="1-120" value={patientData.age} onChange={set} />
+                <InputField label="Age" field="age" autoComplete="off" type="number" icon={Calendar} placeholder="1-120" value={patientData.age} onChange={set} inputClassName="py-2.5 hide-arrows" />
               </div>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Gender</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"><User className="w-4 h-4" /></div>
+                  <label className="text-[10px] font-black text-slate-800 uppercase tracking-wider ml-1">Gender</label>
+                  <div className="relative group">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"><User className="w-4 h-4" /></div>
                     <select name="gender" value={patientData.gender} onChange={e => set('gender', e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-sm focus:bg-white focus:border-primary">
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-slate-300 shadow-sm rounded-xl outline-none font-bold text-slate-900 text-sm focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-200">
                       <option value="">Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
                   </div>
                 </div>
-                <InputField label="Height (cm)" field="height" type="number" icon={Ruler} placeholder="175" value={patientData.height} onChange={set} />
-                <InputField label="Weight (kg)" field="weight" type="number" icon={Weight} placeholder="70" value={patientData.weight} onChange={set} />
+                <InputField label="Height (cm)" field="height" type="number" icon={Ruler} placeholder="175" value={patientData.height} onChange={set} inputClassName="py-2.5 hide-arrows" />
+                <InputField label="Weight (kg)" field="weight" type="number" icon={Weight} placeholder="70" value={patientData.weight} onChange={set} inputClassName="py-2.5 hide-arrows" />
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <InputField label="Phone" field="phone" autoComplete="tel" icon={Phone} placeholder="01XXXXXXXXX" value={patientData.phone} onChange={set} />
@@ -422,11 +457,12 @@ const AddPatient = () => {
           {currentStep === 2 && (
             <motion.div
               key="s2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-4"
+              className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-xl shadow-slate-300/40 space-y-4"
             >
               <InputField
                 label="Medical History"
                 field="medicalHistory"
+                autoComplete="on"
                 icon={ClipboardList}
                 placeholder="Medical History..."
                 value={patientData.medicalHistory}
@@ -436,6 +472,7 @@ const AddPatient = () => {
               <InputField
                 label="Current Medications"
                 field="currentMedications"
+                autoComplete="on"
                 icon={Pill}
                 placeholder="Current Medications..."
                 value={patientData.currentMedications}
@@ -445,6 +482,7 @@ const AddPatient = () => {
               <InputField
                 label="Known Allergies"
                 field="allergies"
+                autoComplete="on"
                 icon={AlertTriangle}
                 placeholder="Known Allergies..."
                 value={patientData.allergies}
@@ -459,8 +497,8 @@ const AddPatient = () => {
               key="s3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="space-y-6"
             >
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2"><FlaskConical className="w-4 h-4 text-teal-600" /> Lab Data</h3>
+              <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-xl shadow-slate-300/40">
+                <h3 className="text-xs font-black text-slate-900 mb-6 uppercase tracking-widest flex items-center gap-2"><FlaskConical className="w-4 h-4 text-primary" /> Lab Data</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {[
                     { id: 'tsh', name: 'TSH', hint: '0.4-4.0' },
@@ -469,16 +507,16 @@ const AddPatient = () => {
                     { id: 'fti', name: 'FTI', hint: '8-18' },
                     { id: 't4u', name: 'T4U', hint: '0.7-1.2' }
                   ].map(f => (
-                    <div key={f.id} className="space-y-1">
-                      <label className="text-[9px] font-black text-gray-400 uppercase">{f.name}</label>
+                    <div key={f.id} className="space-y-1.5">
+                      <label className="text-xs font-black text-slate-900 uppercase tracking-widest">{f.name}</label>
                       <input type="number" step="0.001" placeholder={f.hint} value={patientData[f.id]} onChange={e => set(f.id, e.target.value)}
-                        className="w-full px-2 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl outline-none font-bold text-gray-700 text-center text-sm focus:bg-white focus:border-primary" />
+                        className="w-full px-2 py-3 bg-white border-2 border-slate-300 shadow-sm rounded-xl outline-none font-bold text-slate-900 text-center text-sm placeholder:text-slate-300 placeholder:font-normal focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-200" />
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                <h3 className="text-xs font-black text-gray-900 mb-6 uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-orange-600" /> Clinical Checks</h3>
+              <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-xl shadow-slate-300/40">
+                <h3 className="text-xs font-black text-slate-900 mb-6 uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-orange-500" /> Clinical Checks</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <Toggle label="On Thyroxine" field="onThyroxine" icon={Pill} active={patientData.onThyroxine} onClick={set} />
                   <Toggle label="Thyroid Surgery" field="thyroidSurgery" icon={Microscope} active={patientData.thyroidSurgery} onClick={set} />
@@ -562,13 +600,13 @@ const AddPatient = () => {
                         {patientData.ultrasoundImages.map((img, i) => {
                           const isImgValid = validationResult?.results ? validationResult.results[i]?.is_ultrasound : true;
                           return (
-                          <div key={i} className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
-                            <div className="flex items-center gap-3">
-                              {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : (isImgValid) ? <CheckCircle2 className="w-6 h-6 text-green-300" /> : <X className="w-6 h-6 text-red-300" />}
-                              <span className="text-xs font-bold truncate max-w-[150px]">{img.name}</span>
+                            <div key={i} className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
+                              <div className="flex items-center gap-3">
+                                {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : (isImgValid) ? <CheckCircle2 className="w-6 h-6 text-green-300" /> : <X className="w-6 h-6 text-red-300" />}
+                                <span className="text-xs font-bold truncate max-w-[150px]">{img.name}</span>
+                              </div>
+                              <button type="button" onClick={() => removeImage(i)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"><X size={16} /></button>
                             </div>
-                            <button type="button" onClick={() => removeImage(i)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"><X size={16} /></button>
-                          </div>
                           );
                         })}
                       </div>

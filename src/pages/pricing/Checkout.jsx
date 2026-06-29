@@ -28,12 +28,12 @@ const Checkout = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-2xl shadow-sm border">
-          <Info className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+          <Info className="w-12 h-12 text-[#4695a5] mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">No Plan Selected</h2>
           <p className="text-gray-500 mb-6">Please select a subscription plan to proceed.</p>
           <button 
             onClick={() => navigate('/pricing')}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+            className="px-6 py-2 bg-[#4695a5] text-white rounded-lg font-bold hover:bg-[#00A2C2] transition-colors"
           >
             Back to Pricing
           </button>
@@ -83,7 +83,7 @@ const Checkout = () => {
         <div className="flex items-center justify-between mb-8">
             <button 
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors font-semibold group"
+                className="flex items-center gap-2 text-slate-500 hover:text-[#4695a5] transition-colors font-semibold group"
             >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 Back to Pricing
@@ -105,13 +105,13 @@ const Checkout = () => {
                 >
                     <div className="flex items-start justify-between mb-6">
                         <div>
-                            <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full mb-3 inline-block">
+                            <span className="px-3 py-1 bg-[#4695a5]/10 text-[#4695a5] text-[10px] font-bold uppercase tracking-widest rounded-full mb-3 inline-block">
                                 Selected Plan
                             </span>
                             <h1 className="text-4xl font-black text-slate-900 mb-2">{plan.name}</h1>
                             <p className="text-slate-500 font-medium">{plan.description}</p>
                         </div>
-                        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                        <div className="w-16 h-16 bg-[#4695a5] rounded-2xl flex items-center justify-center shadow-lg shadow-[#4695a5]/20">
                             {plan.name === 'Starter' && <Zap className="w-8 h-8 text-white" />}
                             {plan.name === 'Professional' && <Activity className="w-8 h-8 text-white" />}
                             {(plan.name === 'Enterprise' || plan.name === 'Standard Plan') && <Star className="w-8 h-8 text-white" />}
@@ -136,8 +136,8 @@ const Checkout = () => {
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {plan.features.map((feature, i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
-                                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <div key={i} className="flex items-center gap-3 p-3 bg-[#4695a5]/5 rounded-xl border border-[#4695a5]/20">
+                                    <div className="w-6 h-6 bg-[#4695a5] rounded-full flex items-center justify-center flex-shrink-0">
                                         <Check className="w-4 h-4 text-white" strokeWidth={3} />
                                     </div>
                                     <span className="text-slate-700 font-semibold text-sm">{feature}</span>
@@ -154,7 +154,7 @@ const Checkout = () => {
                         <span className="text-[10px] font-bold text-slate-500 uppercase">HIPAA Compliant</span>
                     </div>
                     <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <Lock className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                        <Lock className="w-6 h-6 text-[#4695a5] mx-auto mb-2" />
                         <span className="text-[10px] font-bold text-slate-500 uppercase">256-bit AES</span>
                     </div>
                     <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
@@ -184,15 +184,15 @@ const Checkout = () => {
                         </div>
                         <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
                             <span className="text-slate-900 font-black text-xl">Total Amount</span>
-                            <span className="text-blue-600 font-black text-3xl">${plan.monthlyPrice}.00</span>
+                            <span className="text-[#4695a5] font-black text-3xl">${plan.monthlyPrice}.00</span>
                         </div>
                     </div>
 
-                    <div className="bg-blue-50 rounded-2xl p-5 mb-8 flex gap-4 border border-blue-100">
-                        <CreditCard className="w-6 h-6 text-blue-600 mt-1" />
+                    <div className="bg-[#4695a5]/5 rounded-2xl p-5 mb-8 flex gap-4 border border-[#4695a5]/20">
+                        <CreditCard className="w-6 h-6 text-[#4695a5] mt-1" />
                         <div>
-                            <h4 className="text-blue-900 font-bold mb-1">Paymob Secure Gateway</h4>
-                            <p className="text-blue-700/70 text-xs font-semibold leading-relaxed">
+                            <h4 className="text-[#1a3d44] font-bold mb-1">Paymob Secure Gateway</h4>
+                            <p className="text-[#4a7d87] text-xs font-semibold leading-relaxed">
                                 You will be redirected to Paymob's secure server to complete your transaction with Visa, Mastercard, or ValU.
                             </p>
                         </div>
@@ -201,7 +201,7 @@ const Checkout = () => {
                     <button 
                         onClick={handlePaymobRedirect}
                         disabled={loading}
-                        className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 group overflow-hidden relative"
+                        className="w-full py-5 bg-[#4695a5] hover:bg-[#00A2C2] disabled:bg-slate-300 text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-[#4695a5]/30 flex items-center justify-center gap-3 group overflow-hidden relative"
                     >
                         {loading ? (
                             <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -212,7 +212,7 @@ const Checkout = () => {
                             </>
                         )}
                         <motion.div 
-                            className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent pointer-events-none"
+                            className="absolute inset-0 bg-gradient-to-r from-[#4695a5]/20 to-transparent pointer-events-none"
                             animate={{ x: ['100%', '-100%'] }}
                             transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                         />
