@@ -9,12 +9,16 @@ import {
   FaRegCircle
 } from "react-icons/fa";
 import { TbHeartbeat } from "react-icons/tb";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 const features = [
   {
     title: "Hormone Regulation",
     desc: "Balances T3 & T4 hormone levels to ensure stable endocrine function and consistent biological activity",
-    position: "top-[5px] left-[-140px]",
+    position: "lg:top-[5px] lg:left-[-140px]",
     delay: 0.6,
     icon: <FaBalanceScale className="text-blue-600" />,
     color: "blue"
@@ -22,7 +26,7 @@ const features = [
   {
     title: "Metabolism Control",
     desc: "Regulates energy production and metabolic rate to support healthy weight management and daily vitality",
-    position: "top-[5px] right-[-140px]",
+    position: "lg:top-[5px] lg:right-[-140px]",
     delay: 0.8,
     icon: <FaFire className="text-orange-500" />,
     color: "orange"
@@ -30,7 +34,7 @@ const features = [
   {
     title: "Cardiovascular Support",
     desc: "Maintains heart rhythm balance and supports normal blood circulation for overall cardiovascular health",
-    position: "bottom-[40px] left-[-140px]",
+    position: "lg:bottom-[40px] lg:left-[-140px]",
     delay: 1,
     icon: <FaHeartbeat className="text-red-500" />,
     color: "red"
@@ -38,7 +42,7 @@ const features = [
   {
     title: "Nervous System Balance",
     desc: "Supports neural signal efficiency and enhances focus, response speed, and cognitive stability",
-    position: "bottom-[40px] right-[-140px]",
+    position: "lg:bottom-[40px] lg:right-[-140px]",
     delay: 1.2,
     icon: <FaBrain className="text-purple-600" />,
     color: "purple"
@@ -59,28 +63,28 @@ const FeatureCard = ({ title, desc, position, delay, icon, color }) => {
       initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
       animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
       transition={{ duration: 0.8, delay, ease: "easeOut" }}
-      className={`absolute ${position} z-20 w-96 p-6 rounded-2xl 
+      className={`relative lg:absolute ${position} z-20 w-full lg:w-96 p-5 lg:p-6 rounded-2xl 
         bg-gradient-to-br ${colorClasses[color]} backdrop-blur-sm
-        shadow-2xl shadow-gray-200/50 border-2`}
+        shadow-xl lg:shadow-2xl shadow-gray-200/50 border-2`}
     >
-      <div className="flex items-start gap-4">
-        <div className={`p-3 rounded-xl bg-white shadow-lg border-2 border-${color}-100`}>
-          <div className="text-2xl">
+      <div className="flex flex-col lg:flex-row items-center lg:items-start text-center lg:text-left gap-3 lg:gap-4">
+        <div className={`p-4 lg:p-3 rounded-2xl lg:rounded-xl bg-white shadow-lg border-2 border-${color}-100`}>
+          <div className="text-3xl lg:text-2xl">
             {icon}
           </div>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 w-full mt-2 lg:mt-0">
           <h4 className="text-xl font-bold text-gray-900 mb-2">
             {title}
           </h4>
-          <p className="text-sm text-gray-600 leading-relaxed mb-3">{desc}</p>
-          <div className="flex items-center text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <TbHeartbeat className="text-gray-400" />
+          <p className="text-sm text-gray-600 leading-relaxed mb-4 lg:mb-3 px-2 lg:px-0">{desc}</p>
+          <div className="flex items-center justify-center lg:justify-start text-xs lg:text-sm text-gray-500 bg-white/50 lg:bg-transparent py-2 lg:py-0 rounded-xl lg:rounded-none">
+            <span className="flex items-center gap-1 font-medium">
+              <TbHeartbeat className="text-gray-400 text-sm lg:text-base" />
               Active function
             </span>
-            <FaArrowRight className="mx-2 text-gray-300 text-xs" />
-            <span>Optimal range</span>
+            <FaArrowRight className="mx-2 text-gray-300 text-[10px] lg:text-xs" />
+            <span className="font-medium">Optimal range</span>
           </div>
         </div>
       </div>
@@ -90,31 +94,13 @@ const FeatureCard = ({ title, desc, position, delay, icon, color }) => {
 
 const ThyroidFeatures = () => {
   return (
-    <section className="relative pt-60 bg-white overflow-hidden pb-28">
+    <section className="relative pt-12 lg:pt-60 bg-white overflow-hidden pb-10 lg:pb-28">
       
-      {/* Section Title */}
-      {/* <div className="text-center mb-20">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="inline-block"
-        >
-    
-          <h2 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-            Thyroid <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">Core Functions</span>
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            A precise visualization of thyroid functionality and vascular response mechanisms
-          </p>
-        </motion.div>
-      </div> */}
-
       {/* Center Wrapper - تركيز العمل هنا */}
-      <div className="relative w-fit mx-auto">
+      <div className="relative w-full lg:w-fit mx-auto px-4 lg:px-0 flex flex-col items-center lg:block">
         
         {/* دوائر حلزونية احترافية حول الصورة */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] z-0 hidden lg:block">
           {/* الدائرة الخارجية */}
           <motion.div
             animate={{ rotate: 360 }}
@@ -147,7 +133,7 @@ const ThyroidFeatures = () => {
         </div>
 
         {/* خطوط توصيل متحركة احترافية */}
-        <svg className="absolute top-0 left-0 w-full h-full z-5" style={{ overflow: 'visible' }}>
+        <svg className="absolute top-0 left-0 w-full h-full z-5 hidden lg:block" style={{ overflow: 'visible' }}>
           {features.map((feature, index) => {
             const positions = {
               0: { x1: "320", y1: "180", x2: "140", y2: "150" },
@@ -231,8 +217,7 @@ const ThyroidFeatures = () => {
             <img
               src="/fff.png"
               alt="Thyroid Gland"
-              className="relative z-10 w-[780px] h-auto select-none drop-shadow-xl rounded-2xl"
-              style={{ maxWidth: 'none' }}
+              className="relative z-10 w-full max-w-[300px] sm:max-w-[400px] lg:w-[780px] lg:max-w-none h-auto select-none drop-shadow-xl rounded-2xl mx-auto"
             />
             
         
@@ -240,10 +225,32 @@ const ThyroidFeatures = () => {
           </div>
         </motion.div>
 
-        {/* Feature Cards */}
-        {features.map((item, index) => (
-          <FeatureCard key={index} {...item} />
-        ))}
+        {/* Desktop Feature Cards (Hidden on Mobile) */}
+        <div className="hidden lg:block">
+          {features.map((item, index) => (
+            <FeatureCard key={index} {...item} />
+          ))}
+        </div>
+
+        {/* Mobile Feature Cards Swiper (Hidden on Desktop) */}
+        <div className="w-full block lg:hidden mt-6 px-2 max-w-full overflow-hidden">
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            spaceBetween={16}
+            slidesPerView={1.1}
+            centeredSlides={true}
+            autoplay={{ delay: 3500, disableOnInteraction: false }}
+            pagination={{ clickable: true, dynamicBullets: true }}
+            className="w-full pb-12 pt-4"
+            loop={true}
+          >
+            {features.map((item, index) => (
+              <SwiperSlide key={index}>
+                <FeatureCard {...item} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
       
       {/* مؤشرات إضافية في الأسفل */}
@@ -251,19 +258,19 @@ const ThyroidFeatures = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="relative z-10  mt-7 text-center"
+        className="relative z-10 mt-12 lg:mt-7 text-center px-4"
       >
-        <div className="inline-flex items-center gap-8 bg-white/80 backdrop-blur-sm px-8 py-4 rounded-2xl border-2 border-blue-100 shadow-lg">
+        <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 bg-white/80 backdrop-blur-sm px-6 sm:px-8 py-4 rounded-2xl border-2 border-blue-100 shadow-lg w-full sm:w-auto">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
             <span className="text-gray-700 font-medium">Active Regulation</span>
           </div>
-          <div className="w-px h-6 bg-gray-200"></div>
+          <div className="hidden sm:block w-px h-6 bg-gray-200"></div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-cyan-500 animate-pulse"></div>
             <span className="text-gray-700 font-medium">Vascular Response</span>
           </div>
-          <div className="w-px h-6 bg-gray-200"></div>
+          <div className="hidden sm:block w-px h-6 bg-gray-200"></div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></div>
             <span className="text-gray-700 font-medium">Neural Integration</span>

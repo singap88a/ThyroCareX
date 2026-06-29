@@ -106,12 +106,11 @@ const Navbar = () => {
   };
 
   const getShortUserName = () => {
-    const name = user?.firstName || user?.username || "User";
-    if (name.length <= 4) return name;
-    return `${name.substring(0, 4)}...`;
+    return user?.firstName || user?.username || "User";
   };
 
   return (
+    <>
     <nav
       className={`fixed top-0 left-0 right-0 z-[500] ${
         isScrolled
@@ -125,7 +124,7 @@ const Navbar = () => {
             <img
               src="/logo_edit.png"
               alt="Thyrax Logo"
-              className="object-contain w-48 transition-all duration-300 group-hover:scale-105 group-hover:brightness-110 drop-shadow-md"
+              className="object-contain w-32 sm:w-40 lg:w-48 transition-all duration-300 group-hover:scale-105 group-hover:brightness-110 drop-shadow-md"
             />
           </Link>
 
@@ -176,7 +175,7 @@ const Navbar = () => {
                         <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || user?.username || 'Doctor')}&background=0D8ABC&color=fff&size=100`} alt="Profile" className="w-full h-full object-cover" />
                       )}
                     </div>
-                    <span className="hidden xl:block font-medium text-sm text-gray-700 max-w-[60px] truncate">
+                    <span className="hidden xl:block font-bold text-sm text-gray-700 max-w-[80px] truncate">
                       {getShortUserName()}
                     </span>
                   </button>
@@ -289,26 +288,117 @@ const Navbar = () => {
               </>
             )}
 
-            <button onClick={toggleMenu} className="flex items-center justify-center w-10 h-10 text-gray-700 lg:hidden bg-gray-100/80 rounded-xl">
-              {isOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
+            <button onClick={toggleMenu} className="flex items-center justify-center w-10 h-10 text-gray-700 lg:hidden hover:bg-gray-100 rounded-xl transition-colors">
+              <FaBars className="w-5 h-5" />
             </button>
           </div>
         </div>
-
-        {isOpen && (
-          <div className="border-t lg:hidden border-gray-200/60 bg-white/98 backdrop-blur-xl">
-            <div className="px-4 py-6 space-y-1">
-              {navLinks.map((link) => (
-                <Link key={link.path} to={link.path} className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-sm ${isActiveLink(link.path) ? "text-primary bg-primary/10" : "text-gray-700"}`} onClick={() => setIsOpen(false)}>
-                  <link.icon className="w-4 h-4" />
-                  <span>{link.label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
+
+    {/* Mobile Menu Overlay */}
+    {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[600] lg:hidden transition-opacity duration-300" 
+            onClick={() => setIsOpen(false)} 
+          />
+        )}
+        
+        {/* Mobile Menu Drawer */}
+        <div 
+          className={`fixed top-0 right-0 h-full w-[300px] bg-white z-[601] lg:hidden transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-2xl ${
+            isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-6 h-full flex flex-col">
+            {/* Drawer Header */}
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+              <img src="/logo_edit.png" alt="Thyrax Logo" className="object-contain w-28" />
+              <button onClick={() => setIsOpen(false)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
+                <FaTimes className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+              {/* Logged In User Section */}
+              {isLoggedIn && (
+                <div className="mb-6 pb-6 border-b border-gray-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-primary overflow-hidden shadow-sm border-2 border-primary/20">
+                      {profileImage ? (
+                        <img src={profileImage} alt="Profile" className="w-full h-full object-cover" onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || user?.username || 'Doctor')}&background=0D8ABC&color=fff&size=100`;}} />
+                      ) : (
+                        <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.firstName || user?.username || 'Doctor')}&background=0D8ABC&color=fff&size=100`} alt="Profile" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-gray-900 truncate">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-[10px] font-bold text-gray-500 truncate">{user?.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Link to="/add-patient" className="flex items-center gap-4 px-4 py-3.5 bg-primary text-white rounded-xl font-bold text-sm shadow-md shadow-primary/20 transition-all hover:scale-[1.02]" onClick={() => setIsOpen(false)}>
+                      <FaStethoscope className="w-5 h-5" />
+                      <span>Add Patient</span>
+                    </Link>
+                    <Link to="/patients" className="flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => setIsOpen(false)}>
+                      <FaUsers className="w-5 h-5 text-primary/70" />
+                      <span>All Patients</span>
+                    </Link>
+                    <Link to="/profile" className="flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => setIsOpen(false)}>
+                      <FaUserCircle className="w-5 h-5 text-primary/70" />
+                      <span>Profile</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* General Links */}
+              <div className="space-y-1">
+                <p className="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Menu</p>
+                {navLinks.map((link) => (
+                  <Link 
+                    key={link.path} 
+                    to={link.path} 
+                    className={`flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
+                      isActiveLink(link.path) ? "text-primary bg-primary/10 shadow-sm" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`} 
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <link.icon className="w-4 h-4" />
+                    <span>{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Auth Links (Not Logged In) */}
+              {!isLoggedIn && (
+                <div className="mt-6 space-y-3 pt-6 border-t border-gray-100">
+                  <Link to="/login" className="flex items-center justify-center gap-2 w-full px-5 py-3.5 text-gray-700 bg-gray-50 hover:bg-gray-100 font-bold text-sm rounded-xl transition-colors" onClick={() => setIsOpen(false)}>
+                    <FaUser className="w-4 h-4" />
+                    <span>Login</span>
+                  </Link>
+                  <Link to="/register" className="flex items-center justify-center gap-2 w-full px-5 py-3.5 bg-primary text-white font-bold text-sm rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl transition-all" onClick={() => setIsOpen(false)}>
+                    <FaUserPlus className="w-4 h-4" />
+                    <span>Get Started</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Logout Footer (Logged In) */}
+            {isLoggedIn && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <button onClick={() => { logout(); setIsOpen(false); }} className="flex items-center gap-4 w-full px-4 py-3.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                  <FaSignOutAlt className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+    </>
   );
 };
 

@@ -4,13 +4,16 @@ import { FaUserMd, FaPills, FaStethoscope, FaArrowRight, FaPlay, FaBell, FaWifi,
 import { BsArrowUpRightCircleFill } from 'react-icons/bs';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
 const Hero = () => {
+  const { isLoggedIn } = useAuth();
 
   return (
-    <div className="relative w-full min-h-screen pt-20 overflow-hidden font-sans bg-white lg:pt-0">
+    <div className="relative w-full lg:min-h-screen pt-20 sm:pt-24 lg:pt-0 overflow-hidden font-sans bg-white">
       
       {/* Background Wave Animation - Full Screen - Animation Stopped */}
       <div className="absolute inset-0 w-full h-full z-0 scale-y-[-1]   pointer-events-none overflow-hidden ">
@@ -24,26 +27,26 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="container relative z-10 h-full px-6 mx-auto lg:px-16">
-        <div className="flex flex-col items-center justify-between h-full min-h-screen gap-12 lg:flex-row lg:gap-20">
+      <div className="container relative z-10 h-full px-4 sm:px-6 mx-auto lg:px-16 pt-0">
+        <div className="flex flex-col items-center justify-center lg:justify-between h-full min-h-[calc(100vh-5rem)] lg:min-h-screen gap-6 lg:flex-row lg:gap-20 pb-10 lg:pb-0">
           
           {/* Left Column: Text Content */}
-          <div className="flex flex-col justify-center w-full space-y-8 lg:w-1/2">
+          <div className="flex flex-col justify-center w-full space-y-6 sm:space-y-8 lg:w-1/2 mt-4 lg:mt-0 text-center lg:text-left items-center lg:items-start">
             
             {/* Premium Tagline Badge */}
             <div className="inline-flex items-center self-start gap-3 px-1.5 py-1.5 pr-6 border rounded-full bg-white/50 border-primary/20 backdrop-blur-md shadow-sm hover:shadow-md transition-all duration-300 group cursor-default">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30 group-hover:rotate-[360deg] transition-transform duration-700">
                   <FaStethoscope className="w-3.5 h-3.5" />
               </div>
-              <span className="text-[10px] font-black text-gray-800 tracking-[0.2em] uppercase font-inter flex items-center gap-2">
+              <span className="text-[9px] sm:text-[10px] font-black text-gray-800 tracking-[0.2em] uppercase font-inter flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                   Advanced AI Diagnostics
               </span>
             </div>
 
             {/* Heading - Descriptive & Long */}
-            <div className="max-w-2xl">
-                <h1 className="text-4xl font-bold leading-tight tracking-tight text-gray-900 md:text-5xl lg:text-7xl font-inter">
+            <div className="max-w-2xl w-full">
+                <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-inter">
                 Empowering Your Health <br/>
                 <span className="italic text-primary">with AI Precision </span>
  
@@ -51,47 +54,51 @@ const Hero = () => {
             </div>
 
             {/* Description */}
-            <p className="max-w-lg pl-5 text-lg leading-relaxed text-gray-600 border-l-2 font-inter opacity-80 border-primary/40">
+            <p className="max-w-lg lg:pl-5 text-base sm:text-lg leading-relaxed text-gray-600 border-l-0 lg:border-l-2 font-inter opacity-80 border-primary/40 text-center lg:text-left px-4 lg:px-0">
               Experience the next generation of thyroid screening. Our AI analyzes your results instantly, providing accuracy validated by leading oncology experts.
             </p>
 
             {/* Refined Liquid-Fill Buttons */}
-            <div className="flex flex-col gap-5 pt-2 sm:flex-row">
-              <button className="relative flex items-center justify-center gap-3 px-10 py-4 overflow-hidden font-bold text-white transition-all duration-500 border-2 shadow-lg bg-primary rounded-xl hover:text-primary border-primary group font-inter shadow-primary/20">
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-5 w-full sm:w-auto px-4 lg:px-0">
+              <Link to={isLoggedIn ? "/add-patient" : "/register"} className="relative flex items-center justify-center gap-3 px-6 py-3.5 sm:px-10 sm:py-4 overflow-hidden font-bold text-white transition-all duration-500 border-2 shadow-lg bg-primary rounded-xl hover:text-primary border-primary group font-inter shadow-primary/20 w-full sm:w-auto text-sm sm:text-base">
                 <span className="relative z-10">Start Analysis</span>
-                <BsArrowUpRightCircleFill className="relative z-10 w-5 h-5 transition-transform duration-500 group-hover:rotate-45" />
+                <BsArrowUpRightCircleFill className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-500 group-hover:rotate-45" />
                 <div className="absolute inset-x-0 bottom-0 h-0 transition-all duration-500 ease-in-out bg-white group-hover:h-full"></div>
-              </button>
+              </Link>
               
-              <button className="px-10 py-4 bg-white border-2 border-gray-100 text-gray-900 rounded-xl font-bold transition-all duration-500 hover:border-primary hover:bg-primary/[0.03] flex items-center justify-center gap-3 font-inter group">
+              <Link to="/about" className="px-6 py-3.5 sm:px-10 sm:py-4 bg-white border-2 border-gray-100 text-gray-900 rounded-xl font-bold transition-all duration-500 hover:border-primary hover:bg-primary/[0.03] flex items-center justify-center gap-3 font-inter group w-full sm:w-auto text-sm sm:text-base">
                  <FaPlay className="w-3 h-3 transition-transform text-primary group-hover:scale-125" />
                  Watch Demo
                  <FaArrowRight className="w-3 h-3 translate-x-0 group-hover:translate-x-1.5 transition-transform duration-300" />
-              </button>
+              </Link>
             </div>
 
             {/* Compact Stats */}
-            <div className="flex items-center gap-10 pt-6">
-               <div className="flex flex-col">
-                 <span className="text-2xl font-bold text-gray-900">99.8%</span>
-                 <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Accuracy</span>
+            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 sm:gap-10 pt-2 sm:pt-6 w-full justify-center lg:justify-start">
+               
+               <div className="flex items-center gap-8 sm:gap-10">
+                 <div className="flex flex-col items-center lg:items-start">
+                   <span className="text-2xl font-bold text-gray-900">99.8%</span>
+                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Accuracy</span>
+                 </div>
+                 <div className="flex flex-col items-center lg:items-start">
+                   <span className="text-2xl font-bold text-gray-900">2 Min</span>
+                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Process</span>
+                 </div>
                </div>
-               <div className="flex flex-col">
-                 <span className="text-2xl font-bold text-gray-900">2 Min</span>
-                 <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Process</span>
-               </div>
-                <div className="flex items-center gap-2">
+
+               <div className="flex flex-col sm:flex-row items-center gap-2">
                    <div className="flex -space-x-2">
-                         {[1,2,3].map(i => <img key={i} src={`https://i.pravatar.cc/100?img=${i+30}`} className="w-8 h-8 border-2 border-white rounded-full" alt="user"/>)}
+                         {[1,2,3].map(i => <img key={i} src={`https://i.pravatar.cc/100?img=${i+30}`} className="w-8 h-8 border-2 border-white rounded-full shadow-sm" alt="user"/>)}
                    </div>
-                   <span className="text-[10px] text-gray-400 font-bold uppercase">10k+ Protected</span>
-                </div>
+                   <span className="text-[10px] text-gray-400 font-bold uppercase mt-1 sm:mt-0">10k+ Protected</span>
+               </div>
             </div>
 
           </div>
 
           {/* Right Column: Premium iPhone 15 Pro Max Component */}
-          <div className="relative flex items-center justify-center w-full pt-10 lg:w-1/2 lg:justify-end lg:pr-36">
+          <div className="relative flex items-center justify-center w-full pt-4 sm:pt-10 lg:w-1/2 lg:justify-end lg:pr-36 scale-[0.8] sm:scale-90 md:scale-100 origin-center lg:origin-right mt-10 lg:mt-0">
              
              {/* Floating Animated Cards with Simple Animation */}
              <div className="absolute z-30 hidden -left-12 top-20 md:block" style={{ animation: 'float-card-primary 6s ease-in-out infinite' }}>

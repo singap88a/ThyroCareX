@@ -333,7 +333,7 @@ const ProfessionalAnalyticsSection = () => {
               </div>
               
               {/* Stats Grid مع تأثيرات متطورة */}
-              <div className="grid grid-cols-3 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
                 {/* Patients Counter */}
                 <div className="relative p-4 text-center transition-all duration-300 bg-white border border-gray-100 shadow-lg rounded-2xl group hover:border-primary/20 hover:-translate-y-1">
                   <div className="absolute top-0 left-0 w-full h-1 transition-opacity opacity-100 rounded-t-2xl bg-gradient-to-r from-transparent via-primary to-transparent"></div>
@@ -409,7 +409,7 @@ const ProfessionalAnalyticsSection = () => {
             </div>
 
             {/* Features Grid - تصميم أبسط */}
-            <div className="flex gap-5">
+            <div className="flex flex-col md:flex-row gap-5">
               {features.map((feature, index) => (
                 <div key={index} className="p-6 transition-shadow duration-300 bg-white border border-gray-200 rounded-3xl">
                   <div className="">
