@@ -5,12 +5,13 @@ import {
   Phone, MapPin, FileText, Upload, Send, X,
   CircleCheck, AlertCircle, Loader2, Brain,
   Activity, FlaskConical, Microscope, Info, CheckCircle2, AlertTriangle, Fingerprint,
-  Pill, HeartPulse, ClipboardList, RotateCcw
+  Pill, HeartPulse, ClipboardList, RotateCcw, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import patientService from '../../services/patientService';
 import testService from '../../services/testService';
+import api from '../../services/api';
 
 // --- Sub-components (Moved outside to fix focus issue) ---
 
@@ -93,6 +94,45 @@ const AddPatient = () => {
     nodulePresent: false,
     ultrasoundImages: [],
   });
+
+  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isAuth, setIsAuth] = useState(true);
+
+  // --- Auth & Subscription Check ---
+  useEffect(() => {
+    const checkAuthAndSub = async () => {
+      const userStr = localStorage.getItem('thyrax_user');
+      if (!userStr) {
+        setIsAuth(false);
+        return;
+      }
+      try {
+        const u = JSON.parse(userStr);
+        const historyRes = await api.get('/Payment/history');
+        if (historyRes.data?.succeeded) {
+          const myTxs = historyRes.data.data.filter(tx => tx.doctorEmail === u.email);
+          const active = myTxs.find(tx => {
+            const statusStr = String(tx.status).toLowerCase();
+            if (statusStr !== 'paid' && statusStr !== '2') return false;
+            if (!tx.startDate) return false;
+            const end = new Date(tx.startDate);
+            end.setDate(end.getDate() + (tx.durationInDays || 30));
+            return end > new Date();
+          });
+          if (!active) {
+            setIsSubscribed(false);
+          }
+        }
+      } catch (err) {
+        if (err.response?.status === 403) {
+          setIsSubscribed(false);
+        } else if (err.response?.status === 401) {
+          setIsAuth(false);
+        }
+      }
+    };
+    checkAuthAndSub();
+  }, []);
 
   // --- Persistence Logic ---
   useEffect(() => {
@@ -347,6 +387,56 @@ const AddPatient = () => {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
+
+      {/* Unauthenticated Overlay */}
+      {!isAuth && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white p-10 rounded-3xl shadow-2xl border border-primary/20 max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 border-[6px] border-red-50/50">
+              <User className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-3xl font-black text-slate-800 mb-3">Login Required</h2>
+            <p className="text-slate-600 mb-8 font-medium">
+              You must be logged in to add a new patient and run AI diagnostics.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => navigate('/login')}
+                className="w-full px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 transition-all"
+              >
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Locked Overlay */}
+      {isAuth && !isSubscribed && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white p-10 rounded-3xl shadow-2xl border border-primary/20 max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 relative border-[6px] border-amber-50/50">
+              <Brain className="w-10 h-10 text-amber-500" />
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-black text-slate-800 mb-3">Subscription Required</h2>
+            <p className="text-slate-600 mb-8 font-medium leading-relaxed">
+              You need an active subscription to add new patients and access the AI medical diagnostic features.
+            </p>
+            <div className="flex flex-col gap-4 justify-center">
+              <button 
+                onClick={() => navigate('/pricing')}
+                className="w-full px-8 py-4 bg-amber-500 text-white font-bold rounded-xl shadow-lg hover:shadow-amber-500/30 transition-all"
+              >
+                View Subscription Plans
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">

@@ -539,7 +539,7 @@ const Register = () => {
                                 <span className="absolute -bottom-2 left-0 w-full h-[4px] bg-gradient-to-r from-primary via-primary/70 to-transparent rounded-full transform -translate-y-1"></span>
                             </span>
                             <span className="ml-2 font-extrabold text-gray-700 block sm:inline sm:ml-2">
-                                to Thyro Carex
+                                to ThyraX
                             </span>
                             </h1>
                         </div>
