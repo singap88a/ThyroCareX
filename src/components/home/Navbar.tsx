@@ -106,7 +106,8 @@ const Navbar = () => {
   };
 
   const getShortUserName = () => {
-    return user?.firstName || user?.username || "User";
+    const name = user?.firstName || user?.username || "User";
+    return name.substring(0, 3) + "..";
   };
 
   return (
@@ -129,7 +130,7 @@ const Navbar = () => {
           </Link>
 
           {/* Center Links */}
-          <div className="absolute hidden transform -translate-x-1/2 lg:flex left-1/2">
+          <div className="hidden lg:flex flex-1 justify-center px-2">
             <div className="flex items-center gap-0.5 px-2 py-2 border shadow-sm bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-xl rounded-2xl border-gray-200/60">
               {navLinks.map((link) => {
                 const IconComponent = link.icon;
@@ -152,7 +153,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 lg:gap-3">
+          <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0 z-10">
             {isLoggedIn ? (
               <>
                 <Link

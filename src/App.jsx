@@ -18,6 +18,7 @@ import Checkout from './pages/pricing/Checkout';
 import ScrollToTop from './components/common/ScrollToTop';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import ForgotPassword from './components/auth/ForgotPassword';
 import PendingVerification from './components/auth/PendingVerification';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import Terms from './pages/legal/Terms';
@@ -68,6 +69,7 @@ function AppContent() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/diagnosis-results" element={<DiagnosisResults />} />

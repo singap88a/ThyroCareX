@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthWave from "./AuthWave";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -117,9 +117,9 @@ const Login = () => {
                 <input type="checkbox" className="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary/50" />
                 <span>Remember me</span>
               </label>
-              <a href="#" className="font-medium text-gray-400 transition-colors hover:text-primary">
+              <Link to="/forgot-password" className="font-medium text-gray-400 transition-colors hover:text-primary">
                 Forgot Password?
-              </a>
+              </Link>
             </div>
 
             {/* Create Account Link */}

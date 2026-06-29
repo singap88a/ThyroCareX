@@ -25,6 +25,21 @@ const authService = {
     });
     return response.data;
   },
+
+  forgotPassword: async (email) => {
+    const response = await api.post('/Authentication/forgot-password', { email });
+    return response.data;
+  },
+
+  verifyOTP: async (email, otp) => {
+    const response = await api.post('/Authentication/verify-otp', { email, otp });
+    return response.data;
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    const response = await api.post('/Authentication/reset-password', { email, otp, newPassword });
+    return response.data;
+  },
 };
 
 export default authService;
