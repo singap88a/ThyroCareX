@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   ArrowLeft, ArrowRight, User, Calendar, Weight, Ruler,
   Phone, MapPin, FileText, Upload, Send, X,
@@ -99,18 +100,18 @@ const AddPatient = () => {
   const [isAuth, setIsAuth] = useState(true);
 
   // --- Auth & Subscription Check ---
+  const { user } = useAuth();
+  
   useEffect(() => {
     const checkAuthAndSub = async () => {
-      const userStr = localStorage.getItem('thyrax_user');
-      if (!userStr) {
+      if (!user) {
         setIsAuth(false);
         return;
       }
       try {
-        const u = JSON.parse(userStr);
         const historyRes = await api.get('/Payment/history');
         if (historyRes.data?.succeeded) {
-          const myTxs = historyRes.data.data.filter(tx => tx.doctorEmail === u.email);
+          const myTxs = historyRes.data.data.filter(tx => tx.doctorEmail === user.email);
           const active = myTxs.find(tx => {
             const statusStr = String(tx.status).toLowerCase();
             if (statusStr !== 'paid' && statusStr !== '2') return false;
@@ -132,7 +133,7 @@ const AddPatient = () => {
       }
     };
     checkAuthAndSub();
-  }, []);
+  }, [user]);
 
   // --- Persistence Logic ---
   useEffect(() => {
