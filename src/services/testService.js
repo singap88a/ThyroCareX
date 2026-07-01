@@ -22,6 +22,20 @@ const testService = {
     return response.data; // { succeeded, data: { status, classification, images, ... } }
   },
 
+  // Run FNAC Bethesda Cytopathology classification
+  processFnac: async (testId, imageFile, sessionId) => {
+    const formData = new FormData();
+    formData.append('TestId', testId);
+    if (sessionId) formData.append('SessionId', sessionId);
+    if (Array.isArray(imageFile)) {
+      imageFile.forEach(file => formData.append('FnacImages', file));
+    } else {
+      formData.append('FnacImages', imageFile);
+    }
+    const response = await api.post('/TestsWithAI/ProcessFnac', formData);
+    return response.data; // { succeeded, data: [{ bethesda_category, ... }] }
+  },
+
   // Get test history for a specific patient
   getPatientTestHistory: async (patientId) => {
     const response = await api.get(`/TestsWithAI/GetPatientTestHistory/${patientId}`);

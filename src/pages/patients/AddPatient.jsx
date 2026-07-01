@@ -698,12 +698,19 @@ const AddPatient = () => {
                         {patientData.ultrasoundImages.map((img, i) => {
                           const isImgValid = validationResult?.results ? validationResult.results[i]?.is_ultrasound : true;
                           return (
-                            <div key={i} className={`flex items-center justify-between p-4 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
-                              <div className="flex items-center gap-3">
-                                {isValidating ? <Loader2 className="animate-spin w-5 h-5" /> : (isImgValid) ? <CheckCircle2 className="w-6 h-6 text-green-300" /> : <X className="w-6 h-6 text-red-300" />}
-                                <span className="text-xs font-bold truncate max-w-[150px]">{img.name}</span>
+                            <div key={i} className={`flex items-center justify-between p-3 rounded-xl ${isValidating ? 'bg-white/10' : (isImgValid) ? 'bg-green-500/20' : 'bg-red-500/40'}`}>
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg border border-white/10 overflow-hidden bg-black/20 flex-shrink-0 relative">
+                                  <img src={URL.createObjectURL(img)} alt="preview" className="w-full h-full object-cover opacity-90" />
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                    {isValidating ? <Loader2 className="animate-spin w-5 h-5 text-white" /> : (isImgValid) ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <X className="w-5 h-5 text-red-400" />}
+                                  </div>
+                                </div>
+                                <span className="text-xs font-bold truncate max-w-[150px] text-white">{img.name}</span>
                               </div>
-                              <button type="button" onClick={() => removeImage(i)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"><X size={16} /></button>
+                              <button type="button" onClick={() => removeImage(i)} className="p-2 hover:bg-white/10 rounded-lg transition-colors group/btn">
+                                <X size={16} className="text-white/70 group-hover/btn:text-white" />
+                              </button>
                             </div>
                           );
                         })}
