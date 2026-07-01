@@ -14,6 +14,7 @@ import DiagnosisComparison from '../diagnosis/DiagnosisComparison';
 import DiagnosisHistory from '../diagnosis/DiagnosisHistory';
 import Anatomy3DView from '../diagnosis/Anatomy3DView';
 import PatientChat from '../../components/patients/PatientChat';
+import PatientAiAgent from '../../components/patients/PatientAiAgent';
 import patientService from '../../services/patientService';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -141,7 +142,7 @@ const PatientDashboard = () => {
       const n = parseInt(testIdParam, 10);
       if (!Number.isNaN(n)) setSelectedTestId(n);
     }
-    if (view && ['info', 'results', 'anatomy', 'history', 'compare', 'rediagnose'].includes(view)) {
+    if (view && ['info', 'results', 'anatomy', 'history', 'compare', 'rediagnose', 'ai_agent', 'chat'].includes(view)) {
       setActiveView(view);
     }
   }, [location.search]);
@@ -168,6 +169,7 @@ const PatientDashboard = () => {
     { id: 'history',    label: 'Diagnosis History',    labelAr: 'تاريخ التشخيص',     icon: History,      color: 'text-green-500',   bg: 'bg-green-500/10'   },
     { id: 'compare',    label: 'Diagnosis Comparison', labelAr: 'مقارنة التشخيص',    icon: Scale,        color: 'text-orange-500',  bg: 'bg-orange-500/10'  },
     { id: 'rediagnose', label: 'New Re-Diagnosis',     labelAr: 'إعادة التشخيص',     icon: RefreshCcw,   color: 'text-red-500',     bg: 'bg-red-500/10'     },
+    { id: 'ai_agent',   label: 'AI Agent',             labelAr: 'اسأل الذكاء الاصطناعي', icon: Brain,        color: 'text-pink-500',    bg: 'bg-pink-500/10'    },
     { id: 'chat',       label: 'Contact Patient',      labelAr: 'التواصل مع المريض',  icon: Bell,         color: 'text-purple-500',  bg: 'bg-purple-500/10'  },
   ];
 
@@ -190,6 +192,7 @@ const PatientDashboard = () => {
       case 'history':    return <DiagnosisHistory dashboardMode={true} onSelectTest={handleTestSelect} />;
       case 'compare':    return <DiagnosisComparison dashboardMode={true} />;
       case 'rediagnose': return <ReDiagnosis dashboardMode={true} onComplete={handleReDiagnosisComplete} onPatientSave={fetchPatient} />;
+      case 'ai_agent':   return <PatientAiAgent patientId={id} testId={selectedTestId} />;
       case 'chat':       return <PatientChat patientId={id} />;
       default:           return <PatientInfoView patient={patient} />;
     }
