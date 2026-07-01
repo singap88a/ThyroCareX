@@ -70,6 +70,7 @@ const AddPatient = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [testId, setTestId] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
   const [patientIdStr, setPatientIdStr] = useState(null);
   const [clinicalResult, setClinicalResult] = useState(null);
 
@@ -145,6 +146,7 @@ const AddPatient = () => {
         setCurrentStep(parsed.currentStep || 1);
         setPatientIdStr(parsed.patientIdStr || null);
         setTestId(parsed.testId || null);
+        setSessionId(parsed.sessionId || null);
         setClinicalResult(parsed.clinicalResult || null);
         if (parsed.currentStep > 1) {
           toast('Resuming active diagnosis session', { icon: '🔄' });
@@ -161,10 +163,11 @@ const AddPatient = () => {
       currentStep,
       patientIdStr,
       testId,
+      sessionId,
       clinicalResult
     };
     localStorage.setItem('thyrocare_active_diagnosis', JSON.stringify(state));
-  }, [patientData, currentStep, patientIdStr, testId, clinicalResult]);
+  }, [patientData, currentStep, patientIdStr, testId, sessionId, clinicalResult]);
 
   const clearProgress = () => {
     localStorage.removeItem('thyrocare_active_diagnosis');
@@ -332,8 +335,12 @@ const AddPatient = () => {
       const pId = patientRes.data;
       setPatientIdStr(pId);
 
+      const newSessionId = crypto.randomUUID();
+      setSessionId(newSessionId);
+
       const clinicalPayload = {
         patient_id: String(pId),
+        session_id: newSessionId,
         Age: getAgeNumber(),
         on_thyroxine: patientData.onThyroxine ? 1 : 0,
         thyroid_surgery: patientData.thyroidSurgery ? 1 : 0,
@@ -371,7 +378,7 @@ const AddPatient = () => {
 
     setIsProcessingImage(true);
     try {
-      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages);
+      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages, sessionId);
       if (imgRes.succeeded) {
         toast.success('Diagnosis complete / اكتمل التشخيص');
         localStorage.removeItem('thyrocare_active_diagnosis'); // Clear upon completion

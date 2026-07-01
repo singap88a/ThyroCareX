@@ -9,9 +9,10 @@ const testService = {
   },
 
   // Run ONNX ultrasound segmentation + TI-RADS classification
-  processImage: async (testId, imageFile) => {
+  processImage: async (testId, imageFile, sessionId) => {
     const formData = new FormData();
     formData.append('TestId', testId);
+    if (sessionId) formData.append('SessionId', sessionId);
     if (Array.isArray(imageFile)) {
       imageFile.forEach(file => formData.append('UltraSoundImages', file));
     } else {

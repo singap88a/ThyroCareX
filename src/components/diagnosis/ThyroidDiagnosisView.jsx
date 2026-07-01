@@ -215,7 +215,8 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     setIsProcessingImage(true);
 
     try {
-      const imgRes = await testService.processImage(diagnosisResult.testId, validImages);
+      // Use testId as session id for subsequent uploads to tie them to the same session
+      const imgRes = await testService.processImage(diagnosisResult.testId, validImages, String(diagnosisResult.testId));
       
       if (imgRes.succeeded) {
         toast.success('AI Image Diagnosis Complete');
@@ -404,7 +405,11 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                 const clinicalRec = pred?.classification?.clinical_recommendation || pred?.Classification?.clinical_recommendation || pred?.clinicalRecommendation || 'Follow up required.';
                 const aiRec = pred?.ai_recommendation || null;
                 const nextStep = pred?.classification?.next_step || pred?.Classification?.next_step || pred?.nextStep || 'Consult endocrinologist';
-                const needsReview = pred?.classification?.needs_manual_review || pred?.Classification?.needs_manual_review || confidence < 60;
+                const needsReview = pred?.classification?.needs_manual_review || pred?.Classification?.needs_manual_review || pred?.classification?.NeedsManualReview || pred?.Classification?.NeedsManualReview || confidence < 60;
+                const tirads = pred?.classification?.acr_tirads_level || pred?.Classification?.acr_tirads_level || pred?.classification?.Tirads_Stage || pred?.Classification?.Tirads_Stage || 'N/A';
+                const radiomicFeatures = pred?.classification?.radiomic_features || pred?.Classification?.radiomic_features || pred?.classification?.RadiomicFeatures || pred?.Classification?.RadiomicFeatures || null;
+                const segmentation = pred?.segmentation || pred?.Segmentation || null;
+                const medicalDisclaimer = pred?.medical_disclaimer || pred?.MedicalDisclaimer || null;
                 const filename = pred?.filename || pred?.Filename || `Image ${idx + 1}`;
                 
                 // Extract images object (could be uppercase or lowercase depending on source)
@@ -436,14 +441,18 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                                     </div>
                                     <h2 className="text-2xl font-black text-gray-900 capitalize">{label}</h2>
                                 </div>
-                                <div className="mt-4 md:mt-0 flex gap-3 text-left md:text-right">
-                                    <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 text-center shadow-sm">
-                                        <p className="text-xl font-black text-primary">{Number(confidence).toFixed(1)}%</p>
-                                        <p className="text-[9px] font-bold text-primary/70 uppercase tracking-widest">Confidence</p>
+                                <div className="mt-6 md:mt-0 flex flex-wrap gap-4 text-center justify-end">
+                                    <div className="bg-white border-2 border-primary/10 rounded-2xl px-6 py-4 shadow-sm flex-1 md:flex-none min-w-[140px] flex flex-col justify-center">
+                                        <p className="text-2xl font-black text-primary mb-1">{Number(confidence).toFixed(1)}%</p>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Confidence</p>
                                     </div>
-                                    <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-center shadow-sm">
-                                        <p className="text-xl font-black text-slate-800 capitalize">{riskLevel.toLowerCase()}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</p>
+                                    <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 shadow-sm flex-1 md:flex-none min-w-[140px] flex flex-col justify-center">
+                                        <p className="text-2xl font-black text-slate-800 capitalize mb-1">{riskLevel.toLowerCase()}</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</p>
+                                    </div>
+                                    <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 shadow-sm flex-1 md:flex-none min-w-[140px] flex flex-col justify-center">
+                                        <p className="text-2xl font-black text-slate-800 uppercase mb-1">{tirads}</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ACR TI-RADS</p>
                                     </div>
                                 </div>
                             </div>
@@ -458,7 +467,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                                             <div className="flex justify-between items-center px-1">
                                                 <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Detection</span>
                                             </div>
-                                            <img src={aiImages.overlay_url} alt="Overlay" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                            <img src={aiImages.overlay_url.startsWith('/') ? `${BASE_URL}${aiImages.overlay_url}` : aiImages.overlay_url} alt="Overlay" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                                         </div>
                                     )}
                                     {aiImages?.mask_url && (
@@ -466,7 +475,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                                             <div className="flex justify-between items-center px-1">
                                                 <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Segmentation</span>
                                             </div>
-                                            <img src={aiImages.mask_url} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                            <img src={aiImages.mask_url.startsWith('/') ? `${BASE_URL}${aiImages.mask_url}` : aiImages.mask_url} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                                         </div>
                                     )}
                                     {aiImages?.roi_url && (
@@ -474,7 +483,7 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                                             <div className="flex justify-between items-center px-1">
                                                 <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">ROI Area</span>
                                             </div>
-                                            <img src={aiImages.roi_url} alt="ROI" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                                            <img src={aiImages.roi_url.startsWith('/') ? `${BASE_URL}${aiImages.roi_url}` : aiImages.roi_url} alt="ROI" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                                         </div>
                                     )}
                                 </div>
@@ -526,6 +535,50 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                                                 <Clock size={16} className="text-gray-400" /> 
                                                 <span><span className="text-gray-400 uppercase text-[10px] tracking-widest mr-2">Suggested Action:</span> {nextStep}</span>
                                             </div>
+
+                                            {radiomicFeatures && (
+                                                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                                                    <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                        <Activity size={16}/> Radiomic Features
+                                                    </p>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        {Object.entries(radiomicFeatures).map(([key, value], rIdx) => {
+                                                            const displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                                            const isBool = typeof value === 'boolean';
+                                                            const displayValue = isBool ? (value ? 'Yes' : 'No') : Number(value).toFixed(2);
+                                                            const highlight = isBool && value ? 'text-amber-600' : 'text-gray-700';
+                                                            
+                                                            return (
+                                                                <div key={rIdx} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate" title={displayKey}>{displayKey}</p>
+                                                                    <p className={`text-sm font-bold ${highlight}`}>{displayValue}</p>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {segmentation && (
+                                                <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-200">
+                                                    <div className="text-xs">
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-2">Method:</span>
+                                                        <span className="font-bold text-gray-700 bg-white px-2 py-1 rounded border border-gray-100">{segmentation.method || segmentation.Method || 'N/A'}</span>
+                                                    </div>
+                                                    <div className="text-xs">
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-2">ROI Extraction:</span>
+                                                        <span className="font-bold text-gray-700 bg-white px-2 py-1 rounded border border-gray-100">{segmentation.roi_extraction || segmentation.RoiExtraction || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {medicalDisclaimer && (
+                                                <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100 mt-4">
+                                                    <p className="text-xs font-bold text-amber-800/80 leading-relaxed">
+                                                        {medicalDisclaimer}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </motion.div>
                                 )}
