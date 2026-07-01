@@ -13,13 +13,43 @@ const aiService = {
   },
 
   getPatientSessions: async (patientId) => {
-    const response = await api.get(`/AiChat/Sessions/${patientId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/AiChat/Sessions/${patientId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get patient sessions:', error);
+      throw error;
+    }
   },
 
   getSessionMessages: async (sessionId) => {
-    const response = await api.get(`/AiChat/Messages/${sessionId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/AiChat/Messages/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get session messages:', error);
+      throw error;
+    }
+  },
+
+  getGeneralSessions: async () => {
+    try {
+      const response = await api.get('/AiChat/GeneralSessions');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get general sessions:', error);
+      throw error;
+    }
+  },
+
+  getGeneralSessionMessages: async (sessionId) => {
+    try {
+      const response = await api.get(`/AiChat/GeneralMessages/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get general session messages:', error);
+      throw error;
+    }
   },
 
   // Stream a chat message to the general AI chat
