@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { FaCopy, FaStop, FaTrash, FaRedo, FaPaperPlane, FaLightbulb, FaSearch, FaCode, FaRobot, FaUser, FaBrain, FaImage, FaTimes, FaPlus, FaComments } from "react-icons/fa";
+import { FaCopy, FaStop, FaTrash, FaRedo, FaPaperPlane, FaLightbulb, FaSearch, FaCode, FaRobot, FaUser, FaBrain, FaImage, FaTimes, FaPlus, FaComments, FaBars } from "react-icons/fa";
 import aiService from "../../services/aiService";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { BASE_URL } from "../../config";
 
 const GeminiSingap = ({ darkMode = false }) => {
   const typingIntervalsRef = useRef({});
@@ -28,8 +30,10 @@ const GeminiSingap = ({ darkMode = false }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const user = localStorage.getItem('thyrax_user');
@@ -88,6 +92,7 @@ const GeminiSingap = ({ darkMode = false }) => {
       toast.error('Failed to load messages');
     } finally {
       setLoadingMessages(false);
+      setIsSidebarOpen(false); // Close sidebar on mobile after selecting
     }
   };
 
@@ -110,6 +115,7 @@ const GeminiSingap = ({ darkMode = false }) => {
   const resetChat = useCallback(() => {
     createNewSession();
     setInputValue("");
+    setIsSidebarOpen(false);
   }, [createNewSession]);
 
   const copyMessage = useCallback(async (text) => {
@@ -143,15 +149,16 @@ const GeminiSingap = ({ darkMode = false }) => {
   };
 
   const handleSendMessage = useCallback(
-    async (e) => {
+    async (e, overrideText = null) => {
       if (e) e.preventDefault();
-      if (!inputValue.trim() || isGenerating) return;
+      const messageToProcess = overrideText || inputValue.trim();
+      if (!messageToProcess || isGenerating) return;
 
       if (!currentSessionId) {
         createNewSession();
       }
 
-      const userMessage = inputValue.trim();
+      const userMessage = messageToProcess;
       setInputValue("");
       setIsTypingStopped(false);
       setShowHeader(false);
@@ -210,6 +217,8 @@ const GeminiSingap = ({ darkMode = false }) => {
             setIsSubscribed(false);
           } else if (err.message === "401") {
             errorMessage = "Please login to use the AI assistant.";
+          } else {
+            errorMessage = `Sorry, I encountered an error (${err.message || 'Unknown'}). Please try again.`;
           }
           setChats((prev) => {
             const updated = [...prev];
@@ -235,6 +244,10 @@ const GeminiSingap = ({ darkMode = false }) => {
     [inputValue, isGenerating, chats, selectedImage, currentSessionId]
   );
 
+  const handleSuggestionClick = (question) => {
+    handleSendMessage(null, question);
+  };
+
   const formatMessage = (text) => {
     if (!text) return null;
     const formattedText = text.replace(/(^|\n)\*\s+/g, '$1• ');
@@ -257,14 +270,25 @@ const GeminiSingap = ({ darkMode = false }) => {
   }, [chats]);
 
   return (
-    <div className={`relative flex min-h-screen transition-colors duration-300 ${darkMode ? 'bg-background text-text' : 'bg-slate-50 text-gray-900'}`}>
+    <div className={`relative flex h-[calc(100vh-80px)] transition-colors duration-300 overflow-hidden ${darkMode ? 'bg-background text-text' : 'bg-slate-50 text-gray-900'}`}>
       
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className={`w-72 flex-shrink-0 flex flex-col border-r transition-colors ${darkMode ? 'bg-surface border-border' : 'bg-white border-gray-200'}`}>
-        <div className="p-4 border-b border-gray-200 dark:border-border">
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 flex-shrink-0 flex flex-col border-r transition-transform duration-300 transform md:relative md:translate-x-0 pt-16 md:pt-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${darkMode ? 'bg-surface border-border' : 'bg-white border-gray-200'}`}>
+        <div className="p-4 border-b border-gray-200 dark:border-border relative">
+          <button className="absolute top-4 right-4 md:hidden text-gray-500 hover:text-gray-700" onClick={() => setIsSidebarOpen(false)}>
+            <FaTimes size={20} />
+          </button>
           <button 
-            onClick={createNewSession}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white rounded-xl hover:bg-primaryHover transition-colors shadow-sm font-semibold text-sm"
+            onClick={() => { createNewSession(); setIsSidebarOpen(false); }}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 mt-8 md:mt-0 bg-primary text-white rounded-xl hover:bg-primaryHover transition-colors shadow-sm font-semibold text-sm"
           >
             <FaPlus size={14} />
             New Chat
@@ -278,7 +302,7 @@ const GeminiSingap = ({ darkMode = false }) => {
               <button
                 key={session.id}
                 onClick={() => selectSession(session.id)}
-                className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${currentSessionId === session.id ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 dark:hover:bg-accent text-gray-700 dark:text-gray-300'}`}
+                className={`w-full text-left px-4 py-3.5 rounded-xl flex items-center gap-3 transition-colors border shadow-sm ${currentSessionId === session.id ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white border-gray-100 hover:border-gray-200 dark:bg-surface dark:border-border text-gray-700 dark:text-gray-300'}`}
               >
                 <FaComments size={16} className={currentSessionId === session.id ? "text-primary" : "text-gray-400"} />
                 <div className="flex-1 truncate">
@@ -290,7 +314,15 @@ const GeminiSingap = ({ darkMode = false }) => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col pt-16">
+      <div className="flex-1 flex flex-col pt-16 md:pt-16 w-full max-w-full">
+        {/* Mobile Sidebar Toggle */}
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="md:hidden fixed top-[84px] left-4 z-30 p-2.5 bg-white rounded-xl shadow-md border border-gray-100 text-gray-700 hover:text-primary transition-colors"
+        >
+          <FaBars size={20} />
+        </button>
+
         {/* Modals */}
         {showCopyPopup && (
           <div className={`fixed z-50 px-4 py-2 text-white bg-green-600 rounded-full shadow-lg top-6 left-1/2 -translate-x-1/2 animate-bounce-in`}>
@@ -340,25 +372,44 @@ const GeminiSingap = ({ darkMode = false }) => {
 
         {/* Header */}
         {showHeader && !loadingMessages && (
-          <header className="flex flex-col items-center justify-center flex-1 w-full max-w-4xl px-4 mx-auto text-center animate-fade-in py-12">
-            <div className="p-6 mb-8 rounded-3xl bg-primary/10 border border-primary/20 shadow-2xl shadow-primary/10">
-              <FaBrain className="w-16 h-16 text-primary animate-pulse-slow" />
+          <header className="flex flex-col items-center justify-center flex-1 w-full max-w-4xl px-4 mx-auto text-center animate-fade-in py-6">
+            <div className="p-4 mb-6 rounded-3xl bg-primary/10 border border-primary/20 shadow-xl shadow-primary/10">
+              <FaBrain className="w-12 h-12 text-primary animate-pulse-slow" />
             </div>
-            <h1 className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl">
+            <h1 className="mb-3 text-4xl font-extrabold tracking-tight md:text-5xl">
               <span className="text-primary">
                 Thyrax AI
               </span>
             </h1>
-            <p className={`text-xl md:text-2xl font-medium max-w-2xl mx-auto ${darkMode ? 'text-text-secondary' : 'text-gray-500'}`}>
+            <p className={`text-lg font-medium max-w-2xl mx-auto ${darkMode ? 'text-text-secondary' : 'text-gray-500'}`}>
               Welcome to your intelligent assistant. Start a new chat below.
             </p>
+
+            <div className="grid w-full max-w-3xl grid-cols-1 gap-4 mt-8 md:grid-cols-3">
+              {[
+                "What are the symptoms of hypothyroidism?",
+                "How do I read my TSH test results?",
+                "Does the thyroid affect my weight?"
+              ].map((question, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSuggestionClick(question)}
+                  className={`p-4 text-sm font-medium text-left transition-all border rounded-2xl ${darkMode ? 'bg-surface border-border hover:border-primary/50' : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-primary/30 hover:-translate-y-1 text-gray-700'}`}
+                >
+                  <div className="flex justify-start mb-3 text-primary">
+                    <FaLightbulb size={20} />
+                  </div>
+                  {question}
+                </button>
+              ))}
+            </div>
           </header>
         )}
 
         {/* Chat container */}
         <div
           ref={chatContainerRef}
-          className={`flex-1 overflow-y-auto px-4 py-8 mx-auto max-w-4xl w-full scroll-smooth ${
+          className={`flex-1 overflow-y-auto px-4 py-8 mt-12 md:mt-0 mx-auto max-w-4xl w-full scroll-smooth ${
             showHeader && !loadingMessages ? "hidden" : "block"
           }`}
         >
@@ -370,12 +421,18 @@ const GeminiSingap = ({ darkMode = false }) => {
                 key={index}
                 className={`mb-8 flex gap-4 ${chat.role === "user" ? "flex-row-reverse" : "flex-row"} animate-slide-up`}
               >
-                <div className={`flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg transition-all ${
+                <div className={`flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg transition-all overflow-hidden ${
                   chat.role === "ai" 
                     ? "bg-primary text-white" 
                     : "bg-gray-100 text-gray-500"
                 }`}>
-                  {chat.role === "ai" ? <FaRobot size={22} /> : <FaUser size={20} />}
+                  {chat.role === "ai" ? <FaRobot size={22} /> : (
+                    user?.profileImage ? (
+                      <img src={user.profileImage.startsWith('http') ? user.profileImage : `${BASE_URL}/${user.profileImage}`} className="w-full h-full object-cover" alt="User" onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=0D8ABC&color=fff`; }} />
+                    ) : (
+                      <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=0D8ABC&color=fff`} className="w-full h-full object-cover" alt="User" />
+                    )
+                  )}
                 </div>
 
                 <div className={`group relative max-w-[80%] ${chat.role === "user" ? "items-end" : "items-start"}`}>

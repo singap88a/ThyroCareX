@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { Activity, HeartPulse, Microscope } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 const AboutHero = () => {
   return (
@@ -47,12 +48,12 @@ const AboutHero = () => {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="flex flex-col gap-4 sm:flex-row"
           >
-            <button className="px-8 py-4 text-lg font-semibold text-white transition-all duration-300 transform shadow-lg bg-primary rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-xl">
-              Meet Our Team
-            </button>
-            <button className="px-8 py-4 text-lg font-semibold text-gray-700 transition-all duration-300 border-2 border-gray-300 rounded-xl hover:border-primary hover:text-primary">
-              View Our Story
-            </button>
+            <Link to="/register" className="px-8 py-4 text-center text-lg font-semibold text-white transition-all duration-300 transform shadow-lg bg-primary rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-xl">
+              Join as Doctor
+            </Link>
+            <Link to="/contact" className="px-8 py-4 text-center text-lg font-semibold text-gray-700 transition-all duration-300 border-2 border-gray-300 rounded-xl hover:border-primary hover:text-primary">
+              Contact Us
+            </Link>
           </motion.div>
         </div>
 

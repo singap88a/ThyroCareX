@@ -13,7 +13,7 @@ const Hero = () => {
   const { isLoggedIn } = useAuth();
 
   return (
-    <div className="relative w-full lg:min-h-screen pt-20 sm:pt-24 lg:pt-0 overflow-hidden font-sans bg-white">
+    <div className="relative w-full lg:min-h-screen pt-4 sm:pt-8 lg:pt-0 overflow-hidden font-sans bg-white">
       
       {/* Background Wave Animation - Full Screen - Animation Stopped */}
       <div className="absolute inset-0 w-full h-full z-0 scale-y-[-1]   pointer-events-none overflow-hidden ">
@@ -28,10 +28,10 @@ const Hero = () => {
       </div>
 
       <div className="container relative z-10 h-full px-4 sm:px-6 mx-auto lg:px-16 pt-0">
-        <div className="flex flex-col items-center justify-center lg:justify-between h-full min-h-[calc(100vh-5rem)] lg:min-h-screen gap-6 lg:flex-row lg:gap-20 pb-10 lg:pb-0">
+        <div className="flex flex-col items-center justify-center lg:justify-between pt-2 pb-10 lg:py-0 lg:h-full lg:min-h-screen gap-6 lg:flex-row lg:gap-20 lg:pb-0">
           
           {/* Left Column: Text Content */}
-          <div className="flex flex-col justify-center w-full space-y-6 sm:space-y-8 lg:w-1/2 mt-4 lg:mt-0 text-center lg:text-left items-center lg:items-start">
+          <div className="flex flex-col justify-center w-full space-y-4 sm:space-y-6 lg:w-1/2 mt-2 lg:mt-0 text-center lg:text-left items-center lg:items-start">
             
             {/* Premium Tagline Badge */}
             <div className="inline-flex items-center self-start gap-3 px-1.5 py-1.5 pr-6 border rounded-full bg-white/50 border-primary/20 backdrop-blur-md shadow-sm hover:shadow-md transition-all duration-300 group cursor-default">
@@ -67,8 +67,8 @@ const Hero = () => {
               </Link>
               
               <Link to="/about" className="px-6 py-3.5 sm:px-10 sm:py-4 bg-white border-2 border-gray-100 text-gray-900 rounded-xl font-bold transition-all duration-500 hover:border-primary hover:bg-primary/[0.03] flex items-center justify-center gap-3 font-inter group w-full sm:w-auto text-sm sm:text-base">
-                 <FaPlay className="w-3 h-3 transition-transform text-primary group-hover:scale-125" />
-                 Watch Demo
+                 <FaArrowRight className="w-3 h-3 transition-transform text-primary group-hover:scale-125" />
+                 Learn More
                  <FaArrowRight className="w-3 h-3 translate-x-0 group-hover:translate-x-1.5 transition-transform duration-300" />
               </Link>
             </div>
@@ -98,7 +98,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column: Premium iPhone 15 Pro Max Component */}
-          <div className="relative flex items-center justify-center w-full pt-4 sm:pt-10 lg:w-1/2 lg:justify-end lg:pr-36 scale-[0.8] sm:scale-90 md:scale-100 origin-center lg:origin-right mt-10 lg:mt-0">
+          <div className="relative flex items-center justify-center w-full pt-0 sm:pt-10 lg:w-1/2 lg:justify-end lg:pr-36 scale-[0.85] sm:scale-95 md:scale-100 origin-top lg:origin-right -mt-10 sm:-mt-5 lg:mt-0 mb-[-40px] sm:mb-0">
              
              {/* Floating Animated Cards with Simple Animation */}
              <div className="absolute z-30 hidden -left-12 top-20 md:block" style={{ animation: 'float-card-primary 6s ease-in-out infinite' }}>
