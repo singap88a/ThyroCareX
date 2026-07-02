@@ -52,10 +52,9 @@ const Footer = () => {
                   {[
                     { name: 'Home', path: '/' },
                     { name: 'About Us', path: '/about' },
-                    { name: 'Services', path: '/services' },
                     { name: 'Pricing', path: '/pricing' },
-                    { name: 'Contact', path: '/contact' },
-                    { name: 'Blog', path: '/blog' }
+                    { name: 'Community', path: '/community' },
+                    { name: 'Contact', path: '/contact' }
                   ].map((item) => (
                     <li key={item.name}>
                       <Link
@@ -70,22 +69,25 @@ const Footer = () => {
                 </ul>
               </div>
 
-              {/* Services */}
+              {/* Legal */}
               <div>
                 <h4 className="flex items-center gap-2 mb-6 text-lg font-semibold text-gray-900">
                   <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  Our Services
+                  Legal
                 </h4>
                 <ul className="space-y-3">
-                  {['AI Diagnosis', 'Doctor Consultation', 'Second Opinion', 'Progress Tracking', 'Emergency Support', 'Research Access'].map((service) => (
-                    <li key={service}>
-                      <a
-                        href="#"
+                  {[
+                    { name: 'Privacy Policy', path: '/privacy' },
+                    { name: 'Terms of Service', path: '/terms' }
+                  ].map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        to={item.path}
                         className="flex items-center gap-2 text-gray-600 transition-all duration-300 hover:text-primary hover:translate-x-2 group"
                       >
                         <div className="w-1 h-1 transition-colors duration-300 bg-gray-400 rounded-full group-hover:bg-primary"></div>
-                        {service}
-                      </a>
+                        {item.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -100,16 +102,16 @@ const Footer = () => {
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">Stay connected with us</p>
                   <div className="flex gap-3">
-                    <a href="#" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                       <FaFacebook size={24} className="text-gray-600 transition-colors duration-300 group-hover:text-primary" />
                     </a>
-                    <a href="#" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                       <FaTwitter size={24} className="text-gray-600 transition-colors duration-300 group-hover:text-blue-400" />
                     </a>
-                    <a href="#" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                       <FaLinkedin size={24} className="text-gray-600 transition-colors duration-300 group-hover:text-blue-700" />
                     </a>
-                    <a href="#" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-all duration-300 transform bg-white shadow-sm group w-14 h-14 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                       <FaInstagram size={24} className="text-gray-600 transition-colors duration-300 group-hover:text-pink-600" />
                     </a>
                   </div>
@@ -121,26 +123,14 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="py-8 border-t border-gray-200">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-center text-gray-600 md:text-left">
+          <div className="flex flex-col items-center justify-center gap-4 text-center">
+            <p className="text-sm text-gray-600">
               © {currentYear} Thyrax. Made with <FaHeart className="inline w-3 h-3 mx-1 text-red-500" />
               for better healthcare. All rights reserved.
             </p>
-
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/privacy" className="text-gray-600 transition-colors duration-300 hover:text-primary">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-gray-600 transition-colors duration-300 hover:text-primary">
-                Terms of Service
-              </Link>
-              <a href="#" className="text-gray-600 transition-colors duration-300 hover:text-primary">
-                Cookie Policy
-              </a>
-              <a href="#" className="text-gray-600 transition-colors duration-300 hover:text-primary">
-                Security
-              </a>
-            </div>
+            <p className="text-gray-500 text-sm">
+              Developed by <a href="https://ahmedsingap.com/en" target="_blank" rel="noopener noreferrer" className="font-bold text-primary hover:text-primaryHover transition-colors">Ahmed Singap</a>
+            </p>
           </div>
         </div>
       </div>

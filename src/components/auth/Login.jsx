@@ -20,9 +20,9 @@ const Login = () => {
     setError('');
 
     const result = await login(formData.username, formData.password);
-    
+
     setLoading(false);
-    
+
     if (result.success) {
       toast.success('Logged in successfully');
       if (result.role === 'Admin') {
@@ -38,11 +38,11 @@ const Login = () => {
 
   return (
     <div className="relative flex w-full min-h-screen overflow-hidden bg-white">
-      
+
       {/* ========== LEFT CONTENT (Form) ========== */}
       <div className="z-20 flex flex-col justify-center w-full lg:w-[55%] h-full px-4 sm:px-12 lg:px-24 mt-16">
         <div className="w-full max-w-md mx-auto animate-fadeIn">
-          
+
           {/* Logo / Header */}
           <div className="mb-12">
             <div className="relative inline-block w-full">
@@ -71,7 +71,7 @@ const Login = () => {
           )}
 
           <form className="space-y-6" onSubmit={handleLogin}>
-            
+
             {/* Username */}
             <div className="space-y-2">
               <div className="relative group">
@@ -82,7 +82,7 @@ const Login = () => {
                   type="text"
                   placeholder="Username or Email"
                   value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="w-full py-4 pr-4 font-medium text-gray-900 placeholder-gray-400 transition-all duration-300 border-2 border-transparent pl-11 bg-gray-50 rounded-2xl focus:ring-0 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/20"
                 />
               </div>
@@ -98,7 +98,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full py-4 pr-12 font-medium text-gray-900 placeholder-gray-400 transition-all duration-300 border-2 border-transparent pl-11 bg-gray-50 rounded-2xl focus:ring-0 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/20"
                 />
                 <button
@@ -133,7 +133,7 @@ const Login = () => {
             </div>
 
             <div className="flex pt-4">
-              <button 
+              <button
                 disabled={loading}
                 className="flex-1 py-4 px-6 bg-primary text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading ? 'Logging in...' : 'Login'}

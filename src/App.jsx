@@ -48,6 +48,7 @@ import FloatingChatbot from './components/common/FloatingChatbot';
 import GeminiSingap from './pages/GeminiSingap/GeminiSingap';
 import PaymentSuccess from './pages/payment/PaymentSuccess';
 import PaymentFailure from './pages/payment/PaymentFailure';
+import NotFound from './pages/errors/NotFound';
 
 function AppContent() {
   const location = useLocation();
@@ -108,6 +109,9 @@ function AppContent() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="community" element={<CommunityManager />} />
           </Route>
+          
+          {/* 404 Fallback Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
       {!isDashboard && !isAdmin && <Footer />}

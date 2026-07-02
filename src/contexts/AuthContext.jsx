@@ -25,24 +25,24 @@ export const AuthProvider = ({ children }) => {
         try {
           const userData = JSON.parse(savedUser);
           // Check if token is expired (optional improvement)
-           const decoded = parseJwt(userData.token);
-           if (decoded && decoded.exp * 1000 > Date.now()) {
-             // Map claims again similarly to login
-             const mappedUser = {
-                ...userData,
-                ...decoded,
-                id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-                username: decoded['UserName'],
-                email: decoded['Email'],
-                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-                DoctorId: decoded['DoctorId'] 
-             };
-             setUser(mappedUser);
-             setIsLoggedIn(true);
-           } else {
-             // Token expired
-             logout();
-           }
+          const decoded = parseJwt(userData.token);
+          if (decoded && decoded.exp * 1000 > Date.now()) {
+            // Map claims again similarly to login
+            const mappedUser = {
+              ...userData,
+              ...decoded,
+              id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+              username: decoded['UserName'],
+              email: decoded['Email'],
+              role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+              DoctorId: decoded['DoctorId']
+            };
+            setUser(mappedUser);
+            setIsLoggedIn(true);
+          } else {
+            // Token expired
+            logout();
+          }
         } catch (error) {
           console.error("Auth check failed", error);
           logout();
@@ -58,11 +58,11 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(email, password);
       // Response data is the token string directly: "eyJ..." or object { data: "token" } depending on api.js wrapper.
       // Based on provided Curl response: { ..., data: "tokenString" }
-      
+
       if (response && response.succeeded && response.data) {
         const token = response.data;
         const decoded = parseJwt(token);
-        
+
         // Extract meaningful fields from claims
         // The claims might have long URL keys, so we map them
         const userData = {
@@ -82,11 +82,11 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.message || 'Login failed' };
       }
     } catch (error) {
-        console.error("Login error context", error);
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'An error occurred during login' 
-        };
+      console.error("Login error context", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'An error occurred during login'
+      };
     }
   };
 
@@ -96,10 +96,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('thyrax_user');
     window.location.href = '/login'; // Force redirect
   };
-  
+
   const register = async (formData) => {
-      // Passthrough to service, but useful to have in context if we want to auto-login later
-      return await authService.registerDoctor(formData);
+    // Passthrough to service, but useful to have in context if we want to auto-login later
+    return await authService.registerDoctor(formData);
   };
 
   const value = {

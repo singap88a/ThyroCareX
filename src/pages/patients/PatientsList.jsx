@@ -149,6 +149,18 @@ const PatientsList = () => {
     return searchMatch && config.tag === filterStatus;
   });
 
+  // Pagination Logic
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  // Reset page when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const currentPatients = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const initials = (name = '') => name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (
@@ -222,56 +234,125 @@ const PatientsList = () => {
         {loading ? (
           <div className="py-40 flex flex-col items-center justify-center bg-white rounded-[40px] border border-gray-100"><Loader2 className="w-12 h-12 text-primary animate-spin" /><p className="mt-6 text-gray-400 font-black uppercase text-[10px]">Neural Syncing...</p></div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {filtered.map(p => {
-              const config = getStatusConfig(p);
-              return (
-                <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={p.patientID} className={`${config.bg} rounded-[36px] p-8 border-2 ${config.border} transition-all duration-500 group relative overflow-hidden`}>
-                  <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-                    <div className="flex items-center gap-6 flex-1 w-full">
-                      <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-2xl font-black text-gray-900 shadow-sm flex-shrink-0">{initials(p.fullName)}</div>
-                      <div>
-                        <div className="flex items-center gap-4 flex-wrap">
-                          <h3 className={`text-2xl font-black ${config.textColor} tracking-tight`}>{p.fullName}</h3>
-                          <div className={`px-4 py-1.5 ${config.tagColor} text-white rounded-xl text-[10px] font-black uppercase tracking-[0.1em] shadow-lg`}>{config.tag}</div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-y-2 gap-x-6 mt-3 font-black text-[11px] uppercase tracking-wider">
-                          <span className={`flex items-center gap-2 ${config.subText}`}><Phone size={14} /> {p.phoneNumber}</span>
-                          <span className={`flex items-center gap-2 ${config.subText}`}><Calendar size={14} /> {p.age} YEARS</span>
-                          <span className={`flex items-center gap-2 px-3 py-1 bg-white/50 rounded-lg ${config.textColor}`}><Brain size={14} /> {config.description}</span>
-                        </div>
-                        <PatientCodeBadge patientID={p.patientID} />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-10 px-10 border-l border-white/40 hidden xl:flex">
-                      <div className="text-center"><p className={`text-[10px] font-black uppercase mb-2 ${config.subText}`}>Function</p><p className={`text-lg font-black ${config.textColor} capitalize`}>{p.latestStatus || 'TBD'}</p></div>
-                      <div className="text-center flex flex-col items-center gap-1">
-                        <p className={`text-[10px] font-black uppercase mb-1 ${config.subText}`}>Confidence</p>
-                        {p.riskConfidence ? (() => {
-                          const pct = p.riskConfidence <= 1 ? Math.round(p.riskConfidence * 100) : Math.round(p.riskConfidence);
-                          const color = pct >= 75 ? 'text-emerald-600' : pct >= 50 ? 'text-amber-500' : 'text-red-500';
-                          const ring = pct >= 75 ? 'border-emerald-400' : pct >= 50 ? 'border-amber-400' : 'border-red-400';
-                          return (
-                            <div className={`w-14 h-14 rounded-full border-4 ${ring} flex items-center justify-center bg-white/70`}>
-                              <span className={`text-sm font-black ${color}`}>{pct}%</span>
-                            </div>
-                          );
-                        })() : (
-                          <div className="w-14 h-14 rounded-full border-4 border-gray-200 flex items-center justify-center bg-white/70">
-                            <span className="text-lg font-black text-gray-300">&mdash;</span>
+          <>
+            <div className="grid grid-cols-1 gap-6">
+              {currentPatients.map(p => {
+                const config = getStatusConfig(p);
+                return (
+                  <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={p.patientID} className={`${config.bg} rounded-[36px] p-8 border-2 ${config.border} transition-all duration-500 group relative overflow-hidden`}>
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
+                      <div className="flex items-center gap-6 flex-1 w-full">
+                        <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-2xl font-black text-gray-900 shadow-sm flex-shrink-0">{initials(p.fullName)}</div>
+                        <div>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <h3 className={`text-2xl font-black ${config.textColor} tracking-tight`}>{p.fullName}</h3>
+                            <div className={`px-4 py-1.5 ${config.tagColor} text-white rounded-xl text-[10px] font-black uppercase tracking-[0.1em] shadow-lg`}>{config.tag}</div>
                           </div>
-                        )}
+                          <div className="flex flex-wrap items-center gap-y-2 gap-x-6 mt-3 font-black text-[11px] uppercase tracking-wider">
+                            <span className={`flex items-center gap-2 ${config.subText}`}><Phone size={14} /> {p.phoneNumber}</span>
+                            <span className={`flex items-center gap-2 ${config.subText}`}><Calendar size={14} /> {p.age} YEARS</span>
+                            <span className={`flex items-center gap-2 px-3 py-1 bg-white/50 rounded-lg ${config.textColor}`}><Brain size={14} /> {config.description}</span>
+                          </div>
+                          <PatientCodeBadge patientID={p.patientID} />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-10 px-10 border-l border-white/40 hidden xl:flex">
+                        <div className="text-center"><p className={`text-[10px] font-black uppercase mb-2 ${config.subText}`}>Function</p><p className={`text-lg font-black ${config.textColor} capitalize`}>{p.latestStatus || 'TBD'}</p></div>
+                        <div className="text-center flex flex-col items-center gap-1">
+                          <p className={`text-[10px] font-black uppercase mb-1 ${config.subText}`}>Confidence</p>
+                          {p.riskConfidence ? (() => {
+                            const pct = p.riskConfidence <= 1 ? Math.round(p.riskConfidence * 100) : Math.round(p.riskConfidence);
+                            const color = pct >= 75 ? 'text-emerald-600' : pct >= 50 ? 'text-amber-500' : 'text-red-500';
+                            const ring = pct >= 75 ? 'border-emerald-400' : pct >= 50 ? 'border-amber-400' : 'border-red-400';
+                            return (
+                              <div className={`w-14 h-14 rounded-full border-4 ${ring} flex items-center justify-center bg-white/70`}>
+                                <span className={`text-sm font-black ${color}`}>{pct}%</span>
+                              </div>
+                            );
+                          })() : (
+                            <div className="w-14 h-14 rounded-full border-4 border-gray-200 flex items-center justify-center bg-white/70">
+                              <span className="text-lg font-black text-gray-300">&mdash;</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 w-full lg:w-auto">
+                        <Link to={`/patients/${p.patientID}/dashboard`} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-10 py-5 bg-white border border-gray-100 rounded-[20px] text-gray-900 font-black uppercase tracking-widest text-[11px] hover:bg-gray-900 hover:text-white transition-all shadow-sm"><LayoutDashboard size={18} /> Dashboard</Link>
+                        <button onClick={() => setDeleteModal({ isOpen: true, patient: p })} className="p-5 bg-white border border-gray-100 text-red-400 rounded-[20px] hover:bg-red-500 hover:text-white transition-all shadow-sm"><Trash2 size={20} /></button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 w-full lg:w-auto">
-                      <Link to={`/patients/${p.patientID}/dashboard`} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-10 py-5 bg-white border border-gray-100 rounded-[20px] text-gray-900 font-black uppercase tracking-widest text-[11px] hover:bg-gray-900 hover:text-white transition-all shadow-sm"><LayoutDashboard size={18} /> Dashboard</Link>
-                      <button onClick={() => setDeleteModal({ isOpen: true, patient: p })} className="p-5 bg-white border border-gray-100 text-red-400 rounded-[20px] hover:bg-red-500 hover:text-white transition-all shadow-sm"><Trash2 size={20} /></button>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-10">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-3 bg-white border border-gray-100 rounded-xl text-gray-500 disabled:opacity-50 hover:bg-gray-50 transition-all"
+                >
+                  Previous
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const pages = [];
+                    const maxVisible = 5;
+                    
+                    if (totalPages <= maxVisible) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                      if (currentPage <= 3) {
+                        for (let i = 1; i <= 4; i++) pages.push(i);
+                        pages.push('...');
+                        pages.push(totalPages);
+                      } else if (currentPage >= totalPages - 2) {
+                        pages.push(1);
+                        pages.push('...');
+                        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        pages.push(1);
+                        pages.push('...');
+                        pages.push(currentPage - 1);
+                        pages.push(currentPage);
+                        pages.push(currentPage + 1);
+                        pages.push('...');
+                        pages.push(totalPages);
+                      }
+                    }
+
+                    return pages.map((pageNum, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => typeof pageNum === 'number' ? setCurrentPage(pageNum) : null}
+                        disabled={typeof pageNum !== 'number'}
+                        className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all ${
+                          pageNum === '...' 
+                            ? 'text-gray-400 bg-transparent border-none' 
+                            : currentPage === pageNum 
+                              ? 'bg-primary text-white shadow-md' 
+                              : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ));
+                  })()}
+                </div>
+                
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-3 bg-white border border-gray-100 rounded-xl text-gray-500 disabled:opacity-50 hover:bg-gray-50 transition-all"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
       <DeleteConfirmModal isOpen={deleteModal.isOpen} onClose={() => setDeleteModal({ isOpen: false, patient: null })} onConfirm={handleDelete} patientName={deleteModal.patient?.fullName} isDeleting={isDeleting} />

@@ -124,7 +124,7 @@ const AboutPrinciplesModern = () => {
             </h2>
           </motion.div>
 
-          <div className="flex items-center gap-3 p-1.5 bg-gray-50 border border-gray-100 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 p-1.5 bg-gray-50 border border-gray-100 rounded-2xl shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
             {timelineData.map((item, index) => (
               <button
                 key={index}
@@ -132,7 +132,7 @@ const AboutPrinciplesModern = () => {
                   setDirection(index > activeIndex ? 1 : -1);
                   setActiveIndex(index);
                 }}
-                className={`relative px-8 py-3 text-xs font-bold tracking-widest uppercase transition-all duration-500 rounded-xl ${
+                className={`relative px-4 sm:px-8 py-2.5 sm:py-3 text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-all duration-500 rounded-xl whitespace-nowrap flex-shrink-0 flex-1 md:flex-none ${
                   activeIndex === index ? "text-white" : "text-gray-500 hover:text-gray-900"
                 }`}
               >

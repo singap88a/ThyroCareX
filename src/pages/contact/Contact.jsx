@@ -103,11 +103,11 @@ const ContactPage = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-teal-500/60 to-cyan-500/40"></div>
 
             <div className="relative grid items-start h-full gap-8 px-6 py-12 text-white md:grid-cols-2">
-              <div className="z-10 mt-20 ml-20 text-left">
+              <div className="z-10 mt-10 md:mt-20 ml-0 md:ml-20 text-center md:text-left">
                 <h1 className="mb-4 text-4xl font-bold md:text-5xl lg:text-5xl">
                   Contact Us
                 </h1>
-                <p className="max-w-lg text-lg leading-relaxed text-white/90 md:text-xl">
+                <p className="max-w-lg text-lg leading-relaxed text-white/90 md:text-xl mx-auto md:mx-0">
                   We're here to help you with any questions about thyroid cancer diagnosis, AI technology, or partnership opportunities. Reach out to us anytime.
                 </p>
               </div>
@@ -117,7 +117,7 @@ const ContactPage = () => {
           <img
             src="/doctor1.png"
             alt="Doctor"
-            className="absolute top-[47%] -translate-y-1/2 -right-4 h-[330px] md:h-[430px] lg:h-[530px] w-auto object-contain drop-shadow-2xl pointer-events-none"
+            className="absolute top-[47%] -translate-y-1/2 -right-4 h-[330px] md:h-[430px] lg:h-[530px] w-auto object-contain drop-shadow-2xl pointer-events-none hidden md:block"
           />
         </div>
       </section>
@@ -127,12 +127,12 @@ const ContactPage = () => {
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-3 lg:items-start">
             {/* Left Column - Lottie Animation */}
-            <div className="relative flex order-1 w-full lg:order-none">
+            <div className="relative flex justify-center order-1 w-full lg:order-none lg:block">
               <DotLottieReact
                 src="https://lottie.host/3d03a661-9736-4630-8012-2fd110ee9bb8/OeAkVAOXq4.lottie"
                 loop
                 autoplay
-                className="w-[300px] md:w-[450px] lg:w-[450px] h-[400px] md:h-[700px] lg:h-[1000px] absolute -top-24 left-0"
+                className="w-[250px] md:w-[450px] lg:w-[450px] h-[300px] md:h-[700px] lg:h-[1000px] relative lg:absolute lg:-top-24 lg:left-0"
               />
             </div>
 
