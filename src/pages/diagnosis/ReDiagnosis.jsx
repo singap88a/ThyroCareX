@@ -79,6 +79,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [testId, setTestId] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
   const [clinicalResult, setClinicalResult] = useState(null);
 
   const [patientData, setPatientData] = useState({
@@ -289,8 +290,12 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
       }
       if (onPatientSave) onPatientSave();
 
+      const newSessionId = crypto.randomUUID();
+      setSessionId(newSessionId);
+
       const clinicalPayload = {
         patient_id: String(id),
+        session_id: newSessionId,
         Age: getAgeNumber(),
         on_thyroxine: patientData.onThyroxine ? 1 : 0,
         thyroid_surgery: patientData.thyroidSurgery ? 1 : 0,
@@ -343,7 +348,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
 
     setIsProcessingImage(true);
     try {
-      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages);
+      const imgRes = await testService.processImage(testId, patientData.ultrasoundImages, sessionId);
       if (imgRes.succeeded) {
         toast.success('Diagnosis complete / اكتمل التشخيص');
         finishFlow(testId);
