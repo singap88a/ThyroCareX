@@ -22,9 +22,6 @@ const PatientDetails = ({ testId = null }) => {
           </div>
           
           <div className="flex items-center gap-4">
-             <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
-                <Printer size={18}/> Export PDF
-             </button>
              <button className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-2xl text-sm font-black hover:shadow-lg hover:shadow-primary/30 transition-all">
                 <Stethoscope size={18}/> New Assessment
              </button>

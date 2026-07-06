@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 import testService from '../../services/testService';
 import patientService from '../../services/patientService';
 import { BASE_URL } from '../../config';
+import html2pdf from 'html2pdf.js';
 
 const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, dashboardMode = false, testId = null }) => {
   const { id: paramPatientId } = useParams();
@@ -35,6 +36,12 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
   // --- FNAC Image Upload State ---
   const [isProcessingFnac, setIsProcessingFnac] = useState(false);
   const [selectedFnacImages, setSelectedFnacImages] = useState([]);
+
+  // --- PDF Export State ---
+  const [isExporting, setIsExporting] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  const reportRef = useRef(null);
 
   const toggleImageDetails = (idx) => {
     setExpandedImageDetails(prev => ({
@@ -303,6 +310,34 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
     }
   };
 
+  const handleExportPDF = () => {
+    setIsExporting(true);
+    const element = reportRef.current;
+    
+    // Temporarily show the element for printing
+    element.style.display = 'block';
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     `Diagnosis_Report_${diagnosisResult.patientInfo.name.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 750 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).output('bloburl').then((pdfUrl) => {
+      element.style.display = 'none';
+      setIsExporting(false);
+      setPdfBlobUrl(pdfUrl);
+      setShowPdfModal(true);
+    }).catch(err => {
+      console.error(err);
+      element.style.display = 'none';
+      setIsExporting(false);
+      toast.error('Failed to generate PDF for review');
+    });
+  };
+
   if (loading) return (
     <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[40px] shadow-sm">
       <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
@@ -318,9 +353,21 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* 1. Patient Profile & Laboratory Biomarkers (Top) */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-center">
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-center relative">
+        {/* Export Button */}
+        <div className="absolute top-6 right-6 xl:relative xl:top-auto xl:right-auto order-first xl:order-last">
+          <button
+            onClick={handleExportPDF}
+            disabled={isExporting}
+            className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-slate-800 transition disabled:opacity-50"
+          >
+            {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
+            {isExporting ? 'Generating...' : 'Review PDF'}
+          </button>
+        </div>
+
         {/* Patient Info */}
         <div className="flex items-center gap-6">
           <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-black text-3xl shrink-0">
@@ -895,6 +942,267 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
           )}
         </div>
       </div>
+
+      {/* Hidden PDF Report Container */}
+      <div style={{ display: 'none' }}>
+        <div ref={reportRef} className="p-8 bg-white text-gray-900 w-[750px] mx-auto min-h-[1060px] box-border">
+          {/* Header */}
+          <div className="flex justify-between items-center border-b-2 border-primary pb-6 mb-6">
+            <div>
+              <img src="/logo_edit.png" alt="ThyroCareX Logo" className="h-10 object-contain mb-2" />
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Official AI Diagnosis Report</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-gray-700">Date: {new Date().toLocaleDateString()}</p>
+              <p className="text-sm font-bold text-gray-700">Ref: #{diagnosisResult.patientInfo.id}-{diagnosisResult.testId}</p>
+            </div>
+          </div>
+
+          {/* Patient Info */}
+          <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-gray-100">
+            <h2 className="text-xl font-black text-gray-800 mb-4 flex items-center gap-2"><User size={20} className="text-primary" /> Patient Details</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Full Name</p>
+                <p className="text-lg font-bold text-gray-900">{diagnosisResult.patientInfo.name}</p>
+              </div>
+              <div>
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Age / Gender</p>
+                <p className="text-lg font-bold text-gray-900">{diagnosisResult.patientInfo.age || '—'} Yrs / {diagnosisResult.patientInfo.gender}</p>
+              </div>
+              <div>
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Patient ID</p>
+                <p className="text-lg font-bold text-gray-900">#{diagnosisResult.patientInfo.id}</p>
+              </div>
+              <div>
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Registration Date</p>
+                <p className="text-lg font-bold text-gray-900">{new Date(diagnosisResult.patientInfo.registrationDate).toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Laboratory Biomarkers */}
+          <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-gray-100">
+            <h2 className="text-xl font-black text-gray-800 mb-4 flex items-center gap-2"><FlaskConical size={20} className="text-primary" /> Laboratory Biomarkers</h2>
+            <div className="grid grid-cols-5 gap-2 text-center">
+              {[
+                { l: 'TSH', v: diagnosisResult.labs.tsh, u: 'mIU/L' },
+                { l: 'T3', v: diagnosisResult.labs.t3, u: 'ng/dL' },
+                { l: 'TT4', v: diagnosisResult.labs.tt4, u: 'μg/dL' },
+                { l: 'FTI', v: diagnosisResult.labs.fti, u: '' },
+                { l: 'T4U', v: diagnosisResult.labs.t4u, u: '' }
+              ].map((lab, i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{lab.l}</p>
+                  <p className="text-lg font-black text-gray-900">{lab.v || '—'}</p>
+                  <p className="text-[9px] text-gray-400 mt-1">{lab.u || '\u00A0'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Clinical Assessment */}
+          {diagnosisResult.clinicalAssessment && (
+            <div className="mb-8">
+              <h2 className="text-xl font-black text-gray-800 mb-4 flex items-center gap-2"><Stethoscope size={20} className="text-primary" /> Clinical Assessment</h2>
+              <div className="p-6 border-l-4 border-teal-500 bg-teal-50/30 rounded-r-2xl">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-xs font-black text-teal-600 uppercase tracking-widest">Functional Status</p>
+                    <p className="text-lg font-bold text-gray-900">{diagnosisResult.clinicalAssessment.functionalStatus}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Risk Level</p>
+                    <p className="text-lg font-black text-slate-800 capitalize">{diagnosisResult.clinicalAssessment.riskLevel.toLowerCase()}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Clinical Recommendation</p>
+                  <p className="text-sm font-bold text-gray-700 leading-relaxed">{diagnosisResult.clinicalAssessment.clinicalRecommendation}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Imaging Results */}
+          {diagnosisResult.imagePredictions && diagnosisResult.imagePredictions.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-black text-gray-800 mb-4 flex items-center gap-2"><Scan size={20} className="text-primary" /> Ultrasound Analysis</h2>
+              {diagnosisResult.imagePredictions.map((pred, idx) => {
+                const label = pred?.classification?.label || pred?.Classification?.Label || pred?.classificationLabel || 'Unknown';
+                const confidence = pred?.classification?.confidence_pct || pred?.Classification?.confidence_pct || pred?.confidence || 0;
+                const tirads = pred?.classification?.acr_tirads_level || pred?.Classification?.acr_tirads_level || pred?.classification?.Tirads_Stage || pred?.Classification?.Tirads_Stage || 'N/A';
+                const aiImages = pred?.images || pred?.Images;
+                
+                const annotatedUrl = aiImages?.annotated_url || aiImages?.overlay_url;
+                const maskUrl = aiImages?.mask_overlay_url || aiImages?.mask_url;
+                const originalUrl = aiImages?.original_url || aiImages?.roi_url;
+                
+                const clinicalRec = pred?.classification?.clinical_recommendation || pred?.Classification?.clinical_recommendation || pred?.clinicalRecommendation || 'Follow up required.';
+                const aiRec = pred?.ai_recommendation || null;
+                const nextStep = pred?.classification?.next_step || pred?.Classification?.next_step || pred?.nextStep || 'Consult endocrinologist';
+                const radiomicFeatures = pred?.classification?.radiomic_features || pred?.Classification?.radiomic_features || pred?.classification?.RadiomicFeatures || pred?.Classification?.RadiomicFeatures || null;
+                const segmentation = pred?.segmentation || pred?.Segmentation || null;
+                const medicalDisclaimer = pred?.medical_disclaimer || pred?.MedicalDisclaimer || null;
+                
+                return (
+                  <div key={idx} className="mb-8 p-6 border border-gray-200 rounded-2xl page-break-inside-avoid" style={{ pageBreakInside: 'avoid' }}>
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                       <h3 className="text-lg font-black text-gray-900 capitalize">{label}</h3>
+                       <div className="flex gap-6">
+                         <div>
+                           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-2">Confidence:</span>
+                           <span className="text-sm font-bold text-primary">{Number(confidence).toFixed(1)}%</span>
+                         </div>
+                         <div>
+                           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-2">TI-RADS:</span>
+                           <span className="text-sm font-bold text-gray-900 uppercase">{tirads}</span>
+                         </div>
+                       </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      {annotatedUrl && (
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 text-center">Detection</p>
+                          <img src={annotatedUrl.startsWith('/') ? `${BASE_URL}${annotatedUrl}` : annotatedUrl} alt="Detection" className="w-full h-32 object-cover rounded-xl border border-gray-200" crossOrigin="anonymous" />
+                        </div>
+                      )}
+                      {maskUrl && (
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 text-center">Segmentation</p>
+                          <img src={maskUrl.startsWith('/') ? `${BASE_URL}${maskUrl}` : maskUrl} alt="Segmentation" className="w-full h-32 object-cover rounded-xl border border-gray-200" crossOrigin="anonymous" />
+                        </div>
+                      )}
+                      {originalUrl && (
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 text-center">Original Scan</p>
+                          <img src={originalUrl.startsWith('/') ? `${BASE_URL}${originalUrl}` : originalUrl} alt="Original" className="w-full h-32 object-cover rounded-xl border border-gray-200" crossOrigin="anonymous" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                          <Stethoscope size={14} /> Primary Recommendation
+                        </p>
+                        <p className="text-sm font-bold text-gray-800 leading-relaxed">"{clinicalRec}"</p>
+                      </div>
+
+                      <div className="inline-flex flex-wrap items-center gap-2 text-gray-700 font-bold text-xs bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-sm w-full">
+                        <Clock size={14} className="text-gray-400" />
+                        <span><span className="text-gray-400 uppercase text-[9px] tracking-widest mr-2">Suggested Action:</span> {nextStep}</span>
+                      </div>
+
+                      {radiomicFeatures && (
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1">
+                            <Activity size={14} /> Radiomic Features
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {Object.entries(radiomicFeatures).map(([key, value], rIdx) => {
+                              const displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                              const isBool = typeof value === 'boolean';
+                              const displayValue = isBool ? (value ? 'Yes' : 'No') : Number(value).toFixed(2);
+                              const highlight = isBool && value ? 'text-amber-600' : 'text-gray-700';
+
+                              return (
+                                <div key={rIdx} className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                  <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate" title={displayKey}>{displayKey}</p>
+                                  <p className={`text-xs font-bold ${highlight}`}>{displayValue}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {segmentation && (
+                        <div className="flex flex-wrap gap-4 pt-2 border-t border-slate-200">
+                          <div className="text-[10px]">
+                            <span className="font-black text-gray-400 uppercase tracking-widest mr-2">Method:</span>
+                            <span className="font-bold text-gray-700 bg-white px-2 py-1 rounded border border-gray-100">{segmentation.method || segmentation.Method || 'N/A'}</span>
+                          </div>
+                          <div className="text-[10px]">
+                            <span className="font-black text-gray-400 uppercase tracking-widest mr-2">ROI Extraction:</span>
+                            <span className="font-bold text-gray-700 bg-white px-2 py-1 rounded border border-gray-100">{segmentation.roi_extraction || segmentation.RoiExtraction || 'N/A'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {medicalDisclaimer && (
+                        <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100 mt-2">
+                          <p className="text-[10px] font-bold text-amber-800/80 leading-relaxed">
+                            {medicalDisclaimer}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          
+          {/* Footer */}
+          <div className="mt-12 pt-6 border-t border-gray-200 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+            Generated by ThyroCareX AI System • Not a substitute for professional medical advice.
+          </div>
+        </div>
+      </div>
+
+      {/* PDF Review Modal */}
+      <AnimatePresence>
+        {showPdfModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 md:p-8"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.95, opacity: 0 }} 
+              className="bg-white rounded-3xl w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-slate-50">
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                  <FileText className="text-primary" /> Review Official Report
+                </h3>
+                <div className="flex items-center gap-4">
+                  <a 
+                    href={pdfBlobUrl} 
+                    download={`Diagnosis_Report_${diagnosisResult.patientInfo.name.replace(/\s+/g, '_')}.pdf`}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm shadow-md hover:bg-primary/90 transition-all"
+                  >
+                    <Download size={16} /> Download PDF
+                  </a>
+                  <button 
+                    onClick={() => {
+                       setShowPdfModal(false);
+                       setTimeout(() => setPdfBlobUrl(null), 300); // cleanup after animation
+                    }} 
+                    className="p-2 bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 bg-gray-50 p-4">
+                {pdfBlobUrl ? (
+                  <iframe src={pdfBlobUrl} className="w-full h-full rounded-2xl border border-gray-200 shadow-sm" title="PDF Preview" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
