@@ -531,29 +531,29 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                   <div className="mt-6">
                     <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2"><Scan size={18} className="text-primary" /> AI Vision Scans</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {/* Removed Original Scan per user request */}
-                      {aiImages?.overlay_url && (
+                      {/* Removed Original Scan per user request, but restored as Original Scan with new AI pipeline */}
+                      {(aiImages?.annotated_url || aiImages?.overlay_url) && (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center px-1">
                             <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Detection</span>
                           </div>
-                          <img src={aiImages.overlay_url.startsWith('/') ? `${BASE_URL}${aiImages.overlay_url}` : aiImages.overlay_url} alt="Overlay" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                          <img src={(aiImages.annotated_url || aiImages.overlay_url).startsWith('/') ? `${BASE_URL}${aiImages.annotated_url || aiImages.overlay_url}` : (aiImages.annotated_url || aiImages.overlay_url)} alt="Detection" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                         </div>
                       )}
-                      {aiImages?.mask_url && (
+                      {(aiImages?.mask_overlay_url || aiImages?.mask_url) && (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center px-1">
                             <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Segmentation</span>
                           </div>
-                          <img src={aiImages.mask_url.startsWith('/') ? `${BASE_URL}${aiImages.mask_url}` : aiImages.mask_url} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                          <img src={(aiImages.mask_overlay_url || aiImages.mask_url).startsWith('/') ? `${BASE_URL}${aiImages.mask_overlay_url || aiImages.mask_url}` : (aiImages.mask_overlay_url || aiImages.mask_url)} alt="Mask" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                         </div>
                       )}
-                      {aiImages?.roi_url && (
+                      {(aiImages?.original_url || aiImages?.roi_url) && (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center px-1">
-                            <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">ROI Area</span>
+                            <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Original Scan</span>
                           </div>
-                          <img src={aiImages.roi_url.startsWith('/') ? `${BASE_URL}${aiImages.roi_url}` : aiImages.roi_url} alt="ROI" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
+                          <img src={(aiImages.original_url || aiImages.roi_url).startsWith('/') ? `${BASE_URL}${aiImages.original_url || aiImages.roi_url}` : (aiImages.original_url || aiImages.roi_url)} alt="Original" className="w-full h-56 object-cover rounded-2xl border border-gray-200 shadow-sm" />
                         </div>
                       )}
                     </div>
