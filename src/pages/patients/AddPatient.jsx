@@ -341,6 +341,7 @@ const AddPatient = () => {
       const clinicalPayload = {
         patient_id: String(pId),
         session_id: newSessionId,
+        age: getAgeNumber(),
         Age: getAgeNumber(),
         on_thyroxine: patientData.onThyroxine ? 1 : 0,
         thyroid_surgery: patientData.thyroidSurgery ? 1 : 0,
@@ -641,10 +642,17 @@ const AddPatient = () => {
                       <h2 className="text-2xl font-black text-gray-900 capitalize">{clinicalResult.functional_status}</h2>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Confidence</p>
-                    <p className="text-3xl font-black text-gray-900">{(clinicalResult.model_confidence * 100).toFixed(1)}%</p>
-                  </div>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      {clinicalResult.needs_manual_review && (
+                        <span className="bg-amber-100 text-amber-700 text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md border border-amber-200 flex items-center gap-1">
+                          <AlertCircle size={12} /> Manual Review Needed
+                        </span>
+                      )}
+                      <div>
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Confidence</p>
+                        <p className="text-3xl font-black text-gray-900">{(clinicalResult.model_confidence * 100).toFixed(1)}%</p>
+                      </div>
+                    </div>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4 mb-8">

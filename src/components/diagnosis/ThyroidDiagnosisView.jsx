@@ -515,6 +515,33 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
       {/* 2. Loop over Image Predictions */}
       {diagnosisResult.imagePredictions && diagnosisResult.imagePredictions.length > 0 ? (
         <div className="space-y-8">
+          
+          {/* Multi-Image Consensus Banner (if available) */}
+          {diagnosisResult.imagePredictions[0]?.consensus && (
+            <div className="bg-amber-50 p-6 rounded-3xl border-2 border-amber-200 shadow-sm flex flex-col md:flex-row gap-6 items-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shrink-0 shadow-inner">
+                <Brain size={32} />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-sm font-black text-amber-800 uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-2">
+                  <AlertCircle size={16} /> Multi-Image Consensus Decision
+                </h3>
+                <p className="text-2xl font-black text-amber-900 capitalize">
+                  {diagnosisResult.imagePredictions[0].consensus.label || diagnosisResult.imagePredictions[0].consensus.Label || 'Analysis Complete'}
+                </p>
+                <p className="text-amber-700/80 font-bold mt-1 text-sm">
+                  {diagnosisResult.imagePredictions[0].consensus.clinical_recommendation || diagnosisResult.imagePredictions[0].consensus.ClinicalRecommendation || 'Overall case review completed based on all uploaded scans.'}
+                </p>
+              </div>
+              <div className="flex flex-col items-center bg-white px-6 py-4 rounded-xl border border-amber-100 shadow-sm">
+                <p className="text-2xl font-black text-amber-600">
+                  {Number(diagnosisResult.imagePredictions[0].consensus.confidence_pct || diagnosisResult.imagePredictions[0].consensus.ConfidencePct || 0).toFixed(1)}%
+                </p>
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-1">Average Confidence</p>
+              </div>
+            </div>
+          )}
+
           {diagnosisResult.imagePredictions.map((pred, idx) => {
             const label = pred?.classification?.label || pred?.Classification?.Label || pred?.classificationLabel || 'Unknown';
             const confidence = pred?.classification?.confidence_pct || pred?.Classification?.confidence_pct || pred?.confidence || 0;
@@ -524,10 +551,12 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
             const nextStep = pred?.classification?.next_step || pred?.Classification?.next_step || pred?.nextStep || 'Consult endocrinologist';
             const needsReview = pred?.classification?.needs_manual_review || pred?.Classification?.needs_manual_review || pred?.classification?.NeedsManualReview || pred?.Classification?.NeedsManualReview || confidence < 60;
             const tirads = pred?.classification?.acr_tirads_level || pred?.Classification?.acr_tirads_level || pred?.classification?.Tirads_Stage || pred?.Classification?.Tirads_Stage || 'N/A';
+            const ataLevel = pred?.classification?.ata_level || pred?.Classification?.ata_level || pred?.classification?.ATA_Level || pred?.Classification?.ATA_Level || 'N/A';
             const radiomicFeatures = pred?.classification?.radiomic_features || pred?.Classification?.radiomic_features || pred?.classification?.RadiomicFeatures || pred?.Classification?.RadiomicFeatures || null;
             const segmentation = pred?.segmentation || pred?.Segmentation || null;
             const medicalDisclaimer = pred?.medical_disclaimer || pred?.MedicalDisclaimer || null;
             const filename = pred?.filename || pred?.Filename || `Image ${idx + 1}`;
+            const consensus = pred?.consensus || pred?.Consensus || null;
 
             // Extract images object (could be uppercase or lowercase depending on source)
             const aiImages = pred?.images || pred?.Images;
@@ -570,6 +599,10 @@ const ThyroidDiagnosisView = ({ patientId: propPatientId, initialData = null, da
                       <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 shadow-sm flex-1 md:flex-none min-w-[140px] flex flex-col justify-center">
                         <p className="text-2xl font-black text-slate-800 uppercase mb-1">{tirads}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ACR TI-RADS</p>
+                      </div>
+                      <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 shadow-sm flex-1 md:flex-none min-w-[140px] flex flex-col justify-center">
+                        <p className="text-2xl font-black text-slate-800 uppercase mb-1 truncate" title={ataLevel}>{ataLevel}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ATA Level</p>
                       </div>
                     </div>
                   </div>
