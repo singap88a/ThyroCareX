@@ -73,12 +73,12 @@ const PatientAiAgent = ({ patientId }) => {
   };
 
   const createNewSession = () => {
-    const newSessionId = "sess_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+    const newSessionId = String(patientId);
     setCurrentSessionId(newSessionId);
     setMessages([{
       id: 'sys-1',
       role: 'system',
-      content: `Hello Doctor, I am the AI Agent. Started a new session for Patient #${patientId}. How can I help you?`
+      content: `Hello Doctor, I am the AI Agent. Connected to diagnostic session for Patient #${patientId}. How can I help you?`
     }]);
   };
 
@@ -133,11 +133,14 @@ const PatientAiAgent = ({ patientId }) => {
       <div className="w-72 bg-gray-50/50 dark:bg-admin-dark-bg border-r border-gray-100 dark:border-admin-dark-border flex flex-col">
         <div className="p-4 border-b border-gray-100 dark:border-admin-dark-border">
           <button 
-            onClick={createNewSession}
+            onClick={() => {
+                createNewSession();
+                toast.success('Chat UI cleared. History remains saved.');
+            }}
             className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white rounded-xl hover:bg-primaryHover transition-colors shadow-sm font-semibold text-sm"
           >
-            <MessageSquarePlus size={18} />
-            New Session
+            <RefreshCcw size={18} />
+            Clear Chat UI
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">

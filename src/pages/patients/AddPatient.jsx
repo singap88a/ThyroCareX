@@ -335,7 +335,7 @@ const AddPatient = () => {
       const pId = patientRes.data;
       setPatientIdStr(pId);
 
-      const newSessionId = crypto.randomUUID();
+      const newSessionId = String(pId);
       setSessionId(newSessionId);
 
       const clinicalPayload = {

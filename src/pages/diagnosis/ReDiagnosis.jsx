@@ -290,7 +290,7 @@ const ReDiagnosis = ({ dashboardMode = false, onComplete, onPatientSave }) => {
       }
       if (onPatientSave) onPatientSave();
 
-      const newSessionId = crypto.randomUUID();
+      const newSessionId = String(id);
       setSessionId(newSessionId);
 
       const clinicalPayload = {
